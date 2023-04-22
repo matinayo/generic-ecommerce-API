@@ -1,6 +1,9 @@
+using HalceraAPI.Extension;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+/// DBContext Intializer
+builder.Services.ConfigureDbContextAsync(builder.Configuration);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
