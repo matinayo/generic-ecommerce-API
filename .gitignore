@@ -360,3 +360,10 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/NovaceptPP/Server/Migrations/NovaceptPP
+/NovaceptPP/Server/appsettings.Development.json
+/NovaceptPP/.vscode
+*.lutconfig
+/.gitignore
+/NovaceptPP/Server/Migrations/NovaceptPP/*
+
