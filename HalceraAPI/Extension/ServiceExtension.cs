@@ -10,7 +10,7 @@ namespace HalceraAPI.Extension
     {
         public static void ConfigureDbContextAsync(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<ApplicationDBContext>(options =>
+            services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });

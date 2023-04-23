@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using HalceraAPI.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace HalceraAPI.DataAccess
 {
@@ -7,5 +8,6 @@ namespace HalceraAPI.DataAccess
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
+        public DbSet<Product>? Products { get; set; }
     }
 }

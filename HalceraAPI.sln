@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33403.182
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HalceraAPI", "HalceraAPI\HalceraAPI.csproj", "{10832F71-0498-4301-99AE-E5557FFA414A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HalceraAPI", "HalceraAPI\HalceraAPI.csproj", "{10832F71-0498-4301-99AE-E5557FFA414A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HalceraAPI.DataAccess", "HalceraAPI.DataAccess\HalceraAPI.DataAccess.csproj", "{8F2EA1C3-4729-48B8-9EFE-39369D97CD1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HalceraAPI.Model", "HalceraAPI.Model\HalceraAPI.Model.csproj", "{B359D05A-D903-43EF-9099-0802CA3FCFF7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{10832F71-0498-4301-99AE-E5557FFA414A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10832F71-0498-4301-99AE-E5557FFA414A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10832F71-0498-4301-99AE-E5557FFA414A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F2EA1C3-4729-48B8-9EFE-39369D97CD1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F2EA1C3-4729-48B8-9EFE-39369D97CD1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F2EA1C3-4729-48B8-9EFE-39369D97CD1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F2EA1C3-4729-48B8-9EFE-39369D97CD1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B359D05A-D903-43EF-9099-0802CA3FCFF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B359D05A-D903-43EF-9099-0802CA3FCFF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B359D05A-D903-43EF-9099-0802CA3FCFF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B359D05A-D903-43EF-9099-0802CA3FCFF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
