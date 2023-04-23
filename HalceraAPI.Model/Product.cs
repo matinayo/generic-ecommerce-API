@@ -22,5 +22,6 @@ namespace HalceraAPI.Model
         [Required]
         public double Price { get; set; }
         public string? ImageURL { get; set; }
+        public string? VideoURL { get; set; }
     }
 }

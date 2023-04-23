@@ -1,4 +1,6 @@
 ﻿using HalceraAPI.DataAccess;
+using HalceraAPI.DataAccess.Contract;
+using HalceraAPI.DataAccess.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace HalceraAPI.Extension
@@ -15,7 +17,7 @@ namespace HalceraAPI.Extension
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
 
-            //  services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
         public static void ConfigureOperationsInjection(this IServiceCollection services)
