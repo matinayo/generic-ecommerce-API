@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Contract\" />
-    <Folder Include="Operations\" />
+    <ProjectReference Include="..\HalceraAPI.DataAccess\HalceraAPI.DataAccess.csproj" />
+    <ProjectReference Include="..\HalceraAPI.Model\HalceraAPI.Model.csproj" />
   </ItemGroup>
 
 </Project>

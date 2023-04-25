@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using HalceraAPI.Model;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace HalceraAPI.Areas.Admin.Controllers
 {
@@ -10,9 +12,19 @@ namespace HalceraAPI.Areas.Admin.Controllers
     {
         [HttpGet]
         [Route("GetAll")]
-        public IActionResult GetAll()
+        [ProducesResponseType(typeof(IEnumerable<Product>), 200)]
+        [ProducesResponseType(404)]
+        public ActionResult<IEnumerable<Product>> GetAll()
         {
-            return Ok();
+            if (ModelState.IsValid)
+            {
+                return Problem();
+            }
+            //if (true)
+            //{
+            //    return NotFound();
+            //}
+            return BadRequest(ModelState);
         }
     }
 }

@@ -3780,6 +3780,20 @@
         "runtime": {
           "bin/placeholder/HalceraAPI.Model.dll": {}
         }
+      },
+      "HalceraAPI.Services/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v7.0",
+        "dependencies": {
+          "HalceraAPI.DataAccess": "1.0.0",
+          "HalceraAPI.Model": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/HalceraAPI.Services.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/HalceraAPI.Services.dll": {}
+        }
       }
     }
   },
@@ -11044,11 +11058,17 @@
       "type": "project",
       "path": "../HalceraAPI.Model/HalceraAPI.Model.csproj",
       "msbuildProject": "../HalceraAPI.Model/HalceraAPI.Model.csproj"
+    },
+    "HalceraAPI.Services/1.0.0": {
+      "type": "project",
+      "path": "../HalceraAPI.Services/HalceraAPI.Services.csproj",
+      "msbuildProject": "../HalceraAPI.Services/HalceraAPI.Services.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net7.0": [
       "HalceraAPI.DataAccess >= 1.0.0",
+      "HalceraAPI.Services >= 1.0.0",
       "Microsoft.AspNetCore.OpenApi >= 7.0.3",
       "Microsoft.EntityFrameworkCore.Design >= 7.0.5",
       "Microsoft.EntityFrameworkCore.SqlServer >= 7.0.5",
@@ -11086,6 +11106,9 @@
           "projectReferences": {
             "C:\\Users\\Admin\\Documents\\Books\\mdx\\individualproject\\hal\\HalceraAPI\\HalceraAPI.DataAccess\\HalceraAPI.DataAccess.csproj": {
               "projectPath": "C:\\Users\\Admin\\Documents\\Books\\mdx\\individualproject\\hal\\HalceraAPI\\HalceraAPI.DataAccess\\HalceraAPI.DataAccess.csproj"
+            },
+            "C:\\Users\\Admin\\Documents\\Books\\mdx\\individualproject\\hal\\HalceraAPI\\HalceraAPI.Services\\HalceraAPI.Services.csproj": {
+              "projectPath": "C:\\Users\\Admin\\Documents\\Books\\mdx\\individualproject\\hal\\HalceraAPI\\HalceraAPI.Services\\HalceraAPI.Services.csproj"
             }
           }
         }

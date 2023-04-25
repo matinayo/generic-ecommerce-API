@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HalceraAPI.Model
 {
@@ -23,5 +24,9 @@ namespace HalceraAPI.Model
         public double Price { get; set; }
         public string? ImageURL { get; set; }
         public string? VideoURL { get; set; }
+
+        public int? CategoryId { get; set; }
+        [ForeignKey(nameof(CategoryId))]
+        public Category? Category { get; set; }
     }
 }

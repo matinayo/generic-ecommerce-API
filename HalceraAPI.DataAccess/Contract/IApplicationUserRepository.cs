@@ -2,7 +2,7 @@
 
 namespace HalceraAPI.DataAccess.Contract
 {
-    public interface IProductRepository : IRepository<Product>
+    public interface IApplicationUserRepository : IRepository<ApplicationUser>
     {
     }
 }

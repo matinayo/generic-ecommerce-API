@@ -4,6 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 /// DBContext Intializer
 builder.Services.ConfigureDbContextAsync(builder.Configuration);
+builder.Services.ConfigureOperationsInjection();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

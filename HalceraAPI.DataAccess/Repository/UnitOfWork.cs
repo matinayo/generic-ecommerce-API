@@ -10,8 +10,10 @@ namespace HalceraAPI.DataAccess.Repository
         {
             _context = context;
             ProductRepository = new ProductRepository(_context);
+            ApplicationUserRepository = new ApplicationUserRepository(_context);
         }
         public IProductRepository ProductRepository { get; private set; }
+        public IApplicationUserRepository ApplicationUserRepository { get; private set; }
 
         public void Dispose()
         {

@@ -1,6 +1,8 @@
 ﻿using HalceraAPI.DataAccess;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.DataAccess.Repository;
+using HalceraAPI.Services.Contract;
+using HalceraAPI.Services.Operations;
 using Microsoft.EntityFrameworkCore;
 
 namespace HalceraAPI.Extension
@@ -22,6 +24,7 @@ namespace HalceraAPI.Extension
 
         public static void ConfigureOperationsInjection(this IServiceCollection services)
         {
+            services.AddScoped<IProductOperation, ProductOperation>();
         }
     }
 }
