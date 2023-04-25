@@ -11,9 +11,18 @@ namespace HalceraAPI.DataAccess.Repository
             _context = context;
             ProductRepository = new ProductRepository(_context);
             ApplicationUserRepository = new ApplicationUserRepository(_context);
+            ShoppingCartRepository = new ShoppingCartRepository(_context);
+            BaseAddressRepository = new BaseAddressRepository(_context);
+            CategoryRepository = new CategoryRepository(_context);
         }
         public IProductRepository ProductRepository { get; private set; }
         public IApplicationUserRepository ApplicationUserRepository { get; private set; }
+
+        public IShoppingCartRepository ShoppingCartRepository { get; private set; }
+
+        public IBaseAddressRepository BaseAddressRepository { get; private set; }
+
+        public ICategoryRepository CategoryRepository { get; private set; }
 
         public void Dispose()
         {

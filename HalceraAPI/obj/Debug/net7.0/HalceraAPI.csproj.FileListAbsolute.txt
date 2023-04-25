@@ -1,9 +1,3 @@
-C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.csproj.AssemblyReference.cache
-C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.AssemblyInfoInputs.cache
-C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.AssemblyInfo.cs
-C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.csproj.CoreCompileInputs.cache
-C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\bin\Debug\net7.0\appsettings.Development.json
 C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\bin\Debug\net7.0\appsettings.json
 C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\bin\Debug\net7.0\HalceraAPI.exe
@@ -261,9 +255,17 @@ C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\b
 C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\bin\Debug\net7.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\bin\Debug\net7.0\HalceraAPI.DataAccess.dll
 C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\bin\Debug\net7.0\HalceraAPI.Model.dll
+C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\bin\Debug\net7.0\HalceraAPI.Services.dll
 C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\bin\Debug\net7.0\HalceraAPI.DataAccess.pdb
+C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\bin\Debug\net7.0\HalceraAPI.Services.pdb
 C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\bin\Debug\net7.0\HalceraAPI.Model.pdb
+C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.csproj.AssemblyReference.cache
+C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.AssemblyInfoInputs.cache
+C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.AssemblyInfo.cs
+C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.csproj.CoreCompileInputs.cache
 C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\HalceraAPI.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\staticwebassets\msbuild.HalceraAPI.Microsoft.AspNetCore.StaticWebAssets.props
 C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\staticwebassets\msbuild.build.HalceraAPI.props
 C:\Users\Admin\Documents\Books\mdx\individualproject\hal\HalceraAPI\HalceraAPI\obj\Debug\net7.0\staticwebassets\msbuild.buildMultiTargeting.HalceraAPI.props

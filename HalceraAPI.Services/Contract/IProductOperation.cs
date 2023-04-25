@@ -7,10 +7,13 @@ using System.Threading.Tasks;
 
 namespace HalceraAPI.Services.Contract
 {
+    /// <summary>
+    /// Product Operations
+    /// </summary>
     public interface IProductOperation
     {
         Task<IEnumerable<Product>?> GetAllProducts();
-        Task<Product?> GetProductById(int id);
+        Task<Product?> GetProductById(int productId);
         Task<int> AddProductToCart(int productId);
     }
 }

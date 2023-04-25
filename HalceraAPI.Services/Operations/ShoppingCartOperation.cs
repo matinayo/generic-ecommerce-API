@@ -54,15 +54,8 @@ namespace HalceraAPI.Services.Operations
         /// <returns>List of Products</returns>
         public async Task<IEnumerable<Product>?> GetAllProducts()
         {
-            try
-            {
-                IEnumerable<Product>? listOfProducts = await _unitOfWork.ProductRepository.GetAll();
-                return listOfProducts;
-            }
-            catch (Exception exception)
-            {
-                throw new Exception(exception.Message);
-            }
+            IEnumerable<Product>? listOfProducts = await _unitOfWork.ProductRepository.GetAll();
+            return listOfProducts;
         }
 
         /// <summary>
@@ -70,17 +63,10 @@ namespace HalceraAPI.Services.Operations
         /// </summary>
         /// <param name="id">Id of product to be returned</param>
         /// <returns>Product</returns>
-        public async Task<Product?> GetProductById(int productId)
+        public async Task<Product?> GetProductById(int id)
         {
-            try
-            {
-                Product? product = await _unitOfWork.ProductRepository.GetFirstOrDefault(product => product.Id == productId);
-                return product;
-            }
-            catch(Exception exception)
-            {
-                throw new Exception(exception.Message);
-            }
+            Product? product = await _unitOfWork.ProductRepository.GetFirstOrDefault(product => product.Id == id);
+            return product;
         }
     }
 }

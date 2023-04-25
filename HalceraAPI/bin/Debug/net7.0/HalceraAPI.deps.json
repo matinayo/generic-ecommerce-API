@@ -9,6 +9,7 @@
       "HalceraAPI/1.0.0": {
         "dependencies": {
           "HalceraAPI.DataAccess": "1.0.0",
+          "HalceraAPI.Services": "1.0.0",
           "Microsoft.AspNetCore.OpenApi": "7.0.3",
           "Microsoft.EntityFrameworkCore.Design": "7.0.5",
           "Microsoft.EntityFrameworkCore.SqlServer": "7.0.5",
@@ -2342,6 +2343,15 @@
         "runtime": {
           "HalceraAPI.Model.dll": {}
         }
+      },
+      "HalceraAPI.Services/1.0.0": {
+        "dependencies": {
+          "HalceraAPI.DataAccess": "1.0.0",
+          "HalceraAPI.Model": "1.0.0"
+        },
+        "runtime": {
+          "HalceraAPI.Services.dll": {}
+        }
       }
     }
   },
@@ -3659,6 +3669,11 @@
       "sha512": ""
     },
     "HalceraAPI.Model/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "HalceraAPI.Services/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

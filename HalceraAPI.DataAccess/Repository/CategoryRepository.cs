@@ -3,9 +3,9 @@ using HalceraAPI.Model;
 
 namespace HalceraAPI.DataAccess.Repository
 {
-    public class ProductRepository : Repository<Product>, IProductRepository
+    public class CategoryRepository : Repository<Category>, ICategoryRepository
     {
-        public ProductRepository(ApplicationDbContext context) : base(context)
+        public CategoryRepository(ApplicationDbContext context) : base(context)
         {
         }
     }
