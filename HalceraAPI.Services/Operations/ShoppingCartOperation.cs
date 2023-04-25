@@ -4,43 +4,37 @@ using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations
 {
-    public class ProductOperation : IProductOperation
+    public class ShoppingCartOperation : IShoppingCartOperation
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public ProductOperation(IUnitOfWork unitOfWork)
+        public ShoppingCartOperation(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
         /// <summary>
-        /// Add product item to cart
+        /// Decrease number of items in cart
         /// </summary>
-        /// <param name="productId">id of product</param>
-        /// <returns>id of product in cart</returns>
-        public async Task<int> AddProductToCart(int productId)
+        /// <param name="shoppingCartId">Id of item in cart</param>
+        /// <returns>number of items in cart after decrease</returns>
+        public async Task<int> DecreaseItemInCart(int shoppingCartId)
         {
             try
             {
-                ShoppingCart? cart = await _unitOfWork.ShoppingCartRepository.GetFirstOrDefault(cart => cart.ProductId == productId);
-                if (cart == null)
-                {   // adds new item in cart
-                    Product? productItem = await _unitOfWork.ProductRepository.GetFirstOrDefault(product => product.Id == productId);
-                    if (productItem == null)
-                    {
-                        throw new Exception("Product not found");
-                    }
-                    // TODO: add ApplicationUser from Token
-                    cart = new ShoppingCart() { ProductId = productId, Price = productItem.Price };
-                    // if product item does not exist in cart, add new item
-                    await _unitOfWork.ShoppingCartRepository.Add(cart);
-                }
-                else
-                {   // update existing item count in cart
-                    cart.Count++;
+                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCartRepository.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
+                if (cartItemFromDb == null)
+                    return 0;
+
+                // decrease number of items in cart
+                cartItemFromDb.Count -= 1;
+                if (cartItemFromDb.Count == 0)
+                {
+                    // remove item from cart
+                    _unitOfWork.ShoppingCartRepository.Remove(cartItemFromDb);
                 }
                 await _unitOfWork.SaveAsync();
-                return cart.Id;
+                return cartItemFromDb.Count;
             }
             catch (Exception exception)
             {
@@ -49,24 +43,84 @@ namespace HalceraAPI.Services.Operations
         }
 
         /// <summary>
-        /// Gets All products
+        /// Delete Item from Shopping Cart
         /// </summary>
-        /// <returns>List of Products</returns>
-        public async Task<IEnumerable<Product>?> GetAllProducts()
+        /// <param name="shoppingCartId">Id of shoppingCart item</param>
+        /// <returns>true if item is successfully deleted</returns>
+        public async Task<bool> DeleteItemInCart(int shoppingCartId)
         {
-            IEnumerable<Product>? listOfProducts = await _unitOfWork.ProductRepository.GetAll();
-            return listOfProducts;
+            try
+            {
+                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCartRepository.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
+                if (cartItemFromDb == null)
+                    throw new Exception("Item not found");
+                _unitOfWork.ShoppingCartRepository.Remove(cartItemFromDb);
+                return true;
+            }
+            catch (Exception exception)
+            {
+                throw new Exception(exception.Message);
+            }
         }
 
         /// <summary>
-        /// Get a single product by Id
+        /// Get user list of shopping cart items
         /// </summary>
-        /// <param name="id">Id of product to be returned</param>
-        /// <returns>Product</returns>
-        public async Task<Product?> GetProductById(int id)
+        /// <returns>list of shoppingCart items</returns>
+        public async Task<IEnumerable<ShoppingCart>?> GetAllItemsInCart()
         {
-            Product? product = await _unitOfWork.ProductRepository.GetFirstOrDefault(product => product.Id == id);
-            return product;
+            try
+            {
+                // TODO: get items for requesting user
+                IEnumerable<ShoppingCart>? shoppingItemsFromDb = await _unitOfWork.ShoppingCartRepository.GetAll();
+                return shoppingItemsFromDb;
+            }
+            catch (Exception exception)
+            {
+                throw new Exception(exception.Message);
+            }
+        }
+
+        /// <summary>
+        /// Get item from cart
+        /// </summary>
+        /// <param name="shoppingCartId">id of shoppingCart item</param>
+        /// <returns>ShoppingCart item</returns>
+        public async Task<ShoppingCart?> GetItemInCart(int shoppingCartId)
+        {
+            try
+            {
+                ShoppingCart? shoppingCartFromDb = await _unitOfWork.ShoppingCartRepository.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
+                return shoppingCartFromDb;
+            }
+            catch (Exception exception)
+            {
+                throw new Exception(exception.Message);
+            }
+        }
+
+        /// <summary>
+        /// Increase number of items in user shoppingCart
+        /// </summary>
+        /// <param name="shoppingCartId">id of shopping cart item to increase</param>
+        /// <returns>number of items in cart after increase</returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<int> IncreaseItemInCart(int shoppingCartId)
+        {
+            try
+            {
+                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCartRepository.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
+                if (cartItemFromDb == null)
+                    throw new Exception("Item not found");
+                cartItemFromDb.Count += 1;
+
+                await _unitOfWork.SaveAsync();
+                return cartItemFromDb.Count;
+            }
+            catch(Exception exception)
+            {
+                throw new Exception(exception.Message);
+            }
         }
     }
 }

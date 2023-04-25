@@ -16,5 +16,6 @@ namespace HalceraAPI.Services.Contract
         Task<ShoppingCart?> GetItemInCart(int shoppingCartId);
         Task<int> IncreaseItemInCart(int shoppingCartId);
         Task<int> DecreaseItemInCart(int shoppingCartId);
+        Task<bool> DeleteItemInCart(int shoppingCartId);
     }
 }

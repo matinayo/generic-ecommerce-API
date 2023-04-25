@@ -25,6 +25,7 @@ namespace HalceraAPI.Extension
         public static void ConfigureOperationsInjection(this IServiceCollection services)
         {
             services.AddScoped<IProductOperation, ProductOperation>();
+            services.AddScoped<IShoppingCartOperation, ShoppingCartOperation>();
         }
     }
 }
