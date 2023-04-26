@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HalceraAPI.Areas.Customer.Controllers
 {
+    /// <summary>
+    /// Product controller defining customers endpoint
+    /// </summary>
     [Area("Customer")]
     [Route("api/[area]/[controller]")]
     [ApiController]
@@ -52,6 +55,29 @@ namespace HalceraAPI.Areas.Customer.Controllers
             {
                 Product? productFromDb = await _productOperation.GetProductById(productId);
                 return Ok(productFromDb);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+            }
+        }
+
+        /// <summary>
+        /// Add product to shopping cart
+        /// </summary>
+        /// <param name="productId">Id of product</param>
+        /// <returns>id of item in cart</returns>
+        [HttpPost]
+        [Route("AddProductToCart")]
+        [ProducesResponseType(typeof(Product), 200)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<Product?>> AddProductToCart([FromQuery] int productId)
+        {
+            try
+            {
+                int idOfShoppingCart = await _productOperation.AddProductToCart(productId);
+                return Ok(idOfShoppingCart);
             }
             catch (Exception exception)
             {

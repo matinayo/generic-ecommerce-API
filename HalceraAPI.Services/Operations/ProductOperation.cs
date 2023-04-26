@@ -77,7 +77,7 @@ namespace HalceraAPI.Services.Operations
                 Product? product = await _unitOfWork.ProductRepository.GetFirstOrDefault(product => product.Id == productId);
                 return product;
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 throw new Exception(exception.Message);
             }
