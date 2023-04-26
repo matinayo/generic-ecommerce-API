@@ -24,7 +24,7 @@ namespace HalceraAPI.Services.Operations
             {
                 ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCartRepository.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
                 if (cartItemFromDb == null)
-                    return 0;
+                    throw new Exception("Item not found");
 
                 // decrease number of items in cart
                 cartItemFromDb.Count -= 1;

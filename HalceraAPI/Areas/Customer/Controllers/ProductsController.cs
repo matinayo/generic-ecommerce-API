@@ -84,5 +84,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
                 return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
             }
         }
+
+        // get products by category
     }
 }
