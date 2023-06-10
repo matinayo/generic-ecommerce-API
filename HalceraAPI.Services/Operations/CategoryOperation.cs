@@ -1,5 +1,5 @@
 ﻿using HalceraAPI.DataAccess.Contract;
-using HalceraAPI.Model;
+using HalceraAPI.Models;
 using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations
@@ -83,9 +83,6 @@ namespace HalceraAPI.Services.Operations
                     throw new Exception("Category not found");
 
                 categoryDetails.Title = category.Title ?? categoryDetails.Title;
-                categoryDetails.Description = category.Description ?? categoryDetails.Description;
-                categoryDetails.ImageURL = category.ImageURL ?? categoryDetails.ImageURL;
-                categoryDetails.VideoURL = category.VideoURL ?? categoryDetails.VideoURL;
 
                 _unitOfWork.CategoryRepository.Update(categoryDetails);
                 return categoryDetails;

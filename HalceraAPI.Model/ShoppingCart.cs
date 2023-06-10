@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace HalceraAPI.Model
+namespace HalceraAPI.Models
 {
     /// <summary>
     /// Shopping cart model

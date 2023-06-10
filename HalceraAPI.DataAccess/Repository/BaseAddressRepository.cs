@@ -1,5 +1,5 @@
 ﻿using HalceraAPI.DataAccess.Contract;
-using HalceraAPI.Model;
+using HalceraAPI.Models;
 
 namespace HalceraAPI.DataAccess.Repository
 {

@@ -1,4 +1,4 @@
-﻿using HalceraAPI.Model;
+﻿using HalceraAPI.Models;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Mvc;
 

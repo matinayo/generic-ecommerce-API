@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/.vs/HalceraAPI/DesignTimeBuild/.dtbcache.v2
+/.vs/HalceraAPI/v17/.suo

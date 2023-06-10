@@ -1,4 +1,4 @@
-﻿using HalceraAPI.Model;
+﻿using HalceraAPI.Models;
 
 namespace HalceraAPI.DataAccess.Contract
 {

@@ -1,5 +1,5 @@
-﻿using HalceraAPI.Model;
-using HalceraAPI.Model.Requests;
+﻿using HalceraAPI.Models;
+using HalceraAPI.Models.Requests;
 
 namespace HalceraAPI.Services.Contract
 {

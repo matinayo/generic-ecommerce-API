@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HalceraAPI.DataAccess\HalceraAPI.DataAccess.csproj" />
-    <ProjectReference Include="..\HalceraAPI.Model\HalceraAPI.Model.csproj" />
+    <ProjectReference Include="..\HalceraAPI.Model\HalceraAPI.Models.csproj" />
   </ItemGroup>
 
 </Project>

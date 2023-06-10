@@ -1,6 +1,6 @@
 ﻿using HalceraAPI.DataAccess.Contract;
-using HalceraAPI.Model;
-using HalceraAPI.Model.Requests;
+using HalceraAPI.Models;
+using HalceraAPI.Models.Requests;
 using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations
@@ -32,7 +32,7 @@ namespace HalceraAPI.Services.Operations
                         throw new Exception("Product not found");
                     }
                     // TODO: add ApplicationUser from Token
-                    cart = new ShoppingCart() { ProductId = productId, Price = productItem.Price };
+                  //  cart = new ShoppingCart() { ProductId = productId, Price = productItem.Price };
                     // if product item does not exist in cart, add new item
                     await _unitOfWork.ShoppingCartRepository.Add(cart);
                 }
@@ -124,8 +124,6 @@ namespace HalceraAPI.Services.Operations
                 if (productFromDb == null) throw new Exception("Product not found");
 
                 productFromDb.Title = product.Title ?? productFromDb.Title;
-                productFromDb.ImageURL = product.ImageURL ?? productFromDb.ImageURL;
-                productFromDb.GlbModelURL = product.GlbModelURL ?? productFromDb.GlbModelURL;
 
                 _unitOfWork.ProductRepository.Update(productFromDb);
                 await _unitOfWork.SaveAsync();

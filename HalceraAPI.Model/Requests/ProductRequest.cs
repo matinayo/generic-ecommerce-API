@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HalceraAPI.Model.Requests
+namespace HalceraAPI.Models.Requests
 {
     public class ProductRequest
     {

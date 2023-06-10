@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HalceraAPI.Model\HalceraAPI.Model.csproj" />
+    <ProjectReference Include="..\HalceraAPI.Model\HalceraAPI.Models.csproj" />
   </ItemGroup>
 
 </Project>
