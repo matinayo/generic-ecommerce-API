@@ -1,4 +1,5 @@
 ﻿using HalceraAPI.Model;
+using HalceraAPI.Model.Requests;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -25,8 +26,23 @@ namespace HalceraAPI.Services.Contract
         /// <returns>id of added item in cart</returns>
         Task<int> AddProductToCart(int productId);
 
-        //Task<Product> CreateProduct(Product product);
-        //Task<Product> UpdateProduct(Product product);
-        //Task<bool> DeleteProduct(int productId);
+        /// <summary>
+        /// Create new product
+        /// </summary>
+        /// <param name="product">product data to be created</param>
+        /// <returns>Created product details</returns>
+        Task<Product> CreateProduct(Product product);
+        /// <summary>
+        /// Update a product
+        /// </summary>
+        /// <param name="product">Product data to be updated</param>
+        /// <returns>Updated product details from DB</returns>
+        Task<Product> UpdateProduct(ProductRequest product);
+        /// <summary>
+        /// Deletes a product
+        /// </summary>
+        /// <param name="productId">Id of product to be deleted</param>
+        /// <returns>boolean to indicate if operation was successful</returns>
+        Task<bool> DeleteProduct(int productId);
     }
 }

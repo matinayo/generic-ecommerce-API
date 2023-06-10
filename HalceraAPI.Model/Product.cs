@@ -23,7 +23,8 @@ namespace HalceraAPI.Model
         [Required]
         public double Price { get; set; }
         public string? ImageURL { get; set; }
-        public string? VideoURL { get; set; }
+        public string? GlbModelURL { get; set; }
+        //public string? VideoURL { get; set; }
 
         public int? CategoryId { get; set; }
         [ForeignKey(nameof(CategoryId))]

@@ -1,5 +1,6 @@
 ﻿using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Model;
+using HalceraAPI.Model.Requests;
 using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations
@@ -48,6 +49,38 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
+        public async Task<Product> CreateProduct(Product product)
+        {
+            try
+            {
+                // TODO: validate category
+                await _unitOfWork.ProductRepository.Add(product);
+                await _unitOfWork.SaveAsync();
+                return product;
+            }
+            catch (Exception exception)
+            {
+                throw new Exception(exception.Message);
+            }
+        }
+
+        public async Task<bool> DeleteProduct(int productId)
+        {
+            try
+            {
+                Product? productDetails = await _unitOfWork.ProductRepository.GetFirstOrDefault(product => product.Id == productId);
+                if (productDetails == null)
+                    throw new Exception("Product not found");
+                _unitOfWork.ProductRepository.Remove(productDetails);
+                await _unitOfWork.SaveAsync();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                throw new Exception(exception.Message);
+            }
+        }
+
         /// <summary>
         /// Gets All products
         /// </summary>
@@ -56,7 +89,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                IEnumerable<Product>? listOfProducts = await _unitOfWork.ProductRepository.GetAll();
+                IEnumerable<Product>? listOfProducts = await _unitOfWork.ProductRepository.GetAll(includeProperties: "Category");
                 return listOfProducts;
             }
             catch (Exception exception)
@@ -76,6 +109,28 @@ namespace HalceraAPI.Services.Operations
             {
                 Product? product = await _unitOfWork.ProductRepository.GetFirstOrDefault(product => product.Id == productId);
                 return product;
+            }
+            catch (Exception exception)
+            {
+                throw new Exception(exception.Message);
+            }
+        }
+
+        public async Task<Product> UpdateProduct(ProductRequest product)
+        {
+            try
+            {
+                Product? productFromDb = await _unitOfWork.ProductRepository.GetFirstOrDefault(productDetails => productDetails.Id == product.Id);
+                if (productFromDb == null) throw new Exception("Product not found");
+
+                productFromDb.Title = product.Title ?? productFromDb.Title;
+                productFromDb.ImageURL = product.ImageURL ?? productFromDb.ImageURL;
+                productFromDb.GlbModelURL = product.GlbModelURL ?? productFromDb.GlbModelURL;
+
+                _unitOfWork.ProductRepository.Update(productFromDb);
+                await _unitOfWork.SaveAsync();
+
+                return productFromDb;
             }
             catch (Exception exception)
             {
