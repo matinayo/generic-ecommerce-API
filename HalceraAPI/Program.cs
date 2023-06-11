@@ -1,4 +1,4 @@
-using HalceraAPI.Extension;
+using HalceraAPI.Utilities.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

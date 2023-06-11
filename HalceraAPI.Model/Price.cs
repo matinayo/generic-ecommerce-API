@@ -21,8 +21,14 @@ namespace HalceraAPI.Models
         [Required]
         public Currency? Currency { get; set; }
 
+        /// <summary>
+        /// indicate if price is discounted
+        /// </summary>
+        public double? DiscountAmount { get; set; }
+
         public int? ProductId { get; set; }
         [ForeignKey(nameof(ProductId))]
         public Product? Product { get; set; }
     }
+
 }

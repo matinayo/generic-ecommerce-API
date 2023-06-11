@@ -17,7 +17,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                await _unitOfWork.CategoryRepository.Add(category);
+                await _unitOfWork.Category.Add(category);
                 await _unitOfWork.SaveAsync();
                 return category;
             }
@@ -31,12 +31,12 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Category? categoryDetails = await _unitOfWork.CategoryRepository.GetFirstOrDefault(category => category.Id == categoryId);
+                Category? categoryDetails = await _unitOfWork.Category.GetFirstOrDefault(category => category.Id == categoryId);
                 if (categoryDetails == null)
                     throw new Exception("Category not found");
 
 
-                _unitOfWork.CategoryRepository.Remove(categoryDetails);
+                _unitOfWork.Category.Remove(categoryDetails);
                 await _unitOfWork.SaveAsync();
                 return true;
             }
@@ -50,7 +50,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                IEnumerable<Category>? listOfCategories = await _unitOfWork.CategoryRepository.GetAll();
+                IEnumerable<Category>? listOfCategories = await _unitOfWork.Category.GetAll();
                 return listOfCategories;
             }
             catch (Exception exception)
@@ -63,7 +63,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Category? categoryDetails = await _unitOfWork.CategoryRepository.GetFirstOrDefault(category => category.Id == categoryId);
+                Category? categoryDetails = await _unitOfWork.Category.GetFirstOrDefault(category => category.Id == categoryId);
                 if (categoryDetails == null)
                     throw new Exception("Category not found");
                 return categoryDetails;
@@ -78,13 +78,13 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Category? categoryDetails = await _unitOfWork.CategoryRepository.GetFirstOrDefault(categoryDb => categoryDb.Id == category.Id);
+                Category? categoryDetails = await _unitOfWork.Category.GetFirstOrDefault(categoryDb => categoryDb.Id == category.Id);
                 if (categoryDetails == null)
                     throw new Exception("Category not found");
 
                 categoryDetails.Title = category.Title ?? categoryDetails.Title;
 
-                _unitOfWork.CategoryRepository.Update(categoryDetails);
+                _unitOfWork.Category.Update(categoryDetails);
                 return categoryDetails;
             }
             catch (Exception exception)

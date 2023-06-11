@@ -5,7 +5,7 @@ using HalceraAPI.Services.Contract;
 using HalceraAPI.Services.Operations;
 using Microsoft.EntityFrameworkCore;
 
-namespace HalceraAPI.Extension
+namespace HalceraAPI.Utilities.Extensions
 {
     /// <summary>
     /// Builder Services for dependencies

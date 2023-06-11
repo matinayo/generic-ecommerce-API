@@ -18,6 +18,11 @@ namespace HalceraAPI.Models
         [StringLength(100, ErrorMessage = "Field has a minimum length of 10 and maximum length of '100'", MinimumLength = 10)]
         public string? Description { get; set; }
 
+        /// <summary>
+        /// if product is active
+        /// </summary>
+        public bool IsActive { get; set; } = true;
+
         [Required]
         public ICollection<Price>? Prices { get; set; }
         /// <summary>
