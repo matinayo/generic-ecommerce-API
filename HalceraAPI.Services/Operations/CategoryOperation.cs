@@ -1,6 +1,8 @@
 ﻿using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Services.Contract;
+using System.ComponentModel.DataAnnotations;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -13,13 +15,23 @@ namespace HalceraAPI.Services.Operations
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Category> CreateCategory(Category category)
+        public async Task<CategoryResponse> CreateCategory(CreateCategoryRequest category)
         {
             try
             {
-                await _unitOfWork.Category.Add(category);
-                await _unitOfWork.SaveAsync();
-                return category;
+                // validate model
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(category);
+                bool isValid = Validator.TryValidateObject(category, validationContext, validationResults, true);
+
+                if (!isValid)
+                {
+
+                }
+
+                //await _unitOfWork.Category.Add(category);
+                //await _unitOfWork.SaveAsync();
+                return new();
             }
             catch (Exception exception)
             {

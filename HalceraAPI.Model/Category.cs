@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace HalceraAPI.Models
 {
@@ -17,12 +12,10 @@ namespace HalceraAPI.Models
         [Required]
         [StringLength(20, ErrorMessage = "Field has a minimum length of '2' and maximum length of '10'", MinimumLength = 2)]
         public string? Title { get; set; }
-
         /// <summary>
         /// Products for this category
         /// </summary>
         public ICollection<Product>? Products { get; set; }
-
         /// <summary>
         /// Category Medias
         /// </summary>

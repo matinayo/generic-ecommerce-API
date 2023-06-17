@@ -116,7 +116,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<Product> UpdateProduct(ProductRequest product)
+        public async Task<Product> UpdateProduct(CreateProductRequest product)
         {
             try
             {

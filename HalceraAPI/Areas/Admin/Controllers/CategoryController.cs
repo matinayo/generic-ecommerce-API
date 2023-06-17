@@ -1,6 +1,9 @@
 ﻿using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Newtonsoft.Json;
 
 namespace HalceraAPI.Areas.Admin.Controllers
 {
@@ -55,14 +58,23 @@ namespace HalceraAPI.Areas.Admin.Controllers
 
         [HttpPost]
         [Route("CreateCategory")]
-        [ProducesResponseType(typeof(Category), 200)]
+        [ProducesResponseType(typeof(CategoryResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<Product?>> CreateCategory([FromBody] Category category)
+        public async Task<ActionResult<CategoryResponse?>> CreateCategory([FromBody] CreateCategoryRequest category)
         {
             try
             {
-                Category categoryDetails = await _categoryOperation.CreateCategory(category);
+                if (!ModelState.IsValid)
+                {
+                    IEnumerable<ModelError> allErrors = ModelState.Values.SelectMany(v => v.Errors);
+                    if (allErrors.Any())
+                    {
+                        string message = JsonConvert.SerializeObject(allErrors);
+                        return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: message));
+                    }
+                }
+                CategoryResponse categoryDetails = await _categoryOperation.CreateCategory(category);
                 return Ok(categoryDetails);
             }
             catch (Exception exception)

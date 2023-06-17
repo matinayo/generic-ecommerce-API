@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HalceraAPI.Models.Requests
 {
-    public class ProductRequest
+    public class CreateProductRequest
     {
         [Required]
         public int Id { get; set; }

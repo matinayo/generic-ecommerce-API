@@ -1,4 +1,5 @@
 ﻿using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.Category;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -23,7 +24,7 @@ namespace HalceraAPI.Services.Contract
         /// </summary>
         /// <param name="category">Category details to be created</param>
         /// <returns>Created category</returns>
-        Task<Category> CreateCategory(Category category);
+        Task<CategoryResponse> CreateCategory(CreateCategoryRequest category);
         /// <summary>
         /// Update details of a category
         /// </summary>
