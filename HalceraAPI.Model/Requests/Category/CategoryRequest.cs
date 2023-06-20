@@ -6,7 +6,7 @@ namespace HalceraAPI.Models.Requests.Category
     /// <summary>
     /// Create category request
     /// </summary>
-    public class CreateCategoryRequest
+    public class CategoryRequest
     {
         [Required]
         [StringLength(20, ErrorMessage = "Field has a minimum length of '2' and maximum length of '10'", MinimumLength = 2)]
@@ -16,5 +16,8 @@ namespace HalceraAPI.Models.Requests.Category
         /// Category media files
         /// </summary>
         public ICollection<CreateMediaRequest>? MediaCollection { get; set; }
+
+        public bool? IsActive { get; set; }
+        public bool? IsFeatured { get; set; }
     }
 }
