@@ -24,13 +24,13 @@ namespace HalceraAPI.Services.Contract
         /// </summary>
         /// <param name="category">Category details to be created</param>
         /// <returns>Created category</returns>
-        Task<CategoryResponse> CreateCategory(CategoryRequest category);
+        Task<CategoryResponse> CreateCategory(CreateCategoryRequest category);
         /// <summary>
         /// Update details of a category
         /// </summary>
         /// <param name="category">Category data to be updated</param>
         /// <returns>updated category details</returns>
-        Task<CategoryResponse> UpdateCategory(CategoryRequest category);
+        Task<CategoryResponse> UpdateCategory(UpdateCategoryRequest category);
         /// <summary>
         /// Delete category record
         /// </summary>

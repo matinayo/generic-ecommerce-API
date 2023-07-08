@@ -10,10 +10,6 @@ namespace HalceraAPI.Models.Requests.Category
         public int Id { get; set; }
         public string? Title { get; set; }
         /// <summary>
-        /// Products for this category
-        /// </summary>
-        public ICollection<Product>? Products { get; set; }
-        /// <summary>
         /// Category Medias
         /// </summary>
         public ICollection<MediaResponse>? MediaCollection { get; set; }

@@ -10,11 +10,18 @@ namespace HalceraAPI.Utilities.Automapper
         public MappingProfiles()
         {
             // Category Request
-            CreateMap<CategoryRequest, Category>().ReverseMap();
+            CreateMap<CreateCategoryRequest, Category>().ReverseMap();
+            CreateMap<UpdateCategoryRequest, Category>()
+                .ForMember(destination => destination.MediaCollection,
+                opt => opt.Ignore())
+                .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
             CreateMap<Category, CategoryResponse>().ReverseMap();
+
 
             // Media
             CreateMap<CreateMediaRequest, Media>().ReverseMap();
+            CreateMap<UpdateMediaRequest, Media>()
+                .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
             CreateMap<Media, MediaResponse>().ReverseMap();
         }
     }

@@ -58,7 +58,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [Route("CreateCategory")]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<CategoryResponse?>> CreateCategory([FromBody] CategoryRequest category)
+        public async Task<ActionResult<CategoryResponse?>> CreateCategory([FromBody] CreateCategoryRequest category)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(typeof(CategoryResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<CategoryResponse?>> UpdateCategory([FromBody] CategoryRequest category)
+        public async Task<ActionResult<CategoryResponse?>> UpdateCategory([FromBody] UpdateCategoryRequest category)
         {
             try
             {

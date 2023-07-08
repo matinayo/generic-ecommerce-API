@@ -27,6 +27,7 @@ namespace HalceraAPI.Utilities.Extensions
             services.AddScoped<IProductOperation, ProductOperation>();
             services.AddScoped<IShoppingCartOperation, ShoppingCartOperation>();
             services.AddScoped<ICategoryOperation, CategoryOperation>();
+            services.AddScoped<IMediaOperation, MediaOperation>();
         }
     }
 }
