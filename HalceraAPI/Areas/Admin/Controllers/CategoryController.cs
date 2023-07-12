@@ -72,15 +72,15 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [HttpPut]
-        [Route("UpdateCategory")]
+        [Route("UpdateCategory/{categoryId}")]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<CategoryResponse?>> UpdateCategory([FromBody] UpdateCategoryRequest category)
+        public async Task<ActionResult<CategoryResponse?>> UpdateCategory(int categoryId, [FromBody] UpdateCategoryRequest category)
         {
             try
             {
-                CategoryResponse categoryDetails = await _categoryOperation.UpdateCategory(category);
+                CategoryResponse categoryDetails = await _categoryOperation.UpdateCategory(categoryId, category);
                 return Ok(categoryDetails);
             }
             catch (Exception exception)
@@ -90,11 +90,11 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [HttpDelete]
-        [Route("DeleteCategory")]
+        [Route("DeleteCategory/{categoryId}")]
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<Category?>> DeleteCategory([FromQuery] int categoryId)
+        public async Task<ActionResult<Category?>> DeleteCategory(int categoryId)
         {
             try
             {

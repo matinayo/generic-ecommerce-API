@@ -116,11 +116,11 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<CategoryResponse> UpdateCategory(UpdateCategoryRequest category)
+        public async Task<CategoryResponse> UpdateCategory(int categoryId, UpdateCategoryRequest category)
         {
             try
             {
-                Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(categoryDb => categoryDb.Id == category.Id);
+                Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(categoryDb => categoryDb.Id == categoryId);
                 if (categoryDetailsFromDb == null)
                     throw new Exception("Category not found");
 

@@ -13,9 +13,6 @@ namespace HalceraAPI.Models.Requests.Category
     /// </summary>
     public class UpdateCategoryRequest
     {
-        [Required]
-        public int Id { get; set; }
-
         [StringLength(20, ErrorMessage = "Field has a minimum length of '2' and maximum length of '10'", MinimumLength = 2)]
         public string? Title { get; set; }
 

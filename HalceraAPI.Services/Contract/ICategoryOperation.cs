@@ -30,7 +30,7 @@ namespace HalceraAPI.Services.Contract
         /// </summary>
         /// <param name="category">Category data to be updated</param>
         /// <returns>updated category details</returns>
-        Task<CategoryResponse> UpdateCategory(UpdateCategoryRequest category);
+        Task<CategoryResponse> UpdateCategory(int categoryId, UpdateCategoryRequest category);
         /// <summary>
         /// Delete category record
         /// </summary>
