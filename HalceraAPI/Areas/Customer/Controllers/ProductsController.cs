@@ -26,11 +26,11 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [Route("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<Product>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<Product>?>> GetAll()
+        public async Task<ActionResult<IEnumerable<Product>?>> GetAll([FromQuery] bool isActive = false)
         {
             try
             {
-                IEnumerable<Product>? listOfProducts = await _productOperation.GetAllProducts();
+                IEnumerable<Product>? listOfProducts = await _productOperation.GetAllProducts(isActive);
                 return Ok(listOfProducts);
             }
             catch (Exception exception)

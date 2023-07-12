@@ -20,5 +20,10 @@ namespace HalceraAPI.Models
         public bool IsActive { get; set; } = true;
 
         public bool? IsFeatured { get; set; }
+
+        /// <summary>
+        /// Product Categories
+        /// </summary>
+        public ICollection<Product>? Products { get; set; }
     }
 }

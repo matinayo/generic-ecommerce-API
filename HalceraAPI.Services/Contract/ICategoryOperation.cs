@@ -1,5 +1,4 @@
-﻿using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.Category;
+﻿using HalceraAPI.Models.Requests.Category;
 
 namespace HalceraAPI.Services.Contract
 {

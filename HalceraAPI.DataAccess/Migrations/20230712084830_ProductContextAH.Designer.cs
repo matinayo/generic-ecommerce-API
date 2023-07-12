@@ -4,6 +4,7 @@ using HalceraAPI.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HalceraAPI.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230712084830_ProductContextAH")]
+    partial class ProductContextAH
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace HalceraAPI.DataAccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CategoryProduct", b =>
-                {
-                    b.Property<int>("CategoriesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CategoriesId", "ProductsId");
-
-                    b.HasIndex("ProductsId");
-
-                    b.ToTable("CategoryProduct");
-                });
 
             modelBuilder.Entity("HalceraAPI.Models.ApplicationUser", b =>
                 {
@@ -106,12 +94,17 @@ namespace HalceraAPI.DataAccess.Migrations
                     b.Property<bool?>("IsFeatured")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("Categories");
                 });
@@ -313,21 +306,6 @@ namespace HalceraAPI.DataAccess.Migrations
                     b.ToTable("ShoppingCart");
                 });
 
-            modelBuilder.Entity("CategoryProduct", b =>
-                {
-                    b.HasOne("HalceraAPI.Models.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CategoriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HalceraAPI.Models.Product", null)
-                        .WithMany()
-                        .HasForeignKey("ProductsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("HalceraAPI.Models.BaseAddress", b =>
                 {
                     b.HasOne("HalceraAPI.Models.ApplicationUser", "ApplicationUser")
@@ -337,6 +315,13 @@ namespace HalceraAPI.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.Category", b =>
+                {
+                    b.HasOne("HalceraAPI.Models.Product", null)
+                        .WithMany("Categories")
+                        .HasForeignKey("ProductId");
                 });
 
             modelBuilder.Entity("HalceraAPI.Models.Composition", b =>
@@ -417,6 +402,8 @@ namespace HalceraAPI.DataAccess.Migrations
 
             modelBuilder.Entity("HalceraAPI.Models.Product", b =>
                 {
+                    b.Navigation("Categories");
+
                     b.Navigation("MediaCollection");
 
                     b.Navigation("Prices");

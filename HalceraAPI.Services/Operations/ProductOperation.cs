@@ -1,6 +1,6 @@
 ﻿using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Models.Requests;
+using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations
@@ -49,14 +49,14 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<Product> CreateProduct(Product product)
+        public async Task<Product> CreateProduct(CreateProductRequest product)
         {
             try
             {
                 // TODO: validate category
-                await _unitOfWork.Product.Add(product);
-                await _unitOfWork.SaveAsync();
-                return product;
+                //await _unitOfWork.Product.Add(product);
+                //await _unitOfWork.SaveAsync();
+                return new();
             }
             catch (Exception exception)
             {
@@ -85,7 +85,7 @@ namespace HalceraAPI.Services.Operations
         /// Gets All products
         /// </summary>
         /// <returns>List of Products</returns>
-        public async Task<IEnumerable<Product>?> GetAllProducts()
+        public async Task<IEnumerable<Product>?> GetAllProducts(bool isActive)
         {
             try
             {
@@ -120,10 +120,10 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == product.Id);
+                Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == 0);
                 if (productFromDb == null) throw new Exception("Product not found");
 
-                productFromDb.Title = product.Title ?? productFromDb.Title;
+                //productFromDb.Title = product.Title ?? productFromDb.Title;
 
                 _unitOfWork.Product.Update(productFromDb);
                 await _unitOfWork.SaveAsync();

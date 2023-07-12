@@ -45,8 +45,9 @@ namespace HalceraAPI.Models
         /// </summary>
         public ICollection<Composition>? ProductCompositions { get; set; }
 
-        public int? CategoryId { get; set; }
-        [ForeignKey(nameof(CategoryId))]
-        public Category? Category { get; set; }
+        /// <summary>
+        /// Product Categories
+        /// </summary>
+        public ICollection<Category>? Categories { get; set; }
     }
 }

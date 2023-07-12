@@ -1,5 +1,5 @@
 ﻿using HalceraAPI.Models;
-using HalceraAPI.Models.Requests;
+using HalceraAPI.Models.Requests.Product;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -12,7 +12,7 @@ namespace HalceraAPI.Services.Contract
         /// Get list of products
         /// </summary>
         /// <returns>List of products from DB</returns>
-        Task<IEnumerable<Product>?> GetAllProducts();
+        Task<IEnumerable<Product>?> GetAllProducts(bool isActive);
         /// <summary>
         /// Get Product By Id
         /// </summary>
@@ -31,7 +31,7 @@ namespace HalceraAPI.Services.Contract
         /// </summary>
         /// <param name="product">product data to be created</param>
         /// <returns>Created product details</returns>
-        Task<Product> CreateProduct(Product product);
+        Task<Product> CreateProduct(CreateProductRequest product);
         /// <summary>
         /// Update a product
         /// </summary>
