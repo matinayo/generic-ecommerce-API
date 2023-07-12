@@ -110,9 +110,9 @@ namespace HalceraAPI.Services.Operations
 
                 return response;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 
@@ -134,9 +134,9 @@ namespace HalceraAPI.Services.Operations
 
                 return response;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 

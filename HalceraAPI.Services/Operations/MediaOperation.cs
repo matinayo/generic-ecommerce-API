@@ -1,13 +1,8 @@
-﻿using HalceraAPI.Models.Requests.Media;
-using HalceraAPI.Models;
-using HalceraAPI.Services.Contract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
-using AutoMapper;
+using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.Media;
+using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -24,33 +19,40 @@ namespace HalceraAPI.Services.Operations
 
         public async Task<ICollection<Media>?> UpdateMediaCollection(IEnumerable<UpdateMediaRequest>? mediaCollection)
         {
-            if (mediaCollection is not null && mediaCollection.Any())
+            try
             {
-                // Retrieve existing media from the database
-                IEnumerable<Media> existingMedia = await _unitOfWork.Media.GetAll(media => mediaCollection.Select(u => u.Id).Contains(media.Id));
-                List<Media>? mediaResponse = new();
-
-                foreach (var mediaRequest in mediaCollection)
+                if (mediaCollection is not null && mediaCollection.Any())
                 {
-                    // Find existing media with the same ID in the database
-                    Media? existingMediaItem = existingMedia.FirstOrDefault(em => em.Id == mediaRequest.Id);
+                    // Retrieve existing media from the database
+                    IEnumerable<Media> existingMedia = await _unitOfWork.Media.GetAll(media => mediaCollection.Select(u => u.Id).Contains(media.Id));
+                    List<Media>? mediaResponse = new();
 
-                    if (existingMediaItem != null)
+                    foreach (var mediaRequest in mediaCollection)
                     {
-                        // If the media already exists, update its properties
-                        _mapper.Map(mediaRequest, existingMediaItem);
-                        mediaResponse.Add(existingMediaItem);
+                        // Find existing media with the same ID in the database
+                        Media? existingMediaItem = existingMedia.FirstOrDefault(em => em.Id == mediaRequest.Id);
+
+                        if (existingMediaItem != null)
+                        {
+                            // If the media already exists, update its properties
+                            _mapper.Map(mediaRequest, existingMediaItem);
+                            mediaResponse.Add(existingMediaItem);
+                        }
+                        else
+                        {
+                            // If the media does not exist, create a new Media object and map the properties
+                            Media newMedia = _mapper.Map<Media>(mediaRequest);
+                            mediaResponse.Add(newMedia);
+                        }
                     }
-                    else
-                    {
-                        // If the media does not exist, create a new Media object and map the properties
-                        Media newMedia = _mapper.Map<Media>(mediaRequest);
-                        mediaResponse.Add(newMedia);
-                    }
+                    return mediaResponse;
                 }
-                return mediaResponse;
+                return null;
             }
-            return null;
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }
