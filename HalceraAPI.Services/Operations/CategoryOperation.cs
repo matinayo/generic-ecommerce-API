@@ -2,7 +2,6 @@
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.Category;
-using HalceraAPI.Models.Requests.Media;
 using HalceraAPI.Services.Contract;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
@@ -65,10 +64,7 @@ namespace HalceraAPI.Services.Operations
                 if (categoryDetailsFromDb == null)
                     throw new Exception("Category not found");
 
-                IEnumerable<Media>? relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.CategoryId == categoryId);
-                if(relatedMediaCollection != null && relatedMediaCollection.Any())
-                    _unitOfWork.Media.RemoveRange(relatedMediaCollection);
-
+                _ = await _mediaService.DeleteMediaCollection(categoryId, null);
                 _unitOfWork.Category.Remove(categoryDetailsFromDb);
 
                 await _unitOfWork.SaveAsync();
