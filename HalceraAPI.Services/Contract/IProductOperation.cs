@@ -25,7 +25,6 @@ namespace HalceraAPI.Services.Contract
         /// <param name="productId">id of product</param>
         /// <returns>id of added item in cart</returns>
         Task<int> AddProductToCart(int productId);
-
         /// <summary>
         /// Create new product
         /// </summary>

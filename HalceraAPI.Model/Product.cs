@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HalceraAPI.Models
 {
@@ -34,7 +33,7 @@ namespace HalceraAPI.Models
         /// Product Medias
         /// </summary>
         public ICollection<Media>? MediaCollection { get; set; }
-        
+
         /// <summary>
         /// Product Ratings
         /// </summary>
