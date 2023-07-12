@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HalceraAPI", "HalceraAPI\Ha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HalceraAPI.DataAccess", "HalceraAPI.DataAccess\HalceraAPI.DataAccess.csproj", "{8F2EA1C3-4729-48B8-9EFE-39369D97CD1D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HalceraAPI.Model", "HalceraAPI.Model\HalceraAPI.Model.csproj", "{B359D05A-D903-43EF-9099-0802CA3FCFF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HalceraAPI.Models", "HalceraAPI.Model\HalceraAPI.Models.csproj", "{B359D05A-D903-43EF-9099-0802CA3FCFF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HalceraAPI.Services", "HalceraAPI.Services\HalceraAPI.Services.csproj", "{44666F4B-B5BF-4AD2-88B1-0312D08A5423}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HalceraAPI.Services", "HalceraAPI.Services\HalceraAPI.Services.csproj", "{44666F4B-B5BF-4AD2-88B1-0312D08A5423}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

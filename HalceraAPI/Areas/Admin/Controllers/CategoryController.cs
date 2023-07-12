@@ -1,4 +1,5 @@
-﻿using HalceraAPI.Model;
+﻿using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,13 +21,13 @@ namespace HalceraAPI.Areas.Admin.Controllers
 
         [HttpGet]
         [Route("GetAll")]
-        [ProducesResponseType(typeof(IEnumerable<Category>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<CategoryResponse>), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<Category>?>> GetAll()
+        public async Task<ActionResult<IEnumerable<CategoryResponse>?>> GetAll()
         {
             try
             {
-                IEnumerable<Category>? listOfCategories = await _categoryOperation.GetAllCategories();
+                IEnumerable<CategoryResponse>? listOfCategories = await _categoryOperation.GetAllCategories();
                 return Ok(listOfCategories);
             }
             catch (Exception exception)
@@ -37,14 +38,14 @@ namespace HalceraAPI.Areas.Admin.Controllers
 
         [HttpGet]
         [Route("GetCategory/{categoryId}")]
-        [ProducesResponseType(typeof(Category), 200)]
+        [ProducesResponseType(typeof(CategoryResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<Category>?>> GetCategoryById(int categoryId)
+        public async Task<ActionResult<IEnumerable<CategoryResponse>?>> GetCategoryById(int categoryId)
         {
             try
             {
-                Category? categoryDetails = await _categoryOperation.GetCategory(categoryId);
+                CategoryResponse? categoryDetails = await _categoryOperation.GetCategory(categoryId);
                 return Ok(categoryDetails);
             }
             catch (Exception exception)
@@ -55,14 +56,13 @@ namespace HalceraAPI.Areas.Admin.Controllers
 
         [HttpPost]
         [Route("CreateCategory")]
-        [ProducesResponseType(typeof(Category), 200)]
-        [ProducesResponseType(204)]
+        [ProducesResponseType(typeof(CategoryResponse), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<Product?>> CreateCategory([FromBody] Category category)
+        public async Task<ActionResult<CategoryResponse?>> CreateCategory([FromBody] CreateCategoryRequest category)
         {
             try
             {
-                Category categoryDetails = await _categoryOperation.CreateCategory(category);
+                CategoryResponse categoryDetails = await _categoryOperation.CreateCategory(category);
                 return Ok(categoryDetails);
             }
             catch (Exception exception)
@@ -72,15 +72,15 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [HttpPut]
-        [Route("UpdateCategory")]
-        [ProducesResponseType(typeof(Category), 200)]
+        [Route("UpdateCategory/{categoryId}")]
+        [ProducesResponseType(typeof(CategoryResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<Category?>> UpdateCategory([FromBody] Category category)
+        public async Task<ActionResult<CategoryResponse?>> UpdateCategory(int categoryId, [FromBody] UpdateCategoryRequest category)
         {
             try
             {
-                Category categoryDetails = await _categoryOperation.UpdateCategory(category);
+                CategoryResponse categoryDetails = await _categoryOperation.UpdateCategory(categoryId, category);
                 return Ok(categoryDetails);
             }
             catch (Exception exception)
@@ -90,11 +90,11 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [HttpDelete]
-        [Route("DeleteCategory")]
+        [Route("DeleteCategory/{categoryId}")]
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<Category?>> DeleteCategory([FromQuery] int categoryId)
+        public async Task<ActionResult<Category?>> DeleteCategory(int categoryId)
         {
             try
             {

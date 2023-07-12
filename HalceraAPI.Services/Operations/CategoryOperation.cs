@@ -1,25 +1,54 @@
-﻿using HalceraAPI.DataAccess.Contract;
-using HalceraAPI.Model;
+﻿using AutoMapper;
+using HalceraAPI.DataAccess.Contract;
+using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Services.Contract;
+using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace HalceraAPI.Services.Operations
 {
+    /// <summary>
+    /// Category Operations
+    /// </summary>
     public class CategoryOperation : ICategoryOperation
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IMediaOperation _mediaService;
 
-        public CategoryOperation(IUnitOfWork unitOfWork)
+        public CategoryOperation(IUnitOfWork unitOfWork, IMapper mapper, IMediaOperation mediaService)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _mediaService = mediaService;
         }
 
-        public async Task<Category> CreateCategory(Category category)
+        public async Task<CategoryResponse> CreateCategory(CreateCategoryRequest categoryRequest)
         {
             try
             {
-                await _unitOfWork.CategoryRepository.Add(category);
+                // Validate model
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(categoryRequest);
+                bool isValid = Validator.TryValidateObject(categoryRequest, validationContext, validationResults, true);
+                if (!isValid)
+                {
+                    string errorMessage = JsonConvert.SerializeObject(validationResults);
+                    throw new Exception(errorMessage);
+                }
+
+                Category category = new();
+                _mapper.Map(categoryRequest, category);
+
+                await _unitOfWork.Category.Add(category);
                 await _unitOfWork.SaveAsync();
-                return category;
+
+                // Return category response
+                CategoryResponse categoryResponse = new();
+                _mapper.Map(category, categoryResponse);
+
+                return categoryResponse;
             }
             catch (Exception exception)
             {
@@ -31,12 +60,13 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Category? categoryDetails = await _unitOfWork.CategoryRepository.GetFirstOrDefault(category => category.Id == categoryId);
-                if (categoryDetails == null)
+                Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(category => category.Id == categoryId);
+                if (categoryDetailsFromDb == null)
                     throw new Exception("Category not found");
 
+                _ = await _mediaService.DeleteMediaCollection(categoryId, null);
+                _unitOfWork.Category.Remove(categoryDetailsFromDb);
 
-                _unitOfWork.CategoryRepository.Remove(categoryDetails);
                 await _unitOfWork.SaveAsync();
                 return true;
             }
@@ -46,12 +76,16 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<IEnumerable<Category>?> GetAllCategories()
+        public async Task<IEnumerable<CategoryResponse>?> GetAllCategories()
         {
             try
             {
-                IEnumerable<Category>? listOfCategories = await _unitOfWork.CategoryRepository.GetAll();
-                return listOfCategories;
+                IEnumerable<CategoryResponse> response = new List<CategoryResponse>();
+                IEnumerable<Category>? listOfCategories = await _unitOfWork.Category.GetAll(includeProperties: nameof(Category.MediaCollection));
+                if (listOfCategories is not null && listOfCategories.Any())
+                    _mapper.Map(listOfCategories, response);
+
+                return response;
             }
             catch (Exception exception)
             {
@@ -59,41 +93,48 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<Category?> GetCategory(int categoryId)
+        public async Task<CategoryResponse?> GetCategory(int categoryId)
         {
             try
             {
-                Category? categoryDetails = await _unitOfWork.CategoryRepository.GetFirstOrDefault(category => category.Id == categoryId);
-                if (categoryDetails == null)
-                    throw new Exception("Category not found");
-                return categoryDetails;
-            }
-            catch (Exception exception)
-            {
-                throw new Exception(exception.Message);
-            }
-        }
-
-        public async Task<Category> UpdateCategory(Category category)
-        {
-            try
-            {
-                Category? categoryDetails = await _unitOfWork.CategoryRepository.GetFirstOrDefault(categoryDb => categoryDb.Id == category.Id);
-                if (categoryDetails == null)
+                Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(category => category.Id == categoryId, includeProperties: nameof(Category.MediaCollection));
+                if (categoryDetailsFromDb == null)
                     throw new Exception("Category not found");
 
-                categoryDetails.Title = category.Title ?? categoryDetails.Title;
-                categoryDetails.Description = category.Description ?? categoryDetails.Description;
-                categoryDetails.ImageURL = category.ImageURL ?? categoryDetails.ImageURL;
-                categoryDetails.VideoURL = category.VideoURL ?? categoryDetails.VideoURL;
+                CategoryResponse response = new();
+                _mapper.Map(categoryDetailsFromDb, response);
 
-                _unitOfWork.CategoryRepository.Update(categoryDetails);
-                return categoryDetails;
+                return response;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
+
+        public async Task<CategoryResponse> UpdateCategory(int categoryId, UpdateCategoryRequest category)
+        {
+            try
+            {
+                Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(categoryDb => categoryDb.Id == categoryId);
+                if (categoryDetailsFromDb == null)
+                    throw new Exception("Category not found");
+
+                categoryDetailsFromDb.MediaCollection = await _mediaService.UpdateMediaCollection(category.MediaCollection);
+
+                _mapper.Map(category, categoryDetailsFromDb);
+                await _unitOfWork.SaveAsync();
+
+                CategoryResponse response = new();
+                _mapper.Map(categoryDetailsFromDb, response);
+
+                return response;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

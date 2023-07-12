@@ -76,6 +76,11 @@ namespace HalceraAPI.DataAccess.Repository
             dbSet.Remove(entity);
         }
 
+        public void RemoveRange(IEnumerable<T> entities)
+        {
+            dbSet.RemoveRange(entities);
+        }
+
         public void Update(T entity)
         {
             dbSet.Update(entity);

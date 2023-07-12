@@ -22,7 +22,22 @@ namespace HalceraAPI.DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("HalceraAPI.Model.ApplicationUser", b =>
+            modelBuilder.Entity("CategoryProduct", b =>
+                {
+                    b.Property<int>("CategoriesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CategoriesId", "ProductsId");
+
+                    b.HasIndex("ProductsId");
+
+                    b.ToTable("CategoryProduct");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -35,15 +50,12 @@ namespace HalceraAPI.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
                     b.ToTable("ApplicationUsers");
                 });
 
-            modelBuilder.Entity("HalceraAPI.Model.BaseAddress", b =>
+            modelBuilder.Entity("HalceraAPI.Models.BaseAddress", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -56,16 +68,22 @@ namespace HalceraAPI.DataAccess.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<string>("PostalCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("State")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<string>("StreetAddress")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.HasKey("Id");
 
@@ -74,7 +92,7 @@ namespace HalceraAPI.DataAccess.Migrations
                     b.ToTable("BaseAddresses");
                 });
 
-            modelBuilder.Entity("HalceraAPI.Model.Category", b =>
+            modelBuilder.Entity("HalceraAPI.Models.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -82,25 +100,72 @@ namespace HalceraAPI.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("ImageURL")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool?>("IsFeatured")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("VideoURL")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category");
+                    b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("HalceraAPI.Model.Product", b =>
+            modelBuilder.Entity("HalceraAPI.Models.Composition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CompositionType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Compositions");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.CompositionData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CompositionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompositionId");
+
+                    b.ToTable("CompositionData");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.Media", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -111,33 +176,114 @@ namespace HalceraAPI.DataAccess.Migrations
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Name")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<string>("URL")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Medias");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.Price", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double?>("Amount")
+                        .IsRequired()
+                        .HasColumnType("float");
+
+                    b.Property<int>("Currency")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("DiscountAmount")
+                        .HasColumnType("float");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Prices");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.Product", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("ImageURL")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
+                    b.Property<bool?>("IsFeatured")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("VideoURL")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("HalceraAPI.Model.ShoppingCart", b =>
+            modelBuilder.Entity("HalceraAPI.Models.Rating", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("Rate")
+                        .IsRequired()
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Ratings");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.ShoppingCart", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -167,9 +313,24 @@ namespace HalceraAPI.DataAccess.Migrations
                     b.ToTable("ShoppingCart");
                 });
 
-            modelBuilder.Entity("HalceraAPI.Model.BaseAddress", b =>
+            modelBuilder.Entity("CategoryProduct", b =>
                 {
-                    b.HasOne("HalceraAPI.Model.ApplicationUser", "ApplicationUser")
+                    b.HasOne("HalceraAPI.Models.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HalceraAPI.Models.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.BaseAddress", b =>
+                {
+                    b.HasOne("HalceraAPI.Models.ApplicationUser", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -178,24 +339,62 @@ namespace HalceraAPI.DataAccess.Migrations
                     b.Navigation("ApplicationUser");
                 });
 
-            modelBuilder.Entity("HalceraAPI.Model.Product", b =>
+            modelBuilder.Entity("HalceraAPI.Models.Composition", b =>
                 {
-                    b.HasOne("HalceraAPI.Model.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId");
-
-                    b.Navigation("Category");
+                    b.HasOne("HalceraAPI.Models.Product", null)
+                        .WithMany("ProductCompositions")
+                        .HasForeignKey("ProductId");
                 });
 
-            modelBuilder.Entity("HalceraAPI.Model.ShoppingCart", b =>
+            modelBuilder.Entity("HalceraAPI.Models.CompositionData", b =>
                 {
-                    b.HasOne("HalceraAPI.Model.ApplicationUser", "ApplicationUser")
+                    b.HasOne("HalceraAPI.Models.Composition", null)
+                        .WithMany("CompositionDataCollection")
+                        .HasForeignKey("CompositionId");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.Media", b =>
+                {
+                    b.HasOne("HalceraAPI.Models.Category", "Category")
+                        .WithMany("MediaCollection")
+                        .HasForeignKey("CategoryId");
+
+                    b.HasOne("HalceraAPI.Models.Product", "Product")
+                        .WithMany("MediaCollection")
+                        .HasForeignKey("ProductId");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.Price", b =>
+                {
+                    b.HasOne("HalceraAPI.Models.Product", "Product")
+                        .WithMany("Prices")
+                        .HasForeignKey("ProductId");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.Rating", b =>
+                {
+                    b.HasOne("HalceraAPI.Models.Product", "Product")
+                        .WithMany("ProductRatings")
+                        .HasForeignKey("ProductId");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.ShoppingCart", b =>
+                {
+                    b.HasOne("HalceraAPI.Models.ApplicationUser", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HalceraAPI.Model.Product", "Product")
+                    b.HasOne("HalceraAPI.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -204,6 +403,27 @@ namespace HalceraAPI.DataAccess.Migrations
                     b.Navigation("ApplicationUser");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.Category", b =>
+                {
+                    b.Navigation("MediaCollection");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.Composition", b =>
+                {
+                    b.Navigation("CompositionDataCollection");
+                });
+
+            modelBuilder.Entity("HalceraAPI.Models.Product", b =>
+                {
+                    b.Navigation("MediaCollection");
+
+                    b.Navigation("Prices");
+
+                    b.Navigation("ProductCompositions");
+
+                    b.Navigation("ProductRatings");
                 });
 #pragma warning restore 612, 618
         }

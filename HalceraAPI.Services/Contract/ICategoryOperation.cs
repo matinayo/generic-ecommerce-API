@@ -1,4 +1,4 @@
-﻿using HalceraAPI.Model;
+﻿using HalceraAPI.Models.Requests.Category;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -11,25 +11,25 @@ namespace HalceraAPI.Services.Contract
         /// Get all categories
         /// </summary>
         /// <returns>List of categories</returns>
-        Task<IEnumerable<Category>?> GetAllCategories();
+        Task<IEnumerable<CategoryResponse>?> GetAllCategories();
         /// <summary>
         /// Get category by Id
         /// </summary>
         /// <param name="categoryId">id of category to retrieve</param>
         /// <returns>Category details from DB</returns>
-        Task<Category?> GetCategory(int categoryId);
+        Task<CategoryResponse?> GetCategory(int categoryId);
         /// <summary>
         /// Create a new category
         /// </summary>
         /// <param name="category">Category details to be created</param>
         /// <returns>Created category</returns>
-        Task<Category> CreateCategory(Category category);
+        Task<CategoryResponse> CreateCategory(CreateCategoryRequest category);
         /// <summary>
         /// Update details of a category
         /// </summary>
         /// <param name="category">Category data to be updated</param>
         /// <returns>updated category details</returns>
-        Task<Category> UpdateCategory(Category category);
+        Task<CategoryResponse> UpdateCategory(int categoryId, UpdateCategoryRequest category);
         /// <summary>
         /// Delete category record
         /// </summary>

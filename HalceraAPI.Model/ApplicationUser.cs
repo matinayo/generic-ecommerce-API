@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HalceraAPI.Model
+namespace HalceraAPI.Models
 {
     /// <summary>
-    /// Application User Model
+    /// Application User Models
     /// </summary>
     public class ApplicationUser
     {
@@ -15,6 +15,5 @@ namespace HalceraAPI.Model
         [Required]
         [EmailAddress]
         public string? Email { get; set; }
-        public string? UserName { get; set; }
     }
 }
