@@ -1,4 +1,5 @@
 ﻿using HalceraAPI.Models.Requests.Category;
+using HalceraAPI.Models.Requests.Composition;
 using HalceraAPI.Models.Requests.Composition.CompositionData;
 using HalceraAPI.Models.Requests.Media;
 using HalceraAPI.Models.Requests.Price;
@@ -31,12 +32,12 @@ namespace HalceraAPI.Models.Requests.Product
         /// <summary>
         /// Product Ratings
         /// </summary>
-        public ICollection<RatingResponse>? ProductRatings { get; set; }
+       // public ICollection<RatingResponse>? ProductRatings { get; set; }
 
         /// <summary>
         /// Product Composition
         /// </summary>
-        public ICollection<CompositionDataResponse>? ProductCompositions { get; set; }
+        public ICollection<CompositionResponse>? ProductCompositions { get; set; }
 
         /// <summary>
         /// Product Categories

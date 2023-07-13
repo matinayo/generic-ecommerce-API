@@ -1,4 +1,5 @@
-﻿using HalceraAPI.DataAccess.Contract;
+﻿using AutoMapper;
+using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Services.Contract;
@@ -8,10 +9,12 @@ namespace HalceraAPI.Services.Operations
     public class ProductOperation : IProductOperation
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public ProductOperation(IUnitOfWork unitOfWork)
+        public ProductOperation(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -32,7 +35,7 @@ namespace HalceraAPI.Services.Operations
                         throw new Exception("Product not found");
                     }
                     // TODO: add ApplicationUser from Token
-                  //  cart = new ShoppingCart() { ProductId = productId, Price = productItem.Price };
+                    //  cart = new ShoppingCart() { ProductId = productId, Price = productItem.Price };
                     // if product item does not exist in cart, add new item
                     await _unitOfWork.ShoppingCart.Add(cart);
                 }
@@ -49,14 +52,25 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<Product> CreateProduct(CreateProductRequest product)
+        public async Task<ProductResponse> CreateProduct(CreateProductRequest productRequest)
         {
             try
             {
-                // TODO: validate category
-                //await _unitOfWork.Product.Add(product);
-                //await _unitOfWork.SaveAsync();
-                return new();
+                Product product = new();
+                _mapper.Map(productRequest, product);
+
+                if (productRequest.Categories != null && productRequest.Categories.Any())
+                {
+                    var categories = await _unitOfWork.Category.GetAll(category => productRequest.Categories != null && productRequest.Categories.Select(opt => opt.CategoryId).Contains(category.Id), includeProperties: nameof(Category.MediaCollection));
+                    product.Categories = categories.ToList();
+                }
+
+                await _unitOfWork.Product.Add(product);
+                await _unitOfWork.SaveAsync();
+
+                ProductResponse productResponse = new();
+                _mapper.Map(product, productResponse);
+                return productResponse;
             }
             catch (Exception exception)
             {
@@ -85,12 +99,12 @@ namespace HalceraAPI.Services.Operations
         /// Gets All products
         /// </summary>
         /// <returns>List of Products</returns>
-        public async Task<IEnumerable<Product>?> GetAllProducts(bool isActive)
+        public async Task<IEnumerable<ProductResponse>?> GetAllProducts(bool isActive)
         {
             try
             {
-                IEnumerable<Product>? listOfProducts = await _unitOfWork.Product.GetAll(includeProperties: "Category");
-                return listOfProducts;
+                IEnumerable<Product>? listOfProducts = await _unitOfWork.Product.GetAll(product => product.IsActive == isActive, includeProperties: nameof(Product.Categories));
+                return new List<ProductResponse>();
             }
             catch (Exception exception)
             {
@@ -103,12 +117,12 @@ namespace HalceraAPI.Services.Operations
         /// </summary>
         /// <param name="id">Id of product to be returned</param>
         /// <returns>Product</returns>
-        public async Task<Product?> GetProductById(int productId)
+        public async Task<ProductResponse?> GetProductById(int productId)
         {
             try
             {
                 Product? product = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId);
-                return product;
+                return new();
             }
             catch (Exception exception)
             {
@@ -116,7 +130,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<Product> UpdateProduct(CreateProductRequest product)
+        public async Task<ProductResponse> UpdateProduct(CreateProductRequest product)
         {
             try
             {
@@ -128,12 +142,13 @@ namespace HalceraAPI.Services.Operations
                 _unitOfWork.Product.Update(productFromDb);
                 await _unitOfWork.SaveAsync();
 
-                return productFromDb;
+                return new();
             }
             catch (Exception exception)
             {
                 throw new Exception(exception.Message);
             }
         }
+
     }
 }

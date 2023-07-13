@@ -27,27 +27,25 @@ namespace HalceraAPI.Models.Requests.Product
         /// </summary>
         public bool? IsFeatured { get; set; }
 
+        /// <summary>
+        /// Define Price for Product
+        /// </summary>
         [Required]
         public ICollection<CreatePriceRequest>? Prices { get; set; }
         
         /// <summary>
-        /// Product Medias
+        /// Define Product Medias
         /// </summary>
         public ICollection<CreateMediaRequest>? MediaCollection { get; set; }
 
         /// <summary>
-        /// Product Ratings
-        /// </summary>
-        public ICollection<CreateRatingRequest>? ProductRatings { get; set; }
-
-        /// <summary>
-        /// Product Composition
+        /// Define Product Composition
         /// </summary>
         public ICollection<CreateCompositionRequest>? ProductCompositions { get; set; }
 
         /// <summary>
         /// Product Categories
         /// </summary>
-        public ICollection<CreateCategoryRequest>? Categories { get; set; }
+        public ICollection<ProductCategoryRequest>? Categories { get; set; }
     }
 }

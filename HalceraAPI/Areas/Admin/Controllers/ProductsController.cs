@@ -1,5 +1,8 @@
 ﻿using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.Category;
+using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Services.Contract;
+using HalceraAPI.Services.Operations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -35,6 +38,23 @@ namespace HalceraAPI.Areas.Admin.Controllers
             //    return NotFound();
             //}
             return BadRequest(ModelState);
+        }
+
+        [HttpPost]
+        [Route("CreateProduct")]
+        [ProducesResponseType(typeof(ProductResponse), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<ProductResponse?>> CreateProduct([FromBody] CreateProductRequest product)
+        {
+            try
+            {
+                ProductResponse productDetails = await _productOperation.CreateProduct(product);
+                return Ok(productDetails);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+            }
         }
     }
 }

@@ -70,9 +70,9 @@ namespace HalceraAPI.Services.Operations
                 await _unitOfWork.SaveAsync();
                 return true;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 
