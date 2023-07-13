@@ -14,7 +14,7 @@ namespace HalceraAPI.Models.Requests.Category
         /// </summary>
         public ICollection<MediaResponse>? MediaCollection { get; set; }
 
-        public bool? IsActive { get; set; }
-        public bool? IsFeatured { get; set; }
+        public bool? Active { get; set; }
+        public bool? Featured { get; set; }
     }
 }

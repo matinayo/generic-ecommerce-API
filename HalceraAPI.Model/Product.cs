@@ -20,14 +20,14 @@ namespace HalceraAPI.Models
         /// <summary>
         /// if product is active
         /// </summary>
-        public bool IsActive { get; set; } = true;
+        public bool Active { get; set; } = true;
 
         [Required]
         public ICollection<Price>? Prices { get; set; }
         /// <summary>
         /// Featured Product
         /// </summary>
-        public bool? IsFeatured { get; set; }
+        public bool? Featured { get; set; }
 
         /// <summary>
         /// Product Medias

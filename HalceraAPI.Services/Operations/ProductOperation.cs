@@ -99,12 +99,16 @@ namespace HalceraAPI.Services.Operations
         /// Gets All products
         /// </summary>
         /// <returns>List of Products</returns>
-        public async Task<IEnumerable<ProductResponse>?> GetAllProducts(bool isActive)
+        public async Task<IEnumerable<ProductResponse>?> GetAllProducts(bool Active)
         {
             try
             {
-                IEnumerable<Product>? listOfProducts = await _unitOfWork.Product.GetAll(product => product.IsActive == isActive, includeProperties: nameof(Product.Categories));
-                return new List<ProductResponse>();
+                IEnumerable<Product>? listOfProducts = await _unitOfWork.Product.GetAll(product => product.Active == Active, includeProperties: nameof(Product.Categories));
+
+                IEnumerable<ProductResponse>? listOfProductResponse = new List<ProductResponse>();
+                _mapper.Map(listOfProducts, listOfProductResponse);
+
+                return listOfProductResponse;
             }
             catch (Exception exception)
             {

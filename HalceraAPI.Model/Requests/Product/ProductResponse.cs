@@ -16,13 +16,13 @@ namespace HalceraAPI.Models.Requests.Product
         /// <summary>
         /// if product is active
         /// </summary>
-        public bool IsActive { get; set; }
+        public bool Active { get; set; }
 
         public ICollection<PriceResponse>? Prices { get; set; }
         /// <summary>
         /// Featured Product
         /// </summary>
-        public bool? IsFeatured { get; set; }
+        public bool? Featured { get; set; }
 
         /// <summary>
         /// Product Medias

@@ -11,7 +11,7 @@ namespace HalceraAPI.Services.Contract
         /// Get all categories
         /// </summary>
         /// <returns>List of categories</returns>
-        Task<IEnumerable<CategoryResponse>?> GetAllCategories();
+        Task<IEnumerable<CategoryResponse>?> GetAllCategories(bool? active, bool? featured);
         /// <summary>
         /// Get category by Id
         /// </summary>

@@ -11,7 +11,7 @@ namespace HalceraAPI.Services.Contract
         /// Get list of products
         /// </summary>
         /// <returns>List of products from DB</returns>
-        Task<IEnumerable<ProductResponse>?> GetAllProducts(bool isActive);
+        Task<IEnumerable<ProductResponse>?> GetAllProducts(bool Active);
         /// <summary>
         /// Get Product By Id
         /// </summary>

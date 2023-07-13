@@ -76,12 +76,12 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<IEnumerable<CategoryResponse>?> GetAllCategories()
+        public async Task<IEnumerable<CategoryResponse>?> GetAllCategories(bool? active, bool? featured)
         {
             try
             {
                 IEnumerable<CategoryResponse> response = new List<CategoryResponse>();
-                IEnumerable<Category>? listOfCategories = await _unitOfWork.Category.GetAll(includeProperties: nameof(Category.MediaCollection));
+                IEnumerable<Category>? listOfCategories = await _unitOfWork.Category.GetAll(category => category.Active == active, includeProperties: nameof(Category.MediaCollection));
                 if (listOfCategories is not null && listOfCategories.Any())
                     _mapper.Map(listOfCategories, response);
 

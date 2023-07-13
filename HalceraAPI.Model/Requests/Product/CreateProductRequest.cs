@@ -20,12 +20,12 @@ namespace HalceraAPI.Models.Requests.Product
         /// <summary>
         /// Indicates if a product is active
         /// </summary>
-        public bool IsActive { get; set; } = true;
+        public bool Active { get; set; } = true;
 
         /// <summary>
         /// Featured Product
         /// </summary>
-        public bool? IsFeatured { get; set; }
+        public bool? Featured { get; set; }
 
         /// <summary>
         /// Define Price for Product

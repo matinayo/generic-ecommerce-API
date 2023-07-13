@@ -23,11 +23,11 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [Route("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<CategoryResponse>), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<CategoryResponse>?>> GetAll()
+        public async Task<ActionResult<IEnumerable<CategoryResponse>?>> GetAll(bool? active = true, bool? featured = null)
         {
             try
             {
-                IEnumerable<CategoryResponse>? listOfCategories = await _categoryOperation.GetAllCategories();
+                IEnumerable<CategoryResponse>? listOfCategories = await _categoryOperation.GetAllCategories(active: active, featured: featured);
                 return Ok(listOfCategories);
             }
             catch (Exception exception)
