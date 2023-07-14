@@ -23,7 +23,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [Route("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<CategoryResponse>), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<CategoryResponse>?>> GetAll(bool? active = true, bool? featured = null)
+        public async Task<ActionResult<IEnumerable<CategoryResponse>?>> GetAll(bool? active, bool? featured = null)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<Category?>> DeleteCategory(int categoryId)
+        public async Task<ActionResult<bool?>> DeleteCategory(int categoryId)
         {
             try
             {

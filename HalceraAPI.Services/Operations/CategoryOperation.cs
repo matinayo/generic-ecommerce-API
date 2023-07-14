@@ -28,16 +28,6 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                // Validate model
-                var validationResults = new List<ValidationResult>();
-                var validationContext = new ValidationContext(categoryRequest);
-                bool isValid = Validator.TryValidateObject(categoryRequest, validationContext, validationResults, true);
-                if (!isValid)
-                {
-                    string errorMessage = JsonConvert.SerializeObject(validationResults);
-                    throw new Exception(errorMessage);
-                }
-
                 Category category = new();
                 _mapper.Map(categoryRequest, category);
 
@@ -50,9 +40,9 @@ namespace HalceraAPI.Services.Operations
 
                 return categoryResponse;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 
@@ -80,16 +70,37 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                IEnumerable<CategoryResponse> response = new List<CategoryResponse>();
-                IEnumerable<Category>? listOfCategories = await _unitOfWork.Category.GetAll(category => category.Active == active, includeProperties: nameof(Category.MediaCollection));
+                IEnumerable<CategoryResponse> response;
+                IEnumerable<Category>? listOfCategories;
+
+                if (active.HasValue && featured != null)
+                {
+                    listOfCategories = await _unitOfWork.Category.GetAll(
+                        category => category.Active == active && category.Featured == featured, includeProperties: nameof(Category.MediaCollection));
+                }
+                else if (active != null)
+                {
+                    listOfCategories = await _unitOfWork.Category.GetAll(category => category.Active == active, includeProperties: nameof(Category.MediaCollection));
+                }
+                else if (featured != null)
+                {
+                    listOfCategories = await _unitOfWork.Category.GetAll(category => category.Featured == featured, includeProperties: nameof(Category.MediaCollection));
+                }
+                else
+                {
+                    listOfCategories = await _unitOfWork.Category.GetAll(includeProperties: nameof(Category.MediaCollection));
+                }
+
                 if (listOfCategories is not null && listOfCategories.Any())
-                    _mapper.Map(listOfCategories, response);
+                    response = _mapper.Map<IEnumerable<CategoryResponse>>(listOfCategories);
+                else
+                    response = Enumerable.Empty<CategoryResponse>();
 
                 return response;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 

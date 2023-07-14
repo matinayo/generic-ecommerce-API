@@ -1,16 +1,20 @@
 ﻿using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Models.Requests.Composition;
-using HalceraAPI.Models.Requests.Composition.CompositionData;
 using HalceraAPI.Models.Requests.Media;
 using HalceraAPI.Models.Requests.Price;
-using HalceraAPI.Models.Requests.Rating;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace HalceraAPI.Models.Requests.Product
 {
-    public class ProductResponse
+    public class ProductDetailsResponse
     {
         public int Id { get; set; }
         public string? Title { get; set; }
+        public string? Description { get; set; }
 
         /// <summary>
         /// if product is active
@@ -27,6 +31,16 @@ namespace HalceraAPI.Models.Requests.Product
         /// Product Medias
         /// </summary>
         public ICollection<MediaResponse>? MediaCollection { get; set; }
+
+        /// <summary>
+        /// Product Ratings
+        /// </summary>
+       // public ICollection<RatingResponse>? ProductRatings { get; set; }
+
+        /// <summary>
+        /// Product Composition
+        /// </summary>
+        public ICollection<CompositionResponse>? ProductCompositions { get; set; }
 
         /// <summary>
         /// Product Categories

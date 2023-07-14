@@ -19,10 +19,12 @@ namespace HalceraAPI.Utilities.Automapper
                 .ForMember(destination => destination.MediaCollection, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
             CreateMap<Category, CategoryResponse>().ReverseMap();
+            CreateMap<Category, CategoryLabelResponse>().ReverseMap();
 
             // Product Request
             CreateMap<CreateProductRequest, Product>().ReverseMap();
             CreateMap<Product, ProductResponse>().ReverseMap();
+            CreateMap<Product, ProductDetailsResponse>().ReverseMap();
 
             // Price Request
             CreateMap<CreatePriceRequest, Price>().ReverseMap();

@@ -11,13 +11,13 @@ namespace HalceraAPI.Services.Contract
         /// Get list of products
         /// </summary>
         /// <returns>List of products from DB</returns>
-        Task<IEnumerable<ProductResponse>?> GetAllProducts(bool Active);
+        Task<IEnumerable<ProductResponse>?> GetAllProducts(bool? active, bool? featured, int? categoryId);
         /// <summary>
         /// Get Product By Id
         /// </summary>
         /// <param name="productId">Id of Product to Get</param>
         /// <returns>Product details from DB</returns>
-        Task<ProductResponse?> GetProductById(int productId);
+        Task<ProductDetailsResponse?> GetProductById(int productId);
         /// <summary>
         /// Add product item to cart
         /// </summary>
@@ -29,7 +29,7 @@ namespace HalceraAPI.Services.Contract
         /// </summary>
         /// <param name="product">product data to be created</param>
         /// <returns>Created product details</returns>
-        Task<ProductResponse> CreateProduct(CreateProductRequest product);
+        Task<ProductDetailsResponse> CreateProduct(CreateProductRequest product);
         /// <summary>
         /// Update a product
         /// </summary>
