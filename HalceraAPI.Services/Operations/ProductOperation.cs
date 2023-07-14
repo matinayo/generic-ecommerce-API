@@ -246,8 +246,8 @@ namespace HalceraAPI.Services.Operations
         private async Task<IEnumerable<Product>> GetFeaturedProductsByCategoryId(bool? featured, int? categoryId, IEnumerable<Product>? listOfProducts)
         {
             listOfProducts = await _unitOfWork.Product.GetAll(
-                                    product => product.Categories != null && product.Featured == featured
-                                    && product.Categories.Select(category => category.Id).Any(category => category == categoryId),
+                                    product => product.Featured == featured
+                                     && product.Categories!.Any(category => category.Id == categoryId),
                                    includeProperties: $"{nameof(Product.Categories)},{nameof(Product.MediaCollection)},{nameof(Product.Prices)}");
             return listOfProducts;
         }
@@ -255,8 +255,8 @@ namespace HalceraAPI.Services.Operations
         private async Task<IEnumerable<Product>> GetActiveProductsByCategoryId(bool? active, int? categoryId, IEnumerable<Product>? listOfProducts)
         {
             listOfProducts = await _unitOfWork.Product.GetAll(
-                                    product => product.Categories != null && product.Active == active
-                                    && product.Categories.Select(category => category.Id).Any(category => category == categoryId),
+                                    product => product.Active == active
+                                    && product.Categories!.Any(category => category.Id == categoryId),
                                    includeProperties: $"{nameof(Product.Categories)},{nameof(Product.MediaCollection)},{nameof(Product.Prices)}");
             return listOfProducts;
         }
@@ -272,17 +272,9 @@ namespace HalceraAPI.Services.Operations
 
         private async Task<IEnumerable<Product>> GetProductsByCategoryId(int categoryId, IEnumerable<Product>? listOfProducts)
         {
-            Category? categoryFromDb = await _unitOfWork.Category.GetFirstOrDefault(category => category.Id == categoryId,
-                includeProperties: $"{nameof(Category.Products)},Products.MediaCollection,Products.Prices");
-            if (categoryFromDb is null)
-            {
-                throw new Exception("Category not found");
-            }
-            if (categoryFromDb is not null && categoryFromDb.Products is not null)
-            {
-                listOfProducts = categoryFromDb.Products;
-            }
-            listOfProducts ??= Enumerable.Empty<Product>();
+            listOfProducts = await _unitOfWork.Product.GetAll(
+            product => product.Categories!.Any(category => category.Id == categoryId),
+                                   includeProperties: $"{nameof(Product.Categories)},{nameof(Product.MediaCollection)},{nameof(Product.Prices)}");
             return listOfProducts;
         }
     }
