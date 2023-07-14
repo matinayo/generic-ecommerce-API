@@ -105,15 +105,15 @@ namespace HalceraAPI.Services.Operations
                 IEnumerable<Product>? listOfProducts = Enumerable.Empty<Product>();
                 if (active.HasValue && featured.HasValue && categoryId.HasValue)
                 {
-                    listOfProducts = await GetActiveAndFeaturedProductsByCategoryId(active, featured, categoryId, listOfProducts);
+                    listOfProducts = await GetActiveAndFeaturedProductsByCategoryId(active, featured, categoryId.Value, listOfProducts);
                 }
                 else if (active.HasValue && categoryId.HasValue)
                 {
-                    listOfProducts = await GetActiveProductsByCategoryId(active, categoryId, listOfProducts);
+                    listOfProducts = await GetActiveProductsByCategoryId(active, categoryId.Value, listOfProducts);
                 }
                 else if (featured.HasValue && categoryId.HasValue)
                 {
-                    listOfProducts = await GetFeaturedProductsByCategoryId(featured, categoryId, listOfProducts);
+                    listOfProducts = await GetFeaturedProductsByCategoryId(featured, categoryId.Value, listOfProducts);
                 }
                 else if (active.HasValue && featured.HasValue)
                 {
@@ -243,7 +243,14 @@ namespace HalceraAPI.Services.Operations
             return listOfProducts;
         }
 
-        private async Task<IEnumerable<Product>> GetFeaturedProductsByCategoryId(bool? featured, int? categoryId, IEnumerable<Product>? listOfProducts)
+        /// <summary>
+        /// Get Featured products by category Id
+        /// </summary>
+        /// <param name="featured">Featured query</param>
+        /// <param name="categoryId">Category Id</param>
+        /// <param name="listOfProducts">IEnumerable</param>
+        /// <returns>List of filtered products by category</returns>
+        private async Task<IEnumerable<Product>> GetFeaturedProductsByCategoryId(bool? featured, int categoryId, IEnumerable<Product>? listOfProducts)
         {
             listOfProducts = await _unitOfWork.Product.GetAll(
                                     product => product.Featured == featured
@@ -252,7 +259,14 @@ namespace HalceraAPI.Services.Operations
             return listOfProducts;
         }
 
-        private async Task<IEnumerable<Product>> GetActiveProductsByCategoryId(bool? active, int? categoryId, IEnumerable<Product>? listOfProducts)
+        /// <summary>
+        /// Get Active products by category Id
+        /// </summary>
+        /// <param name="active">Active query</param>
+        /// <param name="categoryId">Category Id</param>
+        /// <param name="listOfProducts">IEnumerable</param>
+        /// <returns>List of filtered products by category</returns>
+        private async Task<IEnumerable<Product>> GetActiveProductsByCategoryId(bool? active, int categoryId, IEnumerable<Product>? listOfProducts)
         {
             listOfProducts = await _unitOfWork.Product.GetAll(
                                     product => product.Active == active
@@ -261,7 +275,15 @@ namespace HalceraAPI.Services.Operations
             return listOfProducts;
         }
 
-        private async Task<IEnumerable<Product>> GetActiveAndFeaturedProductsByCategoryId(bool? active, bool? featured, int? categoryId, IEnumerable<Product>? listOfProducts)
+        /// <summary>
+        /// Get Active and Featured products by category Id
+        /// </summary>
+        /// <param name="active">Active query</param>
+        /// <param name="featured">Featured query</param>
+        /// <param name="categoryId">Category Id</param>
+        /// <param name="listOfProducts">IEnumerable</param>
+        /// <returns>List of filtered products by category</returns>
+        private async Task<IEnumerable<Product>> GetActiveAndFeaturedProductsByCategoryId(bool? active, bool? featured, int categoryId, IEnumerable<Product>? listOfProducts)
         {
             listOfProducts = await _unitOfWork.Product.GetAll(
                                     product => product.Active == active && product.Featured == featured
@@ -270,6 +292,12 @@ namespace HalceraAPI.Services.Operations
             return listOfProducts;
         }
 
+        /// <summary>
+        /// Get products by category Id
+        /// </summary>
+        /// <param name="categoryId">Category Id</param>
+        /// <param name="listOfProducts">IEnumerable</param>
+        /// <returns>List of filtered products by category</returns>
         private async Task<IEnumerable<Product>> GetProductsByCategoryId(int categoryId, IEnumerable<Product>? listOfProducts)
         {
             listOfProducts = await _unitOfWork.Product.GetAll(

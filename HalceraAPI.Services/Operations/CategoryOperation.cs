@@ -146,6 +146,5 @@ namespace HalceraAPI.Services.Operations
                 throw;
             }
         }
-
     }
 }
