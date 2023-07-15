@@ -76,5 +76,23 @@ namespace HalceraAPI.Areas.Admin.Controllers
                 return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
             }
         }
+
+        [HttpDelete]
+        [Route("DeleteProduct/{productId}")]
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<bool?>> DeleteProduct(int productId)
+        {
+            try
+            {
+                bool result = await _productOperation.DeleteProduct(productId);
+                return Ok(result);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+            }
+        }
     }
 }

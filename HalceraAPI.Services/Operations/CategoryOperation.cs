@@ -15,13 +15,13 @@ namespace HalceraAPI.Services.Operations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IMediaOperation _mediaService;
+        private readonly IMediaOperation _mediaOperation;
 
         public CategoryOperation(IUnitOfWork unitOfWork, IMapper mapper, IMediaOperation mediaService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _mediaService = mediaService;
+            _mediaOperation = mediaService;
         }
 
         public async Task<CategoryResponse> CreateCategory(CreateCategoryRequest categoryRequest)
@@ -54,7 +54,7 @@ namespace HalceraAPI.Services.Operations
                 if (categoryDetailsFromDb == null)
                     throw new Exception("Category not found");
 
-                _ = await _mediaService.DeleteMediaCollection(categoryId, null);
+                _ = await _mediaOperation.DeleteMediaCollection(categoryId, null);
                 _unitOfWork.Category.Remove(categoryDetailsFromDb);
 
                 await _unitOfWork.SaveAsync();
@@ -131,7 +131,7 @@ namespace HalceraAPI.Services.Operations
                 if (categoryDetailsFromDb == null)
                     throw new Exception("Category not found");
 
-                categoryDetailsFromDb.MediaCollection = await _mediaService.UpdateMediaCollection(category.MediaCollection);
+                categoryDetailsFromDb.MediaCollection = await _mediaOperation.UpdateMediaCollection(category.MediaCollection);
 
                 _mapper.Map(category, categoryDetailsFromDb);
                 await _unitOfWork.SaveAsync();

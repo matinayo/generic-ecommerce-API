@@ -10,18 +10,19 @@ namespace HalceraAPI.Services.Operations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IMediaOperation _mediaOperation;
+        private readonly ICompositionOperation _compositionOperation;
+        private readonly IPriceOperation _priceOperation;
 
-        public ProductOperation(IUnitOfWork unitOfWork, IMapper mapper)
+        public ProductOperation(IUnitOfWork unitOfWork, IMapper mapper, IMediaOperation mediaOperation, ICompositionOperation compositionOperation, IPriceOperation priceOperation)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _mediaOperation = mediaOperation;
+            _compositionOperation = compositionOperation;
+            _priceOperation = priceOperation;
         }
 
-        /// <summary>
-        /// Add product item to cart
-        /// </summary>
-        /// <param name="productId">id of product</param>
-        /// <returns>id of product in cart</returns>
         public async Task<int> AddProductToCart(int productId)
         {
             try
@@ -71,10 +72,7 @@ namespace HalceraAPI.Services.Operations
                 _mapper.Map(product, productResponse);
                 return productResponse;
             }
-            catch (Exception exception)
-            {
-                throw new Exception(exception.Message);
-            }
+            catch (Exception) { throw; }
         }
 
         public async Task<bool> DeleteProduct(int productId)
@@ -84,20 +82,24 @@ namespace HalceraAPI.Services.Operations
                 Product? productDetails = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId);
                 if (productDetails == null)
                     throw new Exception("Product not found");
+
+                // delete product media
+                await _mediaOperation.DeleteMediaCollection(null, productId);
+
+                // delete product composition and prices
+                await _compositionOperation.DeleteProductCompositions(productId);
+                await _priceOperation.DeleteProductPrices(productId);
+
                 _unitOfWork.Product.Remove(productDetails);
                 await _unitOfWork.SaveAsync();
                 return true;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 
-        /// <summary>
-        /// Gets All products
-        /// </summary>
-        /// <returns>List of Products</returns>
         public async Task<IEnumerable<ProductResponse>?> GetAllProducts(bool? active, bool? featured, int? categoryId)
         {
             try
@@ -148,11 +150,6 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        /// <summary>
-        /// Get a single product by Id
-        /// </summary>
-        /// <param name="id">Id of product to be returned</param>
-        /// <returns>Product</returns>
         public async Task<ProductDetailsResponse?> GetProductById(int productId)
         {
             try
@@ -185,9 +182,9 @@ namespace HalceraAPI.Services.Operations
 
                 return new();
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 

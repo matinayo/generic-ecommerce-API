@@ -1,5 +1,6 @@
 ﻿using HalceraAPI.Models.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HalceraAPI.Models
 {
@@ -20,5 +21,9 @@ namespace HalceraAPI.Models
         [StringLength(10, ErrorMessage = "Field has a maximum length of '10'")]
         public string? Name { get; set; }
         public ICollection<CompositionData>? CompositionDataCollection { get; set; }
+
+        public int? ProductId { get; set; }
+        [ForeignKey(nameof(ProductId))]
+        public Product? Product { get; set; }
     }
 }

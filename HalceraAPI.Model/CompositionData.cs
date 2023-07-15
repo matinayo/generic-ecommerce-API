@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HalceraAPI.Models
 {
@@ -12,5 +13,9 @@ namespace HalceraAPI.Models
         [Required]
         [StringLength(20, ErrorMessage = "Data field has a maximum length of '20'")]
         public string? Data { get; set; }
+
+        public int? CompositionId { get; set; }
+        [ForeignKey(nameof(CompositionId))]
+        public Composition? Composition { get; set; }
     }
 }
