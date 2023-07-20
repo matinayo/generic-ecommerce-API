@@ -77,6 +77,24 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("UpdateProduct/{productId}")]
+        [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<ProductDetailsResponse?>> UpdateProduct(int productId, [FromBody] UpdateProductRequest product)
+        {
+            try
+            {
+                ProductDetailsResponse productDetails = await _productOperation.UpdateProduct(productId, product);
+                return Ok(productDetails);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+            }
+        }
+
         [HttpDelete]
         [Route("DeleteProduct/{productId}")]
         [ProducesResponseType(typeof(bool), 200)]

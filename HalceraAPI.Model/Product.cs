@@ -22,13 +22,13 @@ namespace HalceraAPI.Models
         /// </summary>
         public bool Active { get; set; } = true;
 
-        [Required]
-        public ICollection<Price>? Prices { get; set; }
         /// <summary>
         /// Featured Product
         /// </summary>
         public bool? Featured { get; set; }
 
+        [Required]
+        public ICollection<Price>? Prices { get; set; }
         /// <summary>
         /// Product Medias
         /// </summary>
@@ -37,7 +37,7 @@ namespace HalceraAPI.Models
         /// <summary>
         /// Product Ratings
         /// </summary>
-        public ICollection<Rating>? ProductRatings { get; set; }
+        // public ICollection<Rating>? ProductRatings { get; set; }
 
         /// <summary>
         /// Product Composition

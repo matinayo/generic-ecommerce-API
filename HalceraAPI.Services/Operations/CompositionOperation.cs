@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.Composition;
 using HalceraAPI.Models.Requests.Media;
 using HalceraAPI.Services.Contract;
 
@@ -41,9 +42,41 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public Task<ICollection<Media>?> UpdateComposition(IEnumerable<UpdateMediaRequest>? mediaCollection)
+        public async Task<ICollection<Composition>?> UpdateComposition(IEnumerable<UpdateCompositionRequest>? compositionCollection)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (compositionCollection is not null && compositionCollection.Any())
+                {
+                    IEnumerable<Composition> existingCompositions = await _unitOfWork.Composition.GetAll(composition => compositionCollection.Select(u => u.Id).Contains(composition.Id));
+                    List<Composition>? compositionResponse = new();
+
+                    foreach (var compositionRequest in compositionCollection)
+                    {
+                        // Find existing composition with the same ID in the database
+                        Composition? existingComposition = existingCompositions?.FirstOrDefault(em => em.Id == compositionRequest.Id);
+
+                        if (existingComposition != null)
+                        {
+                            // If the composition already exists, update its properties
+                            existingComposition.Name = compositionRequest.Name;
+                          //  _mapper.Map(compositionRequest, existingComposition);
+                           // compositionResponse.Add(existingComposition);
+                        }
+                        else
+                        {
+                            // If the composition does not exist, create a new composition object and map the properties
+                            Composition newComposition = _mapper.Map<Composition>(compositionRequest);
+                            compositionResponse.Add(newComposition);
+                        }
+                    }
+                    return compositionResponse;
+                }
+                return null;
+            }catch(Exception)
+            {
+                throw;
+            }
         }
     }
 }

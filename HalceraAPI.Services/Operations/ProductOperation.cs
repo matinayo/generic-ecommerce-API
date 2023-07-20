@@ -168,19 +168,23 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<ProductResponse> UpdateProduct(CreateProductRequest product)
+        public async Task<ProductDetailsResponse> UpdateProduct(int productId, UpdateProductRequest product)
         {
             try
             {
-                Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == 0);
-                if (productFromDb == null) throw new Exception("Product not found");
+                Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId);
+                if (productFromDb is null) throw new Exception("Product not found");
 
-                //productFromDb.Title = product.Title ?? productFromDb.Title;
+                productFromDb.Prices = await _priceOperation.UpdatePrice(product.Prices);
+                productFromDb.MediaCollection = await _mediaOperation.UpdateMediaCollection(product.MediaCollection);
+               productFromDb.ProductCompositions = 
+                    await _compositionOperation.UpdateComposition(product.ProductCompositions);
 
-                _unitOfWork.Product.Update(productFromDb);
+                _mapper.Map(product, productFromDb);
                 await _unitOfWork.SaveAsync();
 
-                return new();
+                ProductDetailsResponse response = _mapper.Map<ProductDetailsResponse>(productFromDb);
+                return response;
             }
             catch (Exception)
             {

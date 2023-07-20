@@ -13,8 +13,7 @@ namespace HalceraAPI.Models.Requests.Media
     /// </summary>
     public class UpdateMediaRequest
     {
-        [Required]
-        public int Id { get; set; }
+        public int? Id { get; set; }
         /// <summary>
         /// Content URL
         /// </summary>

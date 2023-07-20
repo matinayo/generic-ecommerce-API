@@ -1,4 +1,5 @@
 ﻿using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.Composition;
 using HalceraAPI.Models.Requests.Media;
 
 namespace HalceraAPI.Services.Contract
@@ -8,9 +9,7 @@ namespace HalceraAPI.Services.Contract
         /// <summary>
         /// Update Product Composition
         /// </summary>
-        /// <param name="mediaCollection"></param>
-        /// <returns></returns>
-        Task<ICollection<Media>?> UpdateComposition(IEnumerable<UpdateMediaRequest>? mediaCollection);
+        Task<ICollection<Composition>?> UpdateComposition(IEnumerable<UpdateCompositionRequest>? compositionCollection);
         /// <summary>
         /// Delete range of Composition collection
         /// </summary>

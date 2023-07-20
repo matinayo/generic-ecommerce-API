@@ -1,16 +1,15 @@
 ﻿using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.Media;
+using HalceraAPI.Models.Requests.Price;
 
 namespace HalceraAPI.Services.Contract
 {
     public interface IPriceOperation
     {
         /// <summary>
-        /// Update Product Composition
+        /// Update Product Prices
         /// </summary>
-        /// <param name="mediaCollection"></param>
-        /// <returns></returns>
-        Task<ICollection<Media>?> UpdateComposition(IEnumerable<UpdateMediaRequest>? mediaCollection);
+        Task<ICollection<Price>?> UpdatePrice(IEnumerable<UpdatePriceRequest>? priceCollection);
         /// <summary>
         /// Delete range of Composition collection
         /// </summary>
