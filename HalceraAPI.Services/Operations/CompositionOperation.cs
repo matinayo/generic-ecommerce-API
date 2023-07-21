@@ -42,13 +42,12 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<ICollection<Composition>?> UpdateComposition(IEnumerable<UpdateCompositionRequest>? compositionCollection)
+        public ICollection<Composition>? UpdateComposition(IEnumerable<UpdateCompositionRequest>? compositionCollection, IEnumerable<Composition>? existingCompositions)
         {
             try
             {
                 if (compositionCollection is not null && compositionCollection.Any())
                 {
-                    IEnumerable<Composition> existingCompositions = await _unitOfWork.Composition.GetAll(composition => compositionCollection.Select(u => u.Id).Contains(composition.Id));
                     List<Composition>? compositionResponse = new();
 
                     foreach (var compositionRequest in compositionCollection)
@@ -60,7 +59,7 @@ namespace HalceraAPI.Services.Operations
                         {
                             // If the composition already exists, update its properties
                             existingComposition.Name = compositionRequest.Name;
-                          //  _mapper.Map(compositionRequest, existingComposition);
+                            //_mapper.Map(compositionRequest, existingComposition);
                            // compositionResponse.Add(existingComposition);
                         }
                         else

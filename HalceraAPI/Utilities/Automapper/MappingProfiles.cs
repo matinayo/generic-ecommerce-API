@@ -26,7 +26,9 @@ namespace HalceraAPI.Utilities.Automapper
             CreateMap<Product, ProductResponse>().ReverseMap();
             CreateMap<Product, ProductDetailsResponse>().ReverseMap();
             CreateMap<UpdateProductRequest, Product>()
-                // confirm if collection need skip
+                .ForMember(destination => destination.MediaCollection, opt => opt.Ignore())
+                .ForMember(destination => destination.Prices, opt => opt.Ignore())
+                .ForMember(destination => destination.ProductCompositions, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
 
             // Price Request
@@ -38,8 +40,7 @@ namespace HalceraAPI.Utilities.Automapper
             // Composition Request
             CreateMap<CreateCompositionRequest, Composition>().ReverseMap();
             CreateMap<UpdateCompositionRequest, Composition>()
-              //  .ForMember(destination => destination.Id, opt => opt.Ignore())
-                .ReverseMap()
+                .ForMember(destination => destination.Id, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
             CreateMap<Composition, CompositionResponse>().ReverseMap();
 

@@ -172,13 +172,13 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId);
+                Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId, includeProperties: "ProductCompositions");
                 if (productFromDb is null) throw new Exception("Product not found");
 
                 productFromDb.Prices = await _priceOperation.UpdatePrice(product.Prices);
                 productFromDb.MediaCollection = await _mediaOperation.UpdateMediaCollection(product.MediaCollection);
-               productFromDb.ProductCompositions = 
-                    await _compositionOperation.UpdateComposition(product.ProductCompositions);
+             //  productFromDb.ProductCompositions = 
+                    _compositionOperation.UpdateComposition(product.ProductCompositions, productFromDb.ProductCompositions);
 
                 _mapper.Map(product, productFromDb);
                 await _unitOfWork.SaveAsync();
