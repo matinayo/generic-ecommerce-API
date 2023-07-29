@@ -9,7 +9,7 @@ namespace HalceraAPI.Services.Contract
         /// <summary>
         /// Update Product Composition
         /// </summary>
-        ICollection<Composition>? UpdateComposition(IEnumerable<UpdateCompositionRequest>? compositionCollection, IEnumerable<Composition>? existingCompositions);
+        Task UpdateComposition(int productId, IEnumerable<UpdateCompositionRequest>? compositionCollection, IEnumerable<Composition>? existingCompositionsfromDb);
         /// <summary>
         /// Delete range of Composition collection
         /// </summary>

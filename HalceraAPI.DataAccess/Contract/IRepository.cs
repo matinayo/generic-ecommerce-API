@@ -18,6 +18,8 @@ namespace HalceraAPI.DataAccess.Contract
 
         Task Add(T entity);
 
+        Task AddRange(IEnumerable<T> entities);
+
         void Update(T entity);
 
         void Remove(T entity);

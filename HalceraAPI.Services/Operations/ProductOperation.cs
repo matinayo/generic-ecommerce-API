@@ -177,8 +177,7 @@ namespace HalceraAPI.Services.Operations
 
                 productFromDb.Prices = await _priceOperation.UpdatePrice(product.Prices);
                 productFromDb.MediaCollection = await _mediaOperation.UpdateMediaCollection(product.MediaCollection);
-             //  productFromDb.ProductCompositions = 
-                    _compositionOperation.UpdateComposition(product.ProductCompositions, productFromDb.ProductCompositions);
+                await _compositionOperation.UpdateComposition(productId, product.ProductCompositions, productFromDb.ProductCompositions);
 
                 _mapper.Map(product, productFromDb);
                 await _unitOfWork.SaveAsync();

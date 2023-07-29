@@ -26,6 +26,11 @@ namespace HalceraAPI.DataAccess.Repository
             await dbSet.AddAsync(entity);
         }
 
+        public async Task AddRange(IEnumerable<T> entities)
+        {
+            await dbSet.AddRangeAsync(entities);
+        }
+
         public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;

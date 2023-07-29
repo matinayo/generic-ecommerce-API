@@ -42,36 +42,36 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public ICollection<Composition>? UpdateComposition(IEnumerable<UpdateCompositionRequest>? compositionCollection, IEnumerable<Composition>? existingCompositions)
+        public async Task UpdateComposition(int productId, IEnumerable<UpdateCompositionRequest>? compositionCollection, IEnumerable<Composition>? existingCompositions)
         {
             try
             {
                 if (compositionCollection is not null && compositionCollection.Any())
                 {
-                    List<Composition>? compositionResponse = new();
-
+                    List<Composition> compositionsToAdd = new();
                     foreach (var compositionRequest in compositionCollection)
                     {
                         // Find existing composition with the same ID in the database
                         Composition? existingComposition = existingCompositions?.FirstOrDefault(em => em.Id == compositionRequest.Id);
-
                         if (existingComposition != null)
                         {
                             // If the composition already exists, update its properties
-                            existingComposition.Name = compositionRequest.Name;
-                            //_mapper.Map(compositionRequest, existingComposition);
-                           // compositionResponse.Add(existingComposition);
+                            _mapper.Map(compositionRequest, existingComposition);
                         }
                         else
                         {
                             // If the composition does not exist, create a new composition object and map the properties
                             Composition newComposition = _mapper.Map<Composition>(compositionRequest);
-                            compositionResponse.Add(newComposition);
+                            newComposition.ProductId = productId;
+                            compositionsToAdd?.Add(newComposition);
                         }
                     }
-                    return compositionResponse;
+                    if (compositionsToAdd.Any())
+                    {
+                        await _unitOfWork.Composition.AddRange(compositionsToAdd);
+                    }
                 }
-                return null;
+
             }catch(Exception)
             {
                 throw;
