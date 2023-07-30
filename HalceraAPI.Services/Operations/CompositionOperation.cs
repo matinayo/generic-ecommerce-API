@@ -2,7 +2,6 @@
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.Composition;
-using HalceraAPI.Models.Requests.Media;
 using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations
@@ -72,7 +71,8 @@ namespace HalceraAPI.Services.Operations
                     }
                 }
 
-            }catch(Exception)
+            }
+            catch (Exception)
             {
                 throw;
             }

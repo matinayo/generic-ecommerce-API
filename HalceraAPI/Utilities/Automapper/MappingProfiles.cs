@@ -33,7 +33,7 @@ namespace HalceraAPI.Utilities.Automapper
 
             // Price Request
             CreateMap<CreatePriceRequest, Price>().ReverseMap();
-            CreateMap<UpdatePriceRequest, Price>().ReverseMap()
+            CreateMap<UpdatePriceRequest, Price>()
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
             CreateMap<Price, PriceResponse>().ReverseMap();
 
@@ -58,7 +58,16 @@ namespace HalceraAPI.Utilities.Automapper
             // Media
             CreateMap<CreateMediaRequest, Media>().ReverseMap();
             CreateMap<UpdateMediaRequest, Media>()
-                .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
+                .ForMember(destination => destination.Type, opt =>
+                {
+                    opt.PreCondition(source =>
+                    {
+                        if (source.Type != null)
+                            return true;
+                        return false;
+                    });
+                })
+                .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember != null));
             CreateMap<Media, MediaResponse>().ReverseMap();
         }
     }

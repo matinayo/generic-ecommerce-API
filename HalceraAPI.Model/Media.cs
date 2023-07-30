@@ -25,7 +25,7 @@ namespace HalceraAPI.Models
         /// <summary>
         /// Name or Caption of Media
         /// </summary>
-        [StringLength(10)]
+        [StringLength(20)]
         public string? Name { get; set; }
 
         public int? ProductId { get; set; }
