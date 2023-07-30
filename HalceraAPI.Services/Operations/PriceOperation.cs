@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.Media;
 using HalceraAPI.Models.Requests.Price;
 using HalceraAPI.Services.Contract;
 
@@ -20,7 +19,8 @@ namespace HalceraAPI.Services.Operations
 
         public async Task<bool> DeleteProductPrices(int productId)
         {
-            try {
+            try
+            {
                 IEnumerable<Price>? productPrices = await _unitOfWork.Price.GetAll(price => price.ProductId == productId);
                 if (productPrices is not null && productPrices.Any())
                 {
@@ -28,44 +28,39 @@ namespace HalceraAPI.Services.Operations
                     await _unitOfWork.SaveAsync();
                 }
                 return true;
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 throw;
             }
         }
 
-        public async Task<ICollection<Price>?> UpdatePrice(IEnumerable<UpdatePriceRequest>? priceCollection)
+        public void UpdatePrice(IEnumerable<UpdatePriceRequest>? priceCollection, ICollection<Price>? existingPriceFromDb)
         {
             try
             {
                 if (priceCollection is not null && priceCollection.Any())
                 {
-                   IEnumerable<Price> existingPrices = await _unitOfWork.Price.GetAll(price => priceCollection.Select(u => u.Id).Contains(price.Id));
-                    List<Price>? priceResponse = new();
-
+                    existingPriceFromDb ??= new List<Price>();
                     foreach (var priceRequest in priceCollection)
                     {
                         // Find existing price with the same ID in the database
-                        Price? existingPrice = existingPrices?.FirstOrDefault(em => em.Id == priceRequest.Id);
-
+                        Price? existingPrice = existingPriceFromDb?.FirstOrDefault(em => em.Id == priceRequest.Id);
                         if (existingPrice != null)
                         {
                             // If the price already exists, update its properties
                             _mapper.Map(priceRequest, existingPrice);
-                            priceResponse.Add(existingPrice);
                         }
                         else
                         {
                             // If the price does not exist, create a new price object and map the properties
                             Price newPrice = _mapper.Map<Price>(priceRequest);
-                            priceResponse.Add(newPrice);
+                            existingPriceFromDb?.Add(newPrice);
                         }
                     }
-                    return priceResponse;
                 }
-                return null;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }

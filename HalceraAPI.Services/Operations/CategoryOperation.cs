@@ -3,8 +3,6 @@ using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Services.Contract;
-using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -104,6 +102,23 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
+        public async Task<IEnumerable<Category>?> GetCategoriesFromListOfCategoryId(IEnumerable<ProductCategoryRequest>? categoryRequests)
+        {
+            try
+            {
+                if (categoryRequests != null && categoryRequests.Any())
+                {
+                    var categories = await _unitOfWork.Category.GetAll(category => categoryRequests.Select(opt => opt.CategoryId).Contains(category.Id));
+                    return categories;
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<CategoryResponse?> GetCategory(int categoryId)
         {
             try
@@ -127,11 +142,11 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(categoryDb => categoryDb.Id == categoryId);
+                Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(categoryDb => categoryDb.Id == categoryId, includeProperties: $"{nameof(Category.MediaCollection)}");
                 if (categoryDetailsFromDb == null)
                     throw new Exception("Category not found");
-
-                categoryDetailsFromDb.MediaCollection = await _mediaOperation.UpdateMediaCollection(category.MediaCollection);
+                
+                _mediaOperation.UpdateMediaCollection(category.MediaCollection, categoryDetailsFromDb.MediaCollection);
 
                 _mapper.Map(category, categoryDetailsFromDb);
                 await _unitOfWork.SaveAsync();

@@ -5,7 +5,7 @@ namespace HalceraAPI.Services.Contract
 {
     public interface IMediaOperation
     {
-        Task<ICollection<Media>?> UpdateMediaCollection(IEnumerable<UpdateMediaRequest>? mediaCollection);
+        void UpdateMediaCollection(IEnumerable<UpdateMediaRequest>? mediaCollection, ICollection<Media>? mediaCollectionFromDb);
         /// <summary>
         /// Delete range of Media collection
         /// </summary>

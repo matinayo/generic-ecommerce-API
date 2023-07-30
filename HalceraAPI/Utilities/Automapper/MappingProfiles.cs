@@ -16,7 +16,8 @@ namespace HalceraAPI.Utilities.Automapper
             // Category Request
             CreateMap<CreateCategoryRequest, Category>().ReverseMap();
             CreateMap<UpdateCategoryRequest, Category>()
-                .ForMember(destination => destination.MediaCollection, opt => opt.Ignore()).ReverseMap()
+                .ForMember(destination => destination.MediaCollection, opt => opt.Ignore())
+
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
             CreateMap<Category, CategoryResponse>().ReverseMap();
             CreateMap<Category, CategoryLabelResponse>().ReverseMap();

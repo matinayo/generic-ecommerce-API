@@ -41,17 +41,17 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task UpdateComposition(int productId, IEnumerable<UpdateCompositionRequest>? compositionCollection, IEnumerable<Composition>? existingCompositions)
+        public void UpdateComposition(IEnumerable<UpdateCompositionRequest>? compositionCollection, ICollection<Composition>? existingCompositionsFromDb)
         {
             try
             {
                 if (compositionCollection is not null && compositionCollection.Any())
                 {
-                    List<Composition> compositionsToAdd = new();
+                    existingCompositionsFromDb ??= new List<Composition>();
                     foreach (var compositionRequest in compositionCollection)
                     {
                         // Find existing composition with the same ID in the database
-                        Composition? existingComposition = existingCompositions?.FirstOrDefault(em => em.Id == compositionRequest.Id);
+                        Composition? existingComposition = existingCompositionsFromDb?.FirstOrDefault(em => em.Id == compositionRequest.Id);
                         if (existingComposition != null)
                         {
                             // If the composition already exists, update its properties
@@ -61,16 +61,10 @@ namespace HalceraAPI.Services.Operations
                         {
                             // If the composition does not exist, create a new composition object and map the properties
                             Composition newComposition = _mapper.Map<Composition>(compositionRequest);
-                            newComposition.ProductId = productId;
-                            compositionsToAdd?.Add(newComposition);
+                            existingCompositionsFromDb?.Add(newComposition);
                         }
                     }
-                    if (compositionsToAdd.Any())
-                    {
-                        await _unitOfWork.Composition.AddRange(compositionsToAdd);
-                    }
                 }
-
             }
             catch (Exception)
             {
