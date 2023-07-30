@@ -29,6 +29,7 @@ namespace HalceraAPI.Utilities.Automapper
                 .ForMember(destination => destination.MediaCollection, opt => opt.Ignore())
                 .ForMember(destination => destination.Prices, opt => opt.Ignore())
                 .ForMember(destination => destination.ProductCompositions, opt => opt.Ignore())
+                .ForMember(destination => destination.Categories, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
 
             // Price Request
@@ -49,11 +50,6 @@ namespace HalceraAPI.Utilities.Automapper
             CreateMap<UpdateCompositionDataRequest, CompositionData>().ReverseMap()
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
             CreateMap<CompositionData, CompositionDataResponse>().ReverseMap();
-
-            // Product Category Request
-            CreateMap<ProductCategoryRequest, Category>()
-                .ForMember(destination => destination.Id, opt => opt.MapFrom(source => source.CategoryId)).ReverseMap()
-                .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
 
             // Media
             CreateMap<CreateMediaRequest, Media>().ReverseMap();

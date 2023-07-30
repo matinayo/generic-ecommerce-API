@@ -154,7 +154,8 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Product? product = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId, includeProperties: $"{nameof(Product.Categories)},{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.MediaCollection)},{nameof(Product.Prices)}");
+                Product? product = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId, 
+                    includeProperties: $"{nameof(Product.Categories)},{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.MediaCollection)},{nameof(Product.Prices)}");
                 ProductDetailsResponse response = new();
                 if (product is not null)
                 {
@@ -168,18 +169,24 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<ProductDetailsResponse> UpdateProduct(int productId, UpdateProductRequest product)
+        public async Task<ProductDetailsResponse> UpdateProduct(int productId, UpdateProductRequest productRequest)
         {
             try
             {
                 Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId, includeProperties: "ProductCompositions");
                 if (productFromDb is null) throw new Exception("Product not found");
 
-                productFromDb.Prices = await _priceOperation.UpdatePrice(product.Prices);
-                productFromDb.MediaCollection = await _mediaOperation.UpdateMediaCollection(product.MediaCollection);
-                await _compositionOperation.UpdateComposition(productId, product.ProductCompositions, productFromDb.ProductCompositions);
+                productFromDb.Prices = await _priceOperation.UpdatePrice(productRequest.Prices);
+                productFromDb.MediaCollection = await _mediaOperation.UpdateMediaCollection(productRequest.MediaCollection);
+                await _compositionOperation.UpdateComposition(productId, productRequest.ProductCompositions, productFromDb.ProductCompositions);
 
-                _mapper.Map(product, productFromDb);
+                if (productRequest.Categories != null && productRequest.Categories.Any())
+                {
+                    var categories = await _unitOfWork.Category.GetAll(category => productRequest.Categories != null && productRequest.Categories.Select(opt => opt.CategoryId).Contains(category.Id));
+                    productFromDb.Categories = categories.ToList();
+                }
+
+                _mapper.Map(productRequest, productFromDb);
                 await _unitOfWork.SaveAsync();
 
                 ProductDetailsResponse response = _mapper.Map<ProductDetailsResponse>(productFromDb);

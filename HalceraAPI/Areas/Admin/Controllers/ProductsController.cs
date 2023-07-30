@@ -64,11 +64,11 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [Route("CreateProduct")]
         [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ProductDetailsResponse?>> CreateProduct([FromBody] CreateProductRequest product)
+        public async Task<ActionResult<ProductDetailsResponse?>> CreateProduct([FromBody] CreateProductRequest productRequest)
         {
             try
             {
-                ProductDetailsResponse productDetails = await _productOperation.CreateProduct(product);
+                ProductDetailsResponse productDetails = await _productOperation.CreateProduct(productRequest);
                 return Ok(productDetails);
             }
             catch (Exception exception)
@@ -82,11 +82,11 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ProductDetailsResponse?>> UpdateProduct(int productId, [FromBody] UpdateProductRequest product)
+        public async Task<ActionResult<ProductDetailsResponse?>> UpdateProduct(int productId, [FromBody] UpdateProductRequest productRequest)
         {
             try
             {
-                ProductDetailsResponse productDetails = await _productOperation.UpdateProduct(productId, product);
+                ProductDetailsResponse productDetails = await _productOperation.UpdateProduct(productId, productRequest);
                 return Ok(productDetails);
             }
             catch (Exception exception)

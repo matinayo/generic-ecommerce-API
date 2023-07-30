@@ -29,13 +29,13 @@ namespace HalceraAPI.Services.Contract
         /// </summary>
         /// <param name="product">product data to be created</param>
         /// <returns>Created product details</returns>
-        Task<ProductDetailsResponse> CreateProduct(CreateProductRequest product);
+        Task<ProductDetailsResponse> CreateProduct(CreateProductRequest productRequest);
         /// <summary>
         /// Update a product
         /// </summary>
         /// <param name="product">Product data to be updated</param>
         /// <returns>Updated product details from DB</returns>
-        Task<ProductDetailsResponse> UpdateProduct(int productId, UpdateProductRequest product);
+        Task<ProductDetailsResponse> UpdateProduct(int productId, UpdateProductRequest productRequest);
         /// <summary>
         /// Deletes a product
         /// </summary>
