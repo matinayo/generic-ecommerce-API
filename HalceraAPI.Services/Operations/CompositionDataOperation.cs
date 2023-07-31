@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.Media;
+using HalceraAPI.Models.Requests.Composition.CompositionData;
 using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations
@@ -36,9 +36,33 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public Task<ICollection<Media>?> UpdateCompositionData(IEnumerable<UpdateMediaRequest>? mediaCollection)
+        public void UpdateCompositionData(IEnumerable<UpdateCompositionDataRequest>? compositionDataRequests, ICollection<CompositionData>? existingCompositionDataFromDb)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (compositionDataRequests is not null && compositionDataRequests.Any())
+                {
+                    existingCompositionDataFromDb ??= new List<CompositionData>();
+                    foreach (var compositionDataRequest in compositionDataRequests)
+                    {
+                        // Find existing price with the same ID in the database
+                        CompositionData? existingCompositionData = existingCompositionDataFromDb?.FirstOrDefault(em => em.Id == compositionDataRequest.Id);
+                        if (existingCompositionData != null)
+                        {
+                            _mapper.Map(compositionDataRequest, existingCompositionData);
+                        }
+                        else
+                        {
+                            CompositionData newCompositionData = _mapper.Map<CompositionData>(compositionDataRequest);
+                            existingCompositionDataFromDb?.Add(newCompositionData);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

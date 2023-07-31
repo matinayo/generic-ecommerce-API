@@ -43,12 +43,13 @@ namespace HalceraAPI.Utilities.Automapper
             CreateMap<CreateCompositionRequest, Composition>().ReverseMap();
             CreateMap<UpdateCompositionRequest, Composition>()
                 .ForMember(destination => destination.Id, opt => opt.Ignore())
+                .ForMember(destination => destination.CompositionDataCollection, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
             CreateMap<Composition, CompositionResponse>().ReverseMap();
 
             // Composition Data Request
             CreateMap<CreateCompositionDataRequest, CompositionData>().ReverseMap();
-            CreateMap<UpdateCompositionDataRequest, CompositionData>().ReverseMap()
+            CreateMap<UpdateCompositionDataRequest, CompositionData>()
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
             CreateMap<CompositionData, CompositionDataResponse>().ReverseMap();
 

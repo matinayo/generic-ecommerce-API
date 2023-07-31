@@ -175,7 +175,8 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId, includeProperties: $"{nameof(Product.ProductCompositions)},{nameof(Product.Prices)},{nameof(Product.MediaCollection)}");
+                Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId, 
+                    includeProperties: $"{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.Prices)},{nameof(Product.MediaCollection)}");
                 if (productFromDb is null) throw new Exception("Product not found");
 
                 _priceOperation.UpdatePrice(productRequest.Prices, productFromDb.Prices);

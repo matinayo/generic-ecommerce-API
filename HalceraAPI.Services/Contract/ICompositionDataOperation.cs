@@ -5,17 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HalceraAPI.Models.Requests.Composition.CompositionData;
 
 namespace HalceraAPI.Services.Contract
 {
     public interface ICompositionDataOperation
     {
         /// <summary>
-        /// Update Product Composition
+        /// Update Product Composition Data
         /// </summary>
-        /// <param name="mediaCollection"></param>
-        /// <returns></returns>
-        Task<ICollection<Media>?> UpdateCompositionData(IEnumerable<UpdateMediaRequest>? mediaCollection);
+        void UpdateCompositionData(IEnumerable<UpdateCompositionDataRequest>? compositionDataRequests, ICollection<CompositionData>? existingCompositionDataFromDb);
         /// <summary>
         /// Delete range of Composition Data
         /// </summary>
