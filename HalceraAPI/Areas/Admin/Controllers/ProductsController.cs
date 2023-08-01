@@ -1,13 +1,6 @@
-﻿using AutoMapper.Features;
-using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.Category;
-using HalceraAPI.Models.Requests.Product;
+﻿using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Services.Contract;
-using HalceraAPI.Services.Operations;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Net;
 
 namespace HalceraAPI.Areas.Admin.Controllers
 {
@@ -28,7 +21,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [HttpGet]
         [Route("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<ProductResponse>), 200)]
-        [ProducesResponseType(404)]
+        [ProducesResponseType(400)]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetAll(bool? active, bool? featured, int? categoryId)
         {
             try
@@ -45,7 +38,6 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [HttpGet]
         [Route("GetProduct/{productId}")]
         [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
-        [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<IEnumerable<ProductDetailsResponse>?>> GetProductById(int productId)
         {

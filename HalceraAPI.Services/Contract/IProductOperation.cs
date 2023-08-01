@@ -1,5 +1,4 @@
 ﻿using HalceraAPI.Models.Requests.Product;
-using HalceraAPI.Models.Requests.ShoppingCart;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -19,12 +18,6 @@ namespace HalceraAPI.Services.Contract
         /// <param name="productId">Id of Product to Get</param>
         /// <returns>Product details from DB</returns>
         Task<ProductDetailsResponse?> GetProductById(int productId);
-        /// <summary>
-        /// Add product item to cart
-        /// </summary>
-        /// <param name="productId">id of product</param>
-        /// <returns>id of added item in cart</returns>
-        Task<int> AddProductToCart(int productId, AddProductToCartRequest addProductToCartRequest);
         /// <summary>
         /// Create new product
         /// </summary>

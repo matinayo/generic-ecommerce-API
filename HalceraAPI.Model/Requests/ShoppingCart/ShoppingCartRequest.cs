@@ -1,6 +1,6 @@
 ﻿namespace HalceraAPI.Models.Requests.ShoppingCart
 {
-    public class AddProductToCartRequest
+    public class ShoppingCartRequest
     {
         public int? Quantity { get; set; } = 1;
     }

@@ -2,7 +2,6 @@
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.Product;
-using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations
@@ -24,41 +23,6 @@ namespace HalceraAPI.Services.Operations
             _compositionOperation = compositionOperation;
             _priceOperation = priceOperation;
             _categoryOperation = categoryOperation;
-        }
-
-        public async Task<int> AddProductToCart(int productId, AddProductToCartRequest addProductToCartRequest)
-        {
-            try
-            {
-                ShoppingCart? cart = await _unitOfWork.ShoppingCart.GetFirstOrDefault(cart => cart.ProductId == productId);
-                if (cart == null)
-                {   // adds new item in cart
-                    Product? productItem = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId);
-                    if (productItem == null)
-                    {
-                        throw new Exception("Product not found");
-                    }
-                    if (productItem.Quantity <= 0)
-                    {
-                        throw new Exception("No item in stock");
-                    }
-
-                    // TODO: add ApplicationUser from Token
-                    cart = new ShoppingCart() { ProductId = productId, Quantity = addProductToCartRequest.Quantity ?? 1 };
-                    // if product item does not exist in cart, add new item
-                    await _unitOfWork.ShoppingCart.Add(cart);
-                }
-                else
-                {   // update existing item count in cart
-                    cart.Quantity++;
-                }
-                await _unitOfWork.SaveAsync();
-                return cart.Id;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
         }
 
         public async Task<ProductDetailsResponse> CreateProduct(CreateProductRequest productRequest)
