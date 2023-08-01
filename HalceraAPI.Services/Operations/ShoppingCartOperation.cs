@@ -27,14 +27,14 @@ namespace HalceraAPI.Services.Operations
                     throw new Exception("Item not found");
 
                 // decrease number of items in cart
-                cartItemFromDb.Count -= 1;
-                if (cartItemFromDb.Count == 0)
+                cartItemFromDb.Quantity -= 1;
+                if (cartItemFromDb.Quantity == 0)
                 {
                     // remove item from cart
                     _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
                 }
                 await _unitOfWork.SaveAsync();
-                return cartItemFromDb.Count;
+                return cartItemFromDb.Quantity;
             }
             catch (Exception exception)
             {
@@ -112,10 +112,10 @@ namespace HalceraAPI.Services.Operations
                 ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
                 if (cartItemFromDb == null)
                     throw new Exception("Item not found");
-                cartItemFromDb.Count += 1;
+                cartItemFromDb.Quantity += 1;
 
                 await _unitOfWork.SaveAsync();
-                return cartItemFromDb.Count;
+                return cartItemFromDb.Quantity;
             }
             catch(Exception exception)
             {

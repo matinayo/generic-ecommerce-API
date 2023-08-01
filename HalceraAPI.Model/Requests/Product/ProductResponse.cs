@@ -1,9 +1,6 @@
 ﻿using HalceraAPI.Models.Requests.Category;
-using HalceraAPI.Models.Requests.Composition;
-using HalceraAPI.Models.Requests.Composition.CompositionData;
 using HalceraAPI.Models.Requests.Media;
 using HalceraAPI.Models.Requests.Price;
-using HalceraAPI.Models.Requests.Rating;
 
 namespace HalceraAPI.Models.Requests.Product
 {
@@ -11,7 +8,6 @@ namespace HalceraAPI.Models.Requests.Product
     {
         public int Id { get; set; }
         public string? Title { get; set; }
-
         /// <summary>
         /// if product is active
         /// </summary>

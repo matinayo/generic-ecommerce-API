@@ -2,7 +2,6 @@
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.Media;
-using HalceraAPI.Models.Requests.Price;
 using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations
@@ -24,9 +23,9 @@ namespace HalceraAPI.Services.Operations
             {
                 IEnumerable<Media>? relatedMediaCollection = null;
 
-                if(categoryId != null)
+                if (categoryId != null)
                     relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.CategoryId == categoryId);
-                else if(productId != null)
+                else if (productId != null)
                     relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.ProductId == productId);
 
                 if (relatedMediaCollection != null && relatedMediaCollection.Any())
@@ -36,7 +35,7 @@ namespace HalceraAPI.Services.Operations
                 }
                 return false;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
@@ -63,8 +62,11 @@ namespace HalceraAPI.Services.Operations
                         else
                         {
                             // If the media does not exist, create a new Media object and map the properties
-                            Media newMedia = _mapper.Map<Media>(mediaRequest);
-                            mediaCollectionFromDb.Add(newMedia);
+                            if (mediaRequest.Type != null)
+                            {
+                                Media newMedia = _mapper.Map<Media>(mediaRequest);
+                                mediaCollectionFromDb.Add(newMedia);
+                            }
                         }
                     }
                 }

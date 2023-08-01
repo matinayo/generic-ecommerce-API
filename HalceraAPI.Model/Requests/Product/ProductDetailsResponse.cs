@@ -2,11 +2,6 @@
 using HalceraAPI.Models.Requests.Composition;
 using HalceraAPI.Models.Requests.Media;
 using HalceraAPI.Models.Requests.Price;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HalceraAPI.Models.Requests.Product
 {
@@ -15,6 +10,7 @@ namespace HalceraAPI.Models.Requests.Product
         public int Id { get; set; }
         public string? Title { get; set; }
         public string? Description { get; set; }
+        public int? Quantity { get; set; }
 
         /// <summary>
         /// if product is active

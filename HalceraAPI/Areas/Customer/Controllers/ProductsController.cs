@@ -1,4 +1,4 @@
-﻿using HalceraAPI.Models;
+﻿using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Mvc;
 
@@ -62,29 +62,27 @@ namespace HalceraAPI.Areas.Customer.Controllers
         //    }
         //}
 
-        ///// <summary>
-        ///// Add product to shopping cart
-        ///// </summary>
-        ///// <param name="productId">Id of product</param>
-        ///// <returns>id of item in cart</returns>
-        //[HttpPost]
-        //[Route("AddProductToCart")]
-        //[ProducesResponseType(typeof(Product), 200)]
-        //[ProducesResponseType(204)]
-        //[ProducesResponseType(400)]
-        //public async Task<ActionResult<Product?>> AddProductToCart([FromQuery] int productId)
-        //{
-        //    try
-        //    {
-        //        int idOfShoppingCart = await _productOperation.AddProductToCart(productId);
-        //        return Ok(idOfShoppingCart);
-        //    }
-        //    catch (Exception exception)
-        //    {
-        //        return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
-        //    }
-        //}
-
+        /// <summary>
+        /// Add product to shopping cart
+        /// </summary>
+        /// <param name="productId">Id of product</param>
+        /// <returns>id of item in cart</returns>
+        [HttpPost]
+        [Route("AddProductToCart/productId")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<int?>> AddProductToCart(int productId, [FromBody] AddProductToCartRequest addProductToCart)
+        {
+            try
+            {
+                int idOfShoppingCart = await _productOperation.AddProductToCart(productId, addProductToCart);
+                return Ok(idOfShoppingCart);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+            }
+        }
         // get products by category
     }
 }

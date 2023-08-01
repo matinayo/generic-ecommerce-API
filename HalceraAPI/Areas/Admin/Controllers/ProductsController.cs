@@ -38,7 +38,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
@@ -56,7 +56,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
@@ -73,7 +73,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
@@ -91,7 +91,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
@@ -109,7 +109,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
     }

@@ -20,7 +20,7 @@ namespace HalceraAPI.Models.Requests.Composition
         /// </summary>
         public CompositionType? CompositionType { get; set; }
 
-        [StringLength(10, ErrorMessage = "Field has a maximum length of '10'")]
+        [StringLength(20, ErrorMessage = "Field has a maximum length of '20'")]
         public string? Name { get; set; }
         public ICollection<UpdateCompositionDataRequest>? CompositionDataCollection { get; set; }
     }

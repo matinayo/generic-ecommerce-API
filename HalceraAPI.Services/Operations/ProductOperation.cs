@@ -2,6 +2,7 @@
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.Product;
+using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations
@@ -25,7 +26,7 @@ namespace HalceraAPI.Services.Operations
             _categoryOperation = categoryOperation;
         }
 
-        public async Task<int> AddProductToCart(int productId)
+        public async Task<int> AddProductToCart(int productId, AddProductToCartRequest addProductToCartRequest)
         {
             try
             {
@@ -37,21 +38,26 @@ namespace HalceraAPI.Services.Operations
                     {
                         throw new Exception("Product not found");
                     }
+                    if (productItem.Quantity <= 0)
+                    {
+                        throw new Exception("No item in stock");
+                    }
+
                     // TODO: add ApplicationUser from Token
-                    //  cart = new ShoppingCart() { ProductId = productId, Price = productItem.Price };
+                    cart = new ShoppingCart() { ProductId = productId, Quantity = addProductToCartRequest.Quantity ?? 1 };
                     // if product item does not exist in cart, add new item
                     await _unitOfWork.ShoppingCart.Add(cart);
                 }
                 else
                 {   // update existing item count in cart
-                    cart.Count++;
+                    cart.Quantity++;
                 }
                 await _unitOfWork.SaveAsync();
                 return cart.Id;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 
@@ -156,7 +162,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Product? product = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId, 
+                Product? product = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId,
                     includeProperties: $"{nameof(Product.Categories)},{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.MediaCollection)},{nameof(Product.Prices)}");
                 ProductDetailsResponse response = new();
                 if (product is not null)
@@ -175,14 +181,13 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId, 
+                Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId,
                     includeProperties: $"{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.Prices)},{nameof(Product.MediaCollection)}");
                 if (productFromDb is null) throw new Exception("Product not found");
 
                 _priceOperation.UpdatePrice(productRequest.Prices, productFromDb.Prices);
                 _mediaOperation.UpdateMediaCollection(productRequest.MediaCollection, productFromDb.MediaCollection);
                 _compositionOperation.UpdateComposition(productRequest.ProductCompositions, productFromDb.ProductCompositions);
-                
                 var categories = await _categoryOperation.GetCategoriesFromListOfCategoryId(productRequest.Categories);
                 if (categories != null && categories.Any())
                 {

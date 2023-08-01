@@ -18,6 +18,11 @@ namespace HalceraAPI.Models
         public string? Description { get; set; }
 
         /// <summary>
+        /// Product quantity available in stock
+        /// </summary>
+        public int? Quantity { get; set; } = 1;
+
+        /// <summary>
         /// if product is active
         /// </summary>
         public bool Active { get; set; } = true;
