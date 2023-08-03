@@ -18,13 +18,13 @@ namespace HalceraAPI.Services.Contract
         /// Get all items in cart for user
         /// </summary>
         /// <returns>List of items in shopping cart</returns>
-        Task<IEnumerable<ShoppingCartResponse>?> GetAllItemsInCart();
+        Task<IEnumerable<ShoppingCartDetailsResponse>?> GetAllItemsInCart();
         /// <summary>
         /// Get specified item in cart
         /// </summary>
         /// <param name="shoppingCartId">Shopping cart Id</param>
         /// <returns>Details of Item in cart</returns>
-        Task<ShoppingCartResponse?> GetItemInCart(int shoppingCartId);
+        Task<ShoppingCartDetailsResponse?> GetItemInCart(int shoppingCartId);
         /// <summary>
         /// Increases existing item in cart
         /// </summary>

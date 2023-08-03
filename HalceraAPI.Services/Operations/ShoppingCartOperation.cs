@@ -104,13 +104,13 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<IEnumerable<ShoppingCartResponse>?> GetAllItemsInCart()
+        public async Task<IEnumerable<ShoppingCartDetailsResponse>?> GetAllItemsInCart()
         {
             try
             {
                 // TODO: get items for requesting user
                 IEnumerable<ShoppingCart>? shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(includeProperties: nameof(ShoppingCart.Product));
-                var response = _mapper.Map<IEnumerable<ShoppingCartResponse>>(shoppingItemsFromDb);
+                var response = _mapper.Map<IEnumerable<ShoppingCartDetailsResponse>>(shoppingItemsFromDb);
                 return response;
             }
             catch (Exception)
@@ -119,12 +119,12 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<ShoppingCartResponse?> GetItemInCart(int shoppingCartId)
+        public async Task<ShoppingCartDetailsResponse?> GetItemInCart(int shoppingCartId)
         {
             try
             {
                 ShoppingCart? shoppingCartFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId, includeProperties: nameof(ShoppingCart.Product));
-                ShoppingCartResponse response = _mapper.Map<ShoppingCartResponse>(shoppingCartFromDb);
+                ShoppingCartDetailsResponse response = _mapper.Map<ShoppingCartDetailsResponse>(shoppingCartFromDb);
                 return response;
             }
             catch (Exception)

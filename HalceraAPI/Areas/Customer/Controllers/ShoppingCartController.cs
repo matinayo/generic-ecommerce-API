@@ -46,13 +46,13 @@ namespace HalceraAPI.Areas.Customer.Controllers
         /// <returns>List of shopping cart items</returns>
         [HttpGet]
         [Route("GetAll")]
-        [ProducesResponseType(typeof(IEnumerable<ShoppingCartResponse>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<ShoppingCartDetailsResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<ShoppingCartResponse>?>> GetAllItemsInCart()
+        public async Task<ActionResult<IEnumerable<ShoppingCartDetailsResponse>?>> GetAllItemsInCart()
         {
             try
             {
-                IEnumerable<ShoppingCartResponse>? listOfShoppingCartItems = await _shoppingCartOperation.GetAllItemsInCart();
+                IEnumerable<ShoppingCartDetailsResponse>? listOfShoppingCartItems = await _shoppingCartOperation.GetAllItemsInCart();
                 return Ok(listOfShoppingCartItems);
             }
             catch (Exception exception)
@@ -64,14 +64,14 @@ namespace HalceraAPI.Areas.Customer.Controllers
 
         [HttpGet]
         [Route("GetItem/{shoppingCartId}")]
-        [ProducesResponseType(typeof(ShoppingCartResponse), 200)]
+        [ProducesResponseType(typeof(ShoppingCartDetailsResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ShoppingCartResponse?>> GetItemInCart(int shoppingCartId)
+        public async Task<ActionResult<ShoppingCartDetailsResponse?>> GetItemInCart(int shoppingCartId)
         {
             try
             {
-                ShoppingCartResponse? itemFromDb = await _shoppingCartOperation.GetItemInCart(shoppingCartId);
+                ShoppingCartDetailsResponse? itemFromDb = await _shoppingCartOperation.GetItemInCart(shoppingCartId);
                 return Ok(itemFromDb);
             }
             catch (Exception exception)

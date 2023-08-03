@@ -70,6 +70,7 @@ namespace HalceraAPI.Utilities.Automapper
             CreateMap<Media, MediaResponse>().ReverseMap();
 
             // Shopping Cart
+            CreateMap<ShoppingCart, ShoppingCartDetailsResponse>().ReverseMap();
             CreateMap<ShoppingCart, ShoppingCartResponse>().ReverseMap();
         }
     }
