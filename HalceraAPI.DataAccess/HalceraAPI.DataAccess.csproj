@@ -19,4 +19,8 @@
     <ProjectReference Include="..\HalceraAPI.Model\HalceraAPI.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

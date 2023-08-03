@@ -13,8 +13,7 @@ namespace HalceraAPI.Models.Requests.Media
     /// </summary>
     public class UpdateMediaRequest
     {
-        [Required]
-        public int Id { get; set; }
+        public int? Id { get; set; }
         /// <summary>
         /// Content URL
         /// </summary>
@@ -23,11 +22,11 @@ namespace HalceraAPI.Models.Requests.Media
         /// <summary>
         /// Content Type
         /// </summary>
-        public MediaType Type { get; set; }
+        public MediaType? Type { get; set; }
         /// <summary>
         /// Name or Caption of Media
         /// </summary>
-        [StringLength(10)]
+        [StringLength(20)]
         public string? Name { get; set; }
     }
 }

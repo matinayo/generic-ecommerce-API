@@ -1,8 +1,6 @@
-﻿using HalceraAPI.Models;
+﻿using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Services.Contract;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace HalceraAPI.Areas.Admin.Controllers
 {
@@ -20,21 +18,92 @@ namespace HalceraAPI.Areas.Admin.Controllers
             _productOperation = productOperation;
         }
 
+        // [HttpGet("category/{categoryId}")]
         [HttpGet]
         [Route("GetAll")]
-        [ProducesResponseType(typeof(IEnumerable<Product>), 200)]
-        [ProducesResponseType(404)]
-        public ActionResult<IEnumerable<Product>> GetAll()
+        [ProducesResponseType(typeof(IEnumerable<ProductResponse>), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<IEnumerable<ProductResponse>>> GetAll(bool? active, bool? featured, int? categoryId)
         {
-            if (ModelState.IsValid)
+            try
             {
-                return Problem();
+                IEnumerable<ProductResponse>? listOfProducts = await _productOperation.GetAllProducts(active: active, featured: featured, categoryId: categoryId);
+                return Ok(listOfProducts);
             }
-            //if (true)
-            //{
-            //    return NotFound();
-            //}
-            return BadRequest(ModelState);
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
+
+        [HttpGet]
+        [Route("GetProduct/{productId}")]
+        [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<IEnumerable<ProductDetailsResponse>?>> GetProductById(int productId)
+        {
+            try
+            {
+                ProductDetailsResponse? productDetails = await _productOperation.GetProductById(productId);
+                return Ok(productDetails);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
+
+        [HttpPost]
+        [Route("CreateProduct")]
+        [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<ProductDetailsResponse?>> CreateProduct([FromBody] CreateProductRequest productRequest)
+        {
+            try
+            {
+                ProductDetailsResponse productDetails = await _productOperation.CreateProduct(productRequest);
+                return Ok(productDetails);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
+
+        [HttpPut]
+        [Route("UpdateProduct/{productId}")]
+        [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<ProductDetailsResponse?>> UpdateProduct(int productId, [FromBody] UpdateProductRequest productRequest)
+        {
+            try
+            {
+                ProductDetailsResponse productDetails = await _productOperation.UpdateProduct(productId, productRequest);
+                return Ok(productDetails);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
+
+        [HttpDelete]
+        [Route("DeleteProduct/{productId}")]
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<bool?>> DeleteProduct(int productId)
+        {
+            try
+            {
+                bool result = await _productOperation.DeleteProduct(productId);
+                return Ok(result);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
         }
     }
 }

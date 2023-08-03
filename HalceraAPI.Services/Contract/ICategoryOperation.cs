@@ -1,4 +1,5 @@
-﻿using HalceraAPI.Models.Requests.Category;
+﻿using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.Category;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -11,7 +12,7 @@ namespace HalceraAPI.Services.Contract
         /// Get all categories
         /// </summary>
         /// <returns>List of categories</returns>
-        Task<IEnumerable<CategoryResponse>?> GetAllCategories();
+        Task<IEnumerable<CategoryResponse>?> GetAllCategories(bool? active, bool? featured);
         /// <summary>
         /// Get category by Id
         /// </summary>
@@ -36,5 +37,12 @@ namespace HalceraAPI.Services.Contract
         /// <param name="categoryId">id of category to be deleted</param>
         /// <returns>boolean indicating if delete operation is success</returns>
         Task<bool> DeleteCategory(int categoryId);
+
+        /// <summary>
+        /// Gets categories from List of category Id
+        /// </summary>
+        /// <param name="categoryRequests">List of category Id</param>
+        /// <returns>List of category details</returns>
+        Task<IEnumerable<Category>?> GetCategoriesFromListOfCategoryId(IEnumerable<ProductCategoryRequest>? categoryRequests);
     }
 }

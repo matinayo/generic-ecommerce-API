@@ -18,17 +18,22 @@ namespace HalceraAPI.Models
         public string? Description { get; set; }
 
         /// <summary>
+        /// Product quantity available in stock
+        /// </summary>
+        public int? Quantity { get; set; } = 1;
+
+        /// <summary>
         /// if product is active
         /// </summary>
-        public bool IsActive { get; set; } = true;
+        public bool Active { get; set; } = true;
 
-        [Required]
-        public ICollection<Price>? Prices { get; set; }
         /// <summary>
         /// Featured Product
         /// </summary>
-        public bool? IsFeatured { get; set; }
+        public bool? Featured { get; set; }
 
+        [Required]
+        public ICollection<Price>? Prices { get; set; }
         /// <summary>
         /// Product Medias
         /// </summary>
@@ -37,7 +42,7 @@ namespace HalceraAPI.Models
         /// <summary>
         /// Product Ratings
         /// </summary>
-        public ICollection<Rating>? ProductRatings { get; set; }
+        // public ICollection<Rating>? ProductRatings { get; set; }
 
         /// <summary>
         /// Product Composition
@@ -48,5 +53,9 @@ namespace HalceraAPI.Models
         /// Product Categories
         /// </summary>
         public ICollection<Category>? Categories { get; set; }
+
+        //public DateTime? DateAdded { get; set; } = DateTime.Now;
+
+        //public DateTime? DateLastModified { get; set; }
     }
 }

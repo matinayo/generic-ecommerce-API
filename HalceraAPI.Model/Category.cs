@@ -17,9 +17,9 @@ namespace HalceraAPI.Models
         /// </summary>
         public ICollection<Media>? MediaCollection { get; set; }
 
-        public bool IsActive { get; set; } = true;
+        public bool Active { get; set; } = true;
 
-        public bool? IsFeatured { get; set; }
+        public bool? Featured { get; set; }
 
         /// <summary>
         /// Product Categories

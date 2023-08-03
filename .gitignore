@@ -340,3 +340,4 @@ ASALocalRun/
 healthchecksdb
 /.vs/HalceraAPI/DesignTimeBuild/.dtbcache.v2
 /.vs/HalceraAPI/v17/.suo
+/HalceraAPI.DataAccess/Migrations

@@ -3,8 +3,6 @@ using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Services.Contract;
-using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -15,29 +13,19 @@ namespace HalceraAPI.Services.Operations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IMediaOperation _mediaService;
+        private readonly IMediaOperation _mediaOperation;
 
         public CategoryOperation(IUnitOfWork unitOfWork, IMapper mapper, IMediaOperation mediaService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _mediaService = mediaService;
+            _mediaOperation = mediaService;
         }
 
         public async Task<CategoryResponse> CreateCategory(CreateCategoryRequest categoryRequest)
         {
             try
             {
-                // Validate model
-                var validationResults = new List<ValidationResult>();
-                var validationContext = new ValidationContext(categoryRequest);
-                bool isValid = Validator.TryValidateObject(categoryRequest, validationContext, validationResults, true);
-                if (!isValid)
-                {
-                    string errorMessage = JsonConvert.SerializeObject(validationResults);
-                    throw new Exception(errorMessage);
-                }
-
                 Category category = new();
                 _mapper.Map(categoryRequest, category);
 
@@ -50,9 +38,9 @@ namespace HalceraAPI.Services.Operations
 
                 return categoryResponse;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 
@@ -64,32 +52,70 @@ namespace HalceraAPI.Services.Operations
                 if (categoryDetailsFromDb == null)
                     throw new Exception("Category not found");
 
-                _ = await _mediaService.DeleteMediaCollection(categoryId, null);
+                _ = await _mediaOperation.DeleteMediaCollection(categoryId, null);
                 _unitOfWork.Category.Remove(categoryDetailsFromDb);
 
                 await _unitOfWork.SaveAsync();
                 return true;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 
-        public async Task<IEnumerable<CategoryResponse>?> GetAllCategories()
+        public async Task<IEnumerable<CategoryResponse>?> GetAllCategories(bool? active, bool? featured)
         {
             try
             {
-                IEnumerable<CategoryResponse> response = new List<CategoryResponse>();
-                IEnumerable<Category>? listOfCategories = await _unitOfWork.Category.GetAll(includeProperties: nameof(Category.MediaCollection));
+                IEnumerable<CategoryResponse> response;
+                IEnumerable<Category>? listOfCategories;
+
+                if (active.HasValue && featured != null)
+                {
+                    listOfCategories = await _unitOfWork.Category.GetAll(
+                        category => category.Active == active && category.Featured == featured, includeProperties: nameof(Category.MediaCollection));
+                }
+                else if (active != null)
+                {
+                    listOfCategories = await _unitOfWork.Category.GetAll(category => category.Active == active, includeProperties: nameof(Category.MediaCollection));
+                }
+                else if (featured != null)
+                {
+                    listOfCategories = await _unitOfWork.Category.GetAll(category => category.Featured == featured, includeProperties: nameof(Category.MediaCollection));
+                }
+                else
+                {
+                    listOfCategories = await _unitOfWork.Category.GetAll(includeProperties: nameof(Category.MediaCollection));
+                }
+
                 if (listOfCategories is not null && listOfCategories.Any())
-                    _mapper.Map(listOfCategories, response);
+                    response = _mapper.Map<IEnumerable<CategoryResponse>>(listOfCategories);
+                else
+                    response = Enumerable.Empty<CategoryResponse>();
 
                 return response;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Category>?> GetCategoriesFromListOfCategoryId(IEnumerable<ProductCategoryRequest>? categoryRequests)
+        {
+            try
+            {
+                if (categoryRequests != null && categoryRequests.Any())
+                {
+                    var categories = await _unitOfWork.Category.GetAll(category => categoryRequests.Select(opt => opt.CategoryId).Contains(category.Id));
+                    return categories;
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
@@ -116,11 +142,11 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(categoryDb => categoryDb.Id == categoryId);
+                Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(categoryDb => categoryDb.Id == categoryId, includeProperties: $"{nameof(Category.MediaCollection)}");
                 if (categoryDetailsFromDb == null)
                     throw new Exception("Category not found");
-
-                categoryDetailsFromDb.MediaCollection = await _mediaService.UpdateMediaCollection(category.MediaCollection);
+                
+                _mediaOperation.UpdateMediaCollection(category.MediaCollection, categoryDetailsFromDb.MediaCollection);
 
                 _mapper.Map(category, categoryDetailsFromDb);
                 await _unitOfWork.SaveAsync();
@@ -135,6 +161,5 @@ namespace HalceraAPI.Services.Operations
                 throw;
             }
         }
-
     }
 }

@@ -15,13 +15,12 @@ namespace HalceraAPI.Models.Requests.Category
     {
         [StringLength(20, ErrorMessage = "Field has a minimum length of '2' and maximum length of '10'", MinimumLength = 2)]
         public string? Title { get; set; }
-
+        public bool? Active { get; set; }
+        public bool? Featured { get; set; }
         /// <summary>
         /// Category Medias
         /// </summary>
         public ICollection<UpdateMediaRequest>? MediaCollection { get; set; }
 
-        public bool? IsActive { get; set; }
-        public bool? IsFeatured { get; set; }
     }
 }

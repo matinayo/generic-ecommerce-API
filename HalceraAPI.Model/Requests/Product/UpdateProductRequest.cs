@@ -2,48 +2,40 @@
 using HalceraAPI.Models.Requests.Composition;
 using HalceraAPI.Models.Requests.Media;
 using HalceraAPI.Models.Requests.Price;
-using HalceraAPI.Models.Requests.Rating;
 using System.ComponentModel.DataAnnotations;
 
 namespace HalceraAPI.Models.Requests.Product
 {
-    public class CreateProductRequest
+    public class UpdateProductRequest
     {
-        [Required]
         [StringLength(20, ErrorMessage = "Field has a minimum length of '2' and maximum length of '20'", MinimumLength = 2)]
         public string? Title { get; set; }
 
-        [Required]
         [StringLength(100, ErrorMessage = "Field has a minimum length of 10 and maximum length of '100'", MinimumLength = 10)]
         public string? Description { get; set; }
-
         public int? Quantity { get; set; }
 
         /// <summary>
-        /// Indicates if a product is active
+        /// if product is active
         /// </summary>
-        public bool Active { get; set; } = true;
+        public bool? Active { get; set; }
 
         /// <summary>
         /// Featured Product
         /// </summary>
         public bool? Featured { get; set; }
 
-        /// <summary>
-        /// Define Price for Product
-        /// </summary>
-        [Required]
-        public ICollection<CreatePriceRequest>? Prices { get; set; }
-        
-        /// <summary>
-        /// Define Product Medias
-        /// </summary>
-        public ICollection<CreateMediaRequest>? MediaCollection { get; set; }
+        public ICollection<UpdatePriceRequest>? Prices { get; set; }
 
         /// <summary>
-        /// Define Product Composition
+        /// Product Medias
         /// </summary>
-        public ICollection<CreateCompositionRequest>? ProductCompositions { get; set; }
+        public ICollection<UpdateMediaRequest>? MediaCollection { get; set; }
+
+        /// <summary>
+        /// Product Composition
+        /// </summary>
+        public ICollection<UpdateCompositionRequest>? ProductCompositions { get; set; }
 
         /// <summary>
         /// Product Categories

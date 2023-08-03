@@ -1,4 +1,4 @@
-﻿using HalceraAPI.Models;
+﻿using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,88 +19,107 @@ namespace HalceraAPI.Areas.Customer.Controllers
         }
 
         /// <summary>
-        /// Get list of items in cart
+        /// Add product to shopping cart
+        /// </summary>
+        /// <param name="productId">Id of product</param>
+        /// <returns>id of item in cart</returns>
+        [HttpPost]
+        [Route("AddProductToCart/{productId}")]
+        [ProducesResponseType(typeof(ShoppingCartResponse), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<ShoppingCartResponse?>> AddProductToCart(int productId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
+        {
+            try
+            {
+                var response = await _shoppingCartOperation.AddProductToCart(productId, shoppingCartRequest);
+                return Ok(response);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+            }
+        }
+
+        /// <summary>
+        /// Get all items in cart
         /// </summary>
         /// <returns>List of shopping cart items</returns>
         [HttpGet]
         [Route("GetAll")]
-        [ProducesResponseType(typeof(IEnumerable<ShoppingCart>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<ShoppingCartDetailsResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<ShoppingCart>?>> GetAllItemsInCart()
+        public async Task<ActionResult<IEnumerable<ShoppingCartDetailsResponse>?>> GetAllItemsInCart()
         {
             try
             {
-                IEnumerable<ShoppingCart>? listOfShoppingCartItems = await _shoppingCartOperation.GetAllItemsInCart();
+                IEnumerable<ShoppingCartDetailsResponse>? listOfShoppingCartItems = await _shoppingCartOperation.GetAllItemsInCart();
                 return Ok(listOfShoppingCartItems);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
 
 
         [HttpGet]
         [Route("GetItem/{shoppingCartId}")]
-        [ProducesResponseType(typeof(ShoppingCart), 200)]
+        [ProducesResponseType(typeof(ShoppingCartDetailsResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ShoppingCart?>> GetItemInCart(int shoppingCartId)
+        public async Task<ActionResult<ShoppingCartDetailsResponse?>> GetItemInCart(int shoppingCartId)
         {
             try
             {
-                ShoppingCart? itemFromDb = await _shoppingCartOperation.GetItemInCart(shoppingCartId);
+                ShoppingCartDetailsResponse? itemFromDb = await _shoppingCartOperation.GetItemInCart(shoppingCartId);
                 return Ok(itemFromDb);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
 
 
         [HttpPost]
-        [Route("IncreaseItem")]
+        [Route("IncreaseItem/{shoppingCartId}")]
         [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<int?>> IncreaseItemInCart([FromQuery] int shoppingCartId)
+        public async Task<ActionResult<int?>> IncreaseItemInCart(int shoppingCartId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {
-                int totalNumberOfItemsInCart = await _shoppingCartOperation.IncreaseItemInCart(shoppingCartId);
+                int totalNumberOfItemsInCart = await _shoppingCartOperation.IncreaseItemInCart(shoppingCartId, shoppingCartRequest);
                 return Ok(totalNumberOfItemsInCart);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
 
         [HttpPost]
-        [Route("DecreaseItem")]
+        [Route("DecreaseItem/{shoppingCartId}")]
         [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<int?>> DecreaseItemInCart([FromQuery] int shoppingCartId)
+        public async Task<ActionResult<int?>> DecreaseItemInCart(int shoppingCartId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {
-                int totalNumberOfItemsInCart = await _shoppingCartOperation.DecreaseItemInCart(shoppingCartId);
+                int totalNumberOfItemsInCart = await _shoppingCartOperation.DecreaseItemInCart(shoppingCartId, shoppingCartRequest);
                 return Ok(totalNumberOfItemsInCart);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
 
         [HttpDelete]
-        [Route("DeleteItem")]
+        [Route("DeleteItem/{shoppingCartId}")]
         [ProducesResponseType(typeof(bool), 200)]
-        [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<int?>> Delete([FromQuery] int shoppingCartId)
+        public async Task<ActionResult<int?>> Delete(int shoppingCartId)
         {
             try
             {
@@ -109,7 +128,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
     }

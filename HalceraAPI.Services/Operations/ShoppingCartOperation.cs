@@ -1,5 +1,7 @@
-﻿using HalceraAPI.DataAccess.Contract;
+﻿using AutoMapper;
+using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations
@@ -7,46 +9,85 @@ namespace HalceraAPI.Services.Operations
     public class ShoppingCartOperation : IShoppingCartOperation
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public ShoppingCartOperation(IUnitOfWork unitOfWork)
+        public ShoppingCartOperation(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        /// <summary>
-        /// Decrease number of items in cart
-        /// </summary>
-        /// <param name="shoppingCartId">Id of item in cart</param>
-        /// <returns>number of items in cart after decrease</returns>
-        public async Task<int> DecreaseItemInCart(int shoppingCartId)
+        public async Task<ShoppingCartResponse> AddProductToCart(int productId, ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {
-                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
-                if (cartItemFromDb == null)
-                    throw new Exception("Item not found");
+                ShoppingCart? cart = await _unitOfWork.ShoppingCart.GetFirstOrDefault(cart => cart.ProductId == productId, includeProperties: $"{nameof(ShoppingCart.Product)}");
+                int requestedQuantity = shoppingCartRequest?.Quantity ?? 1;
 
-                // decrease number of items in cart
-                cartItemFromDb.Count -= 1;
-                if (cartItemFromDb.Count == 0)
+                if (cart == null)
+                {   // adds new item in cart
+                    Product? productItem = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId);
+                    ValidateAddingItemToCart(productItem);
+                    if(requestedQuantity > productItem?.Quantity)
+                    {
+                        throw new Exception($"Only {productItem?.Quantity} item(s) available in stock");
+                    }
+
+                    // TODO: add ApplicationUser from Token
+                    cart = new ShoppingCart() { ProductId = productId, Quantity = requestedQuantity };
+                    // if product item does not exist in cart, add new item
+                    await _unitOfWork.ShoppingCart.Add(cart);
+                }
+                else
                 {
-                    // remove item from cart
-                    _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
+                    ValidateAndUpdateShoppingCartQuantity(cart, requestedQuantity);
                 }
                 await _unitOfWork.SaveAsync();
-                return cartItemFromDb.Count;
+
+                ShoppingCartResponse response = _mapper.Map<ShoppingCartResponse>(cart);
+                return response;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 
-        /// <summary>
-        /// Delete Item from Shopping Cart
-        /// </summary>
-        /// <param name="shoppingCartId">Id of shoppingCart item</param>
-        /// <returns>true if item is successfully deleted</returns>
+        public async Task<int> DecreaseItemInCart(int shoppingCartId, ShoppingCartRequest? shoppingCartRequest)
+        {
+            try
+            {
+                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId, includeProperties: $"{nameof(ShoppingCart.Product)}");
+                if (cartItemFromDb == null || cartItemFromDb.Product == null)
+                    throw new Exception("Item not found");
+
+                if (!cartItemFromDb.Product.Active || cartItemFromDb.Quantity <= 0)
+                {
+                    // remove from invalid Item from Shopping Cart
+                    _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
+                    await _unitOfWork.SaveAsync();
+                    throw new Exception("This item is not available");
+                }
+
+                // decrease number of items in cart
+                int totalQuantityToRemove = cartItemFromDb.Quantity - (shoppingCartRequest?.Quantity ?? 1);
+                if(totalQuantityToRemove <= 0)
+                {
+                    // remove item from cart
+                    _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
+                    totalQuantityToRemove = 0;
+                }
+                cartItemFromDb.Quantity = totalQuantityToRemove;
+                
+                await _unitOfWork.SaveAsync();
+                return cartItemFromDb.Quantity;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<bool> DeleteItemInCart(int shoppingCartId)
         {
             try
@@ -57,70 +98,104 @@ namespace HalceraAPI.Services.Operations
                 _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
                 return true;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 
-        /// <summary>
-        /// Get user list of shopping cart items
-        /// </summary>
-        /// <returns>list of shoppingCart items</returns>
-        public async Task<IEnumerable<ShoppingCart>?> GetAllItemsInCart()
+        public async Task<IEnumerable<ShoppingCartDetailsResponse>?> GetAllItemsInCart()
         {
             try
             {
                 // TODO: get items for requesting user
-                IEnumerable<ShoppingCart>? shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll();
-                return shoppingItemsFromDb;
+                IEnumerable<ShoppingCart>? shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
+                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Categories,Product.MediaCollection,Product.Prices");
+                var response = _mapper.Map<IEnumerable<ShoppingCartDetailsResponse>>(shoppingItemsFromDb);
+                return response;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
-            }
-        }
-
-        /// <summary>
-        /// Get item from cart
-        /// </summary>
-        /// <param name="shoppingCartId">id of shoppingCart item</param>
-        /// <returns>ShoppingCart item</returns>
-        public async Task<ShoppingCart?> GetItemInCart(int shoppingCartId)
-        {
-            try
-            {
-                ShoppingCart? shoppingCartFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
-                return shoppingCartFromDb;
-            }
-            catch (Exception exception)
-            {
-                throw new Exception(exception.Message);
+                throw;
             }
         }
 
-        /// <summary>
-        /// Increase number of items in user shoppingCart
-        /// </summary>
-        /// <param name="shoppingCartId">id of shopping cart item to increase</param>
-        /// <returns>number of items in cart after increase</returns>
-        /// <exception cref="Exception"></exception>
-        public async Task<int> IncreaseItemInCart(int shoppingCartId)
+        public async Task<ShoppingCartDetailsResponse?> GetItemInCart(int shoppingCartId)
         {
             try
             {
-                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
+                ShoppingCart? shoppingCartFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId,
+                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Categories,Product.MediaCollection,Product.Prices");
+                if(shoppingCartFromDb == null)
+                {
+                    throw new Exception("Item not found");
+                }
+                ShoppingCartDetailsResponse response = _mapper.Map<ShoppingCartDetailsResponse>(shoppingCartFromDb);
+                return response;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> IncreaseItemInCart(int shoppingCartId, ShoppingCartRequest? shoppingCartRequest)
+        {
+            try
+            {
+                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId, includeProperties: $"{nameof(ShoppingCart.Product)}");
                 if (cartItemFromDb == null)
                     throw new Exception("Item not found");
-                cartItemFromDb.Count += 1;
+
+                int requestedQuantity = shoppingCartRequest?.Quantity ?? 1;
+                ValidateAndUpdateShoppingCartQuantity(cartItemFromDb, requestedQuantity);
 
                 await _unitOfWork.SaveAsync();
-                return cartItemFromDb.Count;
+                return cartItemFromDb.Quantity;
             }
-            catch(Exception exception)
+            catch (Exception)
             {
-                throw new Exception(exception.Message);
+                throw;
             }
+        }
+
+        /// <summary>
+        /// Checks if a product is available for purchase, i.e. being added to cart
+        /// </summary>
+        private static void ValidateAddingItemToCart(Product? product)
+        {
+            if (product == null)
+            {
+                throw new Exception("Item not found");
+            }
+            if (!product.Active)
+            {
+                throw new Exception("This item is not available");
+            }
+            if (product.Quantity <= 0)
+            {
+                throw new Exception("No item in stock");
+            }
+        }
+
+        /// <summary>
+        /// Validate and updates quantity of a shopping cart item with product data
+        /// </summary>
+        /// <param name="cart">Existing item in cart from Db</param>
+        /// <param name="requestedQuantity">quantity to be added</param>
+        private static void ValidateAndUpdateShoppingCartQuantity(ShoppingCart cart, int requestedQuantity)
+        {
+            ValidateAddingItemToCart(cart.Product);
+            cart.Product ??= new();
+
+            // update existing item count in cart
+            int totalQuantity = cart.Quantity + requestedQuantity;
+            if (totalQuantity > cart.Product.Quantity)
+            {
+                throw new Exception($"Only {cart.Product.Quantity} item(s) available in stock");
+            }
+            // update quantity
+            cart.Quantity = totalQuantity;
         }
     }
 }

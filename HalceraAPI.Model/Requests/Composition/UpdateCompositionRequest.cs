@@ -1,19 +1,27 @@
 ﻿using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.Composition.CompositionData;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace HalceraAPI.Models.Requests.Composition
 {
-    public class CreateCompositionRequest
+    /// <summary>
+    /// Update Composition Request
+    /// </summary>
+    public class UpdateCompositionRequest
     {
+        public int? Id { get; set; }
         /// <summary>
         /// Type of product composition
         /// </summary>
-        [Required]
         public CompositionType? CompositionType { get; set; }
-        [Required]
+
         [StringLength(20, ErrorMessage = "Field has a maximum length of '20'")]
         public string? Name { get; set; }
-        public ICollection<CreateCompositionDataRequest>? CompositionDataCollection { get; set; }
+        public ICollection<UpdateCompositionDataRequest>? CompositionDataCollection { get; set; }
     }
 }
