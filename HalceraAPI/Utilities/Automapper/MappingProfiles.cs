@@ -6,6 +6,7 @@ using HalceraAPI.Models.Requests.Composition.CompositionData;
 using HalceraAPI.Models.Requests.Media;
 using HalceraAPI.Models.Requests.Price;
 using HalceraAPI.Models.Requests.Product;
+using HalceraAPI.Models.Requests.ShoppingCart;
 
 namespace HalceraAPI.Utilities.Automapper
 {
@@ -67,6 +68,9 @@ namespace HalceraAPI.Utilities.Automapper
                 })
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember != null));
             CreateMap<Media, MediaResponse>().ReverseMap();
+
+            // Shopping Cart
+            CreateMap<ShoppingCart, ShoppingCartResponse>().ReverseMap();
         }
     }
 }

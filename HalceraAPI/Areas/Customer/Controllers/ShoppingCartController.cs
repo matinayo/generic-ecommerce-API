@@ -1,7 +1,5 @@
-﻿using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.ShoppingCart;
+﻿using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
-using HalceraAPI.Services.Operations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HalceraAPI.Areas.Customer.Controllers
@@ -27,14 +25,14 @@ namespace HalceraAPI.Areas.Customer.Controllers
         /// <returns>id of item in cart</returns>
         [HttpPost]
         [Route("AddProductToCart/{productId}")]
-        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(ShoppingCartResponse), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<int?>> AddProductToCart(int productId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
+        public async Task<ActionResult<ShoppingCartResponse?>> AddProductToCart(int productId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {
-                int idOfShoppingCart = await _shoppingCartOperation.AddProductToCart(productId, shoppingCartRequest);
-                return Ok(idOfShoppingCart);
+                var response = await _shoppingCartOperation.AddProductToCart(productId, shoppingCartRequest);
+                return Ok(response);
             }
             catch (Exception exception)
             {
@@ -48,13 +46,13 @@ namespace HalceraAPI.Areas.Customer.Controllers
         /// <returns>List of shopping cart items</returns>
         [HttpGet]
         [Route("GetAll")]
-        [ProducesResponseType(typeof(IEnumerable<ShoppingCart>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<ShoppingCartResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<ShoppingCart>?>> GetAllItemsInCart()
+        public async Task<ActionResult<IEnumerable<ShoppingCartResponse>?>> GetAllItemsInCart()
         {
             try
             {
-                IEnumerable<ShoppingCart>? listOfShoppingCartItems = await _shoppingCartOperation.GetAllItemsInCart();
+                IEnumerable<ShoppingCartResponse>? listOfShoppingCartItems = await _shoppingCartOperation.GetAllItemsInCart();
                 return Ok(listOfShoppingCartItems);
             }
             catch (Exception exception)
@@ -66,14 +64,14 @@ namespace HalceraAPI.Areas.Customer.Controllers
 
         [HttpGet]
         [Route("GetItem/{shoppingCartId}")]
-        [ProducesResponseType(typeof(ShoppingCart), 200)]
+        [ProducesResponseType(typeof(ShoppingCartResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ShoppingCart?>> GetItemInCart(int shoppingCartId)
+        public async Task<ActionResult<ShoppingCartResponse?>> GetItemInCart(int shoppingCartId)
         {
             try
             {
-                ShoppingCart? itemFromDb = await _shoppingCartOperation.GetItemInCart(shoppingCartId);
+                ShoppingCartResponse? itemFromDb = await _shoppingCartOperation.GetItemInCart(shoppingCartId);
                 return Ok(itemFromDb);
             }
             catch (Exception exception)
@@ -87,7 +85,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [Route("IncreaseItem/{shoppingCartId}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<int?>> IncreaseItemInCart(int shoppingCartId, [FromBody]ShoppingCartRequest? shoppingCartRequest)
+        public async Task<ActionResult<int?>> IncreaseItemInCart(int shoppingCartId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {
@@ -104,7 +102,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [Route("DecreaseItem/{shoppingCartId}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<int?>> DecreaseItemInCart(int shoppingCartId, [FromBody]ShoppingCartRequest? shoppingCartRequest)
+        public async Task<ActionResult<int?>> DecreaseItemInCart(int shoppingCartId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {

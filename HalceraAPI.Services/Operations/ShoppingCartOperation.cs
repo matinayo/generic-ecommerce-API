@@ -1,4 +1,5 @@
-﻿using HalceraAPI.DataAccess.Contract;
+﻿using AutoMapper;
+using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
@@ -8,13 +9,15 @@ namespace HalceraAPI.Services.Operations
     public class ShoppingCartOperation : IShoppingCartOperation
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public ShoppingCartOperation(IUnitOfWork unitOfWork)
+        public ShoppingCartOperation(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        public async Task<int> AddProductToCart(int productId, ShoppingCartRequest? shoppingCartRequest)
+        public async Task<ShoppingCartResponse> AddProductToCart(int productId, ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {
@@ -25,6 +28,10 @@ namespace HalceraAPI.Services.Operations
                 {   // adds new item in cart
                     Product? productItem = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId);
                     ValidateAddingItemToCart(productItem);
+                    if(requestedQuantity > productItem?.Quantity)
+                    {
+                        throw new Exception($"Only {productItem?.Quantity} item(s) available in stock");
+                    }
 
                     // TODO: add ApplicationUser from Token
                     cart = new ShoppingCart() { ProductId = productId, Quantity = requestedQuantity };
@@ -36,7 +43,9 @@ namespace HalceraAPI.Services.Operations
                     ValidateAndUpdateShoppingCartQuantity(cart, requestedQuantity);
                 }
                 await _unitOfWork.SaveAsync();
-                return cart.Id;
+
+                ShoppingCartResponse response = _mapper.Map<ShoppingCartResponse>(cart);
+                return response;
             }
             catch (Exception)
             {
@@ -44,11 +53,6 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        /// <summary>
-        /// Decrease number of items in cart
-        /// </summary>
-        /// <param name="shoppingCartId">Id of item in cart</param>
-        /// <returns>number of items in cart after decrease</returns>
         public async Task<int> DecreaseItemInCart(int shoppingCartId, ShoppingCartRequest? shoppingCartRequest)
         {
             try
@@ -66,12 +70,15 @@ namespace HalceraAPI.Services.Operations
                 }
 
                 // decrease number of items in cart
-                cartItemFromDb.Quantity -= 1;
-                if (cartItemFromDb.Quantity == 0)
+                int totalQuantityToRemove = cartItemFromDb.Quantity - (shoppingCartRequest?.Quantity ?? 1);
+                if(totalQuantityToRemove <= 0)
                 {
                     // remove item from cart
                     _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
+                    totalQuantityToRemove = 0;
                 }
+                cartItemFromDb.Quantity = totalQuantityToRemove;
+                
                 await _unitOfWork.SaveAsync();
                 return cartItemFromDb.Quantity;
             }
@@ -81,11 +88,6 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        /// <summary>
-        /// Delete Item from Shopping Cart
-        /// </summary>
-        /// <param name="shoppingCartId">Id of shoppingCart item</param>
-        /// <returns>true if item is successfully deleted</returns>
         public async Task<bool> DeleteItemInCart(int shoppingCartId)
         {
             try
@@ -102,17 +104,14 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        /// <summary>
-        /// Get user list of shopping cart items
-        /// </summary>
-        /// <returns>list of shoppingCart items</returns>
-        public async Task<IEnumerable<ShoppingCart>?> GetAllItemsInCart()
+        public async Task<IEnumerable<ShoppingCartResponse>?> GetAllItemsInCart()
         {
             try
             {
                 // TODO: get items for requesting user
-                IEnumerable<ShoppingCart>? shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll();
-                return shoppingItemsFromDb;
+                IEnumerable<ShoppingCart>? shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(includeProperties: nameof(ShoppingCart.Product));
+                var response = _mapper.Map<IEnumerable<ShoppingCartResponse>>(shoppingItemsFromDb);
+                return response;
             }
             catch (Exception)
             {
@@ -120,17 +119,13 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        /// <summary>
-        /// Get item from cart
-        /// </summary>
-        /// <param name="shoppingCartId">id of shoppingCart item</param>
-        /// <returns>ShoppingCart item</returns>
-        public async Task<ShoppingCart?> GetItemInCart(int shoppingCartId)
+        public async Task<ShoppingCartResponse?> GetItemInCart(int shoppingCartId)
         {
             try
             {
-                ShoppingCart? shoppingCartFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
-                return shoppingCartFromDb;
+                ShoppingCart? shoppingCartFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId, includeProperties: nameof(ShoppingCart.Product));
+                ShoppingCartResponse response = _mapper.Map<ShoppingCartResponse>(shoppingCartFromDb);
+                return response;
             }
             catch (Exception)
             {
@@ -138,11 +133,6 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        /// <summary>
-        /// Increase number of items in user shoppingCart
-        /// </summary>
-        /// <param name="shoppingCartId">id of shopping cart item to increase</param>
-        /// <returns>number of items in cart after increase</returns>
         public async Task<int> IncreaseItemInCart(int shoppingCartId, ShoppingCartRequest? shoppingCartRequest)
         {
             try
@@ -196,7 +186,7 @@ namespace HalceraAPI.Services.Operations
             int totalQuantity = cart.Quantity + requestedQuantity;
             if (totalQuantity > cart.Product.Quantity)
             {
-                throw new Exception($"Only {cart.Product.Quantity} item(s) left");
+                throw new Exception($"Only {cart.Product.Quantity} item(s) available in stock");
             }
             // update quantity
             cart.Quantity = totalQuantity;

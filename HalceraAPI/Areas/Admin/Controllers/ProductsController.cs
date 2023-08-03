@@ -18,6 +18,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             _productOperation = productOperation;
         }
 
+        // [HttpGet("category/{categoryId}")]
         [HttpGet]
         [Route("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<ProductResponse>), 200)]
