@@ -109,7 +109,8 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 // TODO: get items for requesting user
-                IEnumerable<ShoppingCart>? shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(includeProperties: nameof(ShoppingCart.Product));
+                IEnumerable<ShoppingCart>? shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
+                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Categories,Product.MediaCollection,Product.Prices");
                 var response = _mapper.Map<IEnumerable<ShoppingCartDetailsResponse>>(shoppingItemsFromDb);
                 return response;
             }
@@ -123,7 +124,12 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ShoppingCart? shoppingCartFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId, includeProperties: nameof(ShoppingCart.Product));
+                ShoppingCart? shoppingCartFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId,
+                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Categories,Product.MediaCollection,Product.Prices");
+                if(shoppingCartFromDb == null)
+                {
+                    throw new Exception("Item not found");
+                }
                 ShoppingCartDetailsResponse response = _mapper.Map<ShoppingCartDetailsResponse>(shoppingCartFromDb);
                 return response;
             }
