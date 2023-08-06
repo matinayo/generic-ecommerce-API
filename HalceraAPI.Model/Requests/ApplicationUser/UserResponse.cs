@@ -12,5 +12,6 @@
         public DateTime? LockoutEnd { get; set; }
         public DateTime? UserCreatedDate { get; set; }
         public DateTime? DateLastModified { get; set; }
+        public string? Token { get; set; }
     }
 }

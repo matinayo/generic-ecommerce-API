@@ -1,8 +1,14 @@
 ﻿using AutoMapper;
+using HalceraAPI.Common.AppsettingsOptions;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Services.Contract;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace HalceraAPI.Services.Operations
@@ -11,11 +17,13 @@ namespace HalceraAPI.Services.Operations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly JWTOptions jwtOptions;
 
-        public ApplicationUserOperation(IUnitOfWork unitOfWork, IMapper mapper)
+        public ApplicationUserOperation(IUnitOfWork unitOfWork, IMapper mapper, IOptions<JWTOptions> options)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            jwtOptions = options.Value;
         }
 
         public async Task<UserResponse> Register(RegisterRequest registerRequest)
@@ -40,6 +48,8 @@ namespace HalceraAPI.Services.Operations
                 await _unitOfWork.SaveAsync();
 
                 UserResponse userResponse = _mapper.Map<UserResponse>(applicationUser);
+                string token = CreateToken(applicationUser);
+                userResponse.Token = token;
                 return userResponse;
             }
             catch (Exception)
@@ -58,10 +68,14 @@ namespace HalceraAPI.Services.Operations
                     throw new Exception("Incorrect email or password.");
                 }
                 VerifyPassword(loginRequest.Password, applicationUserFromDb.PasswordHash);
+                ValidateAccountStatus(applicationUserFromDb);
+
                 applicationUserFromDb.LastLoginDate = DateTime.UtcNow;
                 await _unitOfWork.SaveAsync();
 
                 UserResponse userResponse = _mapper.Map<UserResponse>(applicationUserFromDb);
+                string token = CreateToken(applicationUserFromDb);
+                userResponse.Token = token;
                 return userResponse;
             }
             catch (Exception)
@@ -149,6 +163,41 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        //private static string CreateToken(ApplicationUser )
+        /// <summary>
+        /// Validating Account status and preferences 
+        /// </summary>
+        /// <param name="applicationUser">Application User from db</param>
+        private static void ValidateAccountStatus(ApplicationUser applicationUser)
+        {
+            DateTime lockoutEnd = applicationUser.LockoutEnd ?? DateTime.UtcNow.AddYears(100);
+            int result = DateTime.Compare(lockoutEnd, DateTime.UtcNow);
+            if (result >= 0 || !applicationUser.Active)
+            {
+                // account is inactive
+                throw new Exception("Account is inactive");
+            }
+        }
+
+        /// <summary>
+        /// Create Json Web Token for user
+        /// </summary>
+        /// <param name="applicationUser">User from Db</param>
+        /// <returns>Json Token</returns>
+        private string CreateToken(ApplicationUser applicationUser)
+        {
+            List<Claim> claims = new()
+            {
+                new Claim(ClaimTypes.Name, applicationUser.Name ?? string.Empty),
+                new Claim(ClaimTypes.Email, applicationUser.Email)
+            };
+
+            // key to create and verify JWT
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Token));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var token = new JwtSecurityToken(claims: claims, expires: DateTime.UtcNow.AddDays(1), signingCredentials: credentials);
+
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            return jwt;
+        }
     }
 }

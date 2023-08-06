@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HalceraAPI.Common\HalceraAPI.Common.csproj" />
     <ProjectReference Include="..\HalceraAPI.DataAccess\HalceraAPI.DataAccess.csproj" />
     <ProjectReference Include="..\HalceraAPI.Model\HalceraAPI.Models.csproj" />
   </ItemGroup>
