@@ -159,6 +159,7 @@ namespace HalceraAPI.Services.Operations
                 }
 
                 _mapper.Map(productRequest, productFromDb);
+                productFromDb.DateLastModified = DateTime.UtcNow;
                 await _unitOfWork.SaveAsync();
 
                 ProductDetailsResponse response = _mapper.Map<ProductDetailsResponse>(productFromDb);

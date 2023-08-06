@@ -149,6 +149,7 @@ namespace HalceraAPI.Services.Operations
                 _mediaOperation.UpdateMediaCollection(category.MediaCollection, categoryDetailsFromDb.MediaCollection);
 
                 _mapper.Map(category, categoryDetailsFromDb);
+                categoryDetailsFromDb.DateLastModified = DateTime.UtcNow;
                 await _unitOfWork.SaveAsync();
 
                 CategoryResponse response = new();

@@ -1,4 +1,5 @@
-﻿using HalceraAPI.DataAccess;
+﻿using HalceraAPI.Common.AppsettingsOptions;
+using HalceraAPI.DataAccess;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.DataAccess.Repository;
 using HalceraAPI.Services.Contract;
@@ -17,9 +18,11 @@ namespace HalceraAPI.Utilities.Extensions
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                // configuration.GetSection("AppSettings:Token").Value
             });
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.Configure<JWTOptions>(configuration.GetSection("JWTOptions"));
         }
 
         public static void ConfigureOperationsInjection(this IServiceCollection services)
@@ -31,6 +34,7 @@ namespace HalceraAPI.Utilities.Extensions
             services.AddScoped<ICompositionOperation, CompositionOperation>();
             services.AddScoped<IPriceOperation, PriceOperation>();
             services.AddScoped<ICompositionDataOperation, CompositionDataOperation>();
+            services.AddScoped<IApplicationUserOperation, ApplicationUserOperation>();
         }
     }
 }

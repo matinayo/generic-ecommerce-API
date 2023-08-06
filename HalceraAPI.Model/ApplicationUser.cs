@@ -10,10 +10,23 @@ namespace HalceraAPI.Models
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
         [Required]
+        [StringLength(256)]
         public string? Name { get; set; }
 
         [Required]
         [EmailAddress]
-        public string? Email { get; set; }
+        [StringLength(256)]
+        public string Email { get; set; } = string.Empty;
+
+        public string PasswordHash { get; set; } = string.Empty;
+
+        public bool Active { get; set; } = true;
+        /// <summary>
+        /// End date if account is locked
+        /// </summary>
+        public DateTime? LockoutEnd { get; set; }
+        public DateTime? UserCreatedDate { get; set; } = DateTime.UtcNow;
+        public DateTime? DateLastModified { get; set; }
+        public DateTime? LastLoginDate { get; set; }
     }
 }

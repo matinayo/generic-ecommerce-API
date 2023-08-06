@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Models.Requests.Composition;
 using HalceraAPI.Models.Requests.Composition.CompositionData;
@@ -72,6 +73,10 @@ namespace HalceraAPI.Utilities.Automapper
             // Shopping Cart
             CreateMap<ShoppingCart, ShoppingCartDetailsResponse>().ReverseMap();
             CreateMap<ShoppingCart, ShoppingCartResponse>().ReverseMap();
+
+            // Application User
+            CreateMap<RegisterRequest, ApplicationUser>().ReverseMap();
+            CreateMap<ApplicationUser, UserResponse>().ReverseMap();
         }
     }
 }

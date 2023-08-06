@@ -25,5 +25,9 @@ namespace HalceraAPI.Models
         /// Product Categories
         /// </summary>
         public ICollection<Product>? Products { get; set; }
+
+        public DateTime? DateAdded { get; set; } = DateTime.UtcNow;
+
+        public DateTime? DateLastModified { get; set; }
     }
 }
