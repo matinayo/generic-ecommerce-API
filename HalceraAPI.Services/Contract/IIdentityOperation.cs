@@ -3,7 +3,7 @@ using HalceraAPI.Models.Requests.ApplicationUser;
 
 namespace HalceraAPI.Services.Contract
 {
-    public interface IApplicationUserOperation
+    public interface IIdentityOperation
     {
         /// <summary>
         /// Register User

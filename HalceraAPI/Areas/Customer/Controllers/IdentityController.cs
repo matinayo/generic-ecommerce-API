@@ -7,10 +7,10 @@ namespace HalceraAPI.Areas.Customer.Controllers
     [Area("Customer")]
     [Route("api/[area]/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class IdentityController : ControllerBase
     {
-        private readonly IApplicationUserOperation _applicationUserOperation;
-        public UserController(IApplicationUserOperation applicationUserOperation)
+        private readonly IIdentityOperation _applicationUserOperation;
+        public IdentityController(IIdentityOperation applicationUserOperation)
         {
             _applicationUserOperation = applicationUserOperation;
         }
@@ -23,6 +23,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
         {
             try
             {
+                U
                 UserResponse applicationUser = await _applicationUserOperation.Register(registerRequest);
                 return Ok(applicationUser);
             }

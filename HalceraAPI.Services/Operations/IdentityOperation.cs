@@ -13,13 +13,13 @@ using System.Text.RegularExpressions;
 
 namespace HalceraAPI.Services.Operations
 {
-    public class ApplicationUserOperation : IApplicationUserOperation
+    public class IdentityOperation : IIdentityOperation
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly JWTOptions jwtOptions;
 
-        public ApplicationUserOperation(IUnitOfWork unitOfWork, IMapper mapper, IOptions<JWTOptions> options)
+        public IdentityOperation(IUnitOfWork unitOfWork, IMapper mapper, IOptions<JWTOptions> options)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -169,9 +169,17 @@ namespace HalceraAPI.Services.Operations
         /// <param name="applicationUser">Application User from db</param>
         private static void ValidateAccountStatus(ApplicationUser applicationUser)
         {
-            DateTime lockoutEnd = applicationUser.LockoutEnd ?? DateTime.UtcNow.AddYears(100);
-            int result = DateTime.Compare(lockoutEnd, DateTime.UtcNow);
-            if (result >= 0 || !applicationUser.Active)
+            bool accountIsInactive = !applicationUser.Active;
+            if(applicationUser.LockoutEnd != null)
+            {
+                DateTime lockoutEnd = applicationUser.LockoutEnd.GetValueOrDefault();
+                int result = DateTime.Compare(lockoutEnd, DateTime.UtcNow);
+                if(result >= 0)
+                {
+                    accountIsInactive = true;
+                }
+            }
+            if (accountIsInactive)
             {
                 // account is inactive
                 throw new Exception("Account is inactive");
