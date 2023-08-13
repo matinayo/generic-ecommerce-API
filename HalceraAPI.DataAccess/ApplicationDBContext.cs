@@ -19,5 +19,7 @@ namespace HalceraAPI.DataAccess
         public DbSet<Media>? Medias { get; set; }
         public DbSet<Price>? Prices { get; set; }
         public DbSet<Rating>? Ratings { get; set; }
+        public DbSet<Roles>? Roles { get; set; }
+        public DbSet<RefreshToken>? RefreshTokens { get; set; }
     }
 }

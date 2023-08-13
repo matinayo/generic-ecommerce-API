@@ -3,11 +3,14 @@ using HalceraAPI.Common.AppsettingsOptions;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.ApplicationUser;
+using HalceraAPI.Models.Requests.RefreshToken;
 using HalceraAPI.Services.Contract;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -17,12 +20,14 @@ namespace HalceraAPI.Services.Operations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly JWTOptions jwtOptions;
 
-        public IdentityOperation(IUnitOfWork unitOfWork, IMapper mapper, IOptions<JWTOptions> options)
+        public IdentityOperation(IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IOptions<JWTOptions> options)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
             jwtOptions = options.Value;
         }
 
@@ -44,12 +49,16 @@ namespace HalceraAPI.Services.Operations
                 };
                 _mapper.Map(registerRequest, applicationUser);
 
+                applicationUser.LastLoginDate = DateTime.UtcNow;
+                applicationUser.RefreshToken = GenerateRefreshToken();
+
                 await _unitOfWork.ApplicationUser.Add(applicationUser);
                 await _unitOfWork.SaveAsync();
 
                 UserResponse userResponse = _mapper.Map<UserResponse>(applicationUser);
                 string token = CreateToken(applicationUser);
                 userResponse.Token = token;
+
                 return userResponse;
             }
             catch (Exception)
@@ -71,11 +80,14 @@ namespace HalceraAPI.Services.Operations
                 ValidateAccountStatus(applicationUserFromDb);
 
                 applicationUserFromDb.LastLoginDate = DateTime.UtcNow;
+                applicationUserFromDb.RefreshToken = GenerateRefreshToken();
+
                 await _unitOfWork.SaveAsync();
 
                 UserResponse userResponse = _mapper.Map<UserResponse>(applicationUserFromDb);
                 string token = CreateToken(applicationUserFromDb);
                 userResponse.Token = token;
+
                 return userResponse;
             }
             catch (Exception)
@@ -84,8 +96,55 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
+        public async Task<UserResponse> RefreshToken(RefreshTokenRequest refreshTokenRequest)
+        {
+            ApplicationUser applicationUser = await GetLoggedInUser();
+            if(applicationUser.RefreshToken == null || !applicationUser.RefreshToken.Token.Equals(refreshTokenRequest.Token))
+            {
+                throw new UnauthorizedAccessException("Invalid Refresh Token");
+            }
+            else if(applicationUser.RefreshToken.DateExpires  < DateTime.UtcNow)
+            {
+                throw new UnauthorizedAccessException("Token expired");
+            }
+
+            string token = CreateToken(applicationUser);
+            applicationUser.RefreshToken = GenerateRefreshToken();
+
+            await _unitOfWork.SaveAsync();
+            UserResponse userResponse = _mapper.Map<UserResponse>(applicationUser);
+            userResponse.Token = token;
+
+            return userResponse;
+        }
+
+        public async Task<ApplicationUser> GetLoggedInUser()
+        {
+            try
+            {
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    var claim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+                    if (claim != null)
+                    {
+                        ApplicationUser? applicationUser = await _unitOfWork.ApplicationUser.GetFirstOrDefault(user => user.Id == claim.Value, includeProperties: nameof(ApplicationUser.RefreshToken));
+                        if (applicationUser != null)
+                        {
+                            return applicationUser;
+                        }
+                    }
+                }
+                // TODO: create Unauthorized exception
+                throw new UnauthorizedAccessException("Login to your account");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         /// <summary>
-        /// Validate if user email is already in use
+        /// Get user email
         /// </summary>
         /// <param name="email">Email</param>
         /// <returns>ApplicaitonUser associated with email</returns>
@@ -170,11 +229,11 @@ namespace HalceraAPI.Services.Operations
         private static void ValidateAccountStatus(ApplicationUser applicationUser)
         {
             bool accountIsInactive = !applicationUser.Active;
-            if(applicationUser.LockoutEnd != null)
+            if (applicationUser.LockoutEnd != null)
             {
                 DateTime lockoutEnd = applicationUser.LockoutEnd.GetValueOrDefault();
                 int result = DateTime.Compare(lockoutEnd, DateTime.UtcNow);
-                if(result >= 0)
+                if (result >= 0)
                 {
                     accountIsInactive = true;
                 }
@@ -196,6 +255,7 @@ namespace HalceraAPI.Services.Operations
             List<Claim> claims = new()
             {
                 new Claim(ClaimTypes.Name, applicationUser.Name ?? string.Empty),
+                new Claim(ClaimTypes.NameIdentifier, applicationUser.Id ?? string.Empty),
                 new Claim(ClaimTypes.Email, applicationUser.Email)
             };
 
@@ -206,6 +266,20 @@ namespace HalceraAPI.Services.Operations
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;
+        }
+
+        /// <summary>
+        /// Generate Refresh Token
+        /// </summary>
+        /// <returns>New refresh token</returns>
+        private static RefreshToken GenerateRefreshToken()
+        {
+            return new RefreshToken
+            {
+                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+                DateExpires = DateTime.UtcNow.AddDays(29),
+                DateCreated = DateTime.UtcNow
+            };
         }
     }
 }

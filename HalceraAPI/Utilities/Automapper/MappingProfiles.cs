@@ -7,6 +7,7 @@ using HalceraAPI.Models.Requests.Composition.CompositionData;
 using HalceraAPI.Models.Requests.Media;
 using HalceraAPI.Models.Requests.Price;
 using HalceraAPI.Models.Requests.Product;
+using HalceraAPI.Models.Requests.RefreshToken;
 using HalceraAPI.Models.Requests.ShoppingCart;
 
 namespace HalceraAPI.Utilities.Automapper
@@ -77,6 +78,9 @@ namespace HalceraAPI.Utilities.Automapper
             // Application User
             CreateMap<RegisterRequest, ApplicationUser>().ReverseMap();
             CreateMap<ApplicationUser, UserResponse>().ReverseMap();
+
+            // Refresh Token
+            CreateMap<RefreshToken, RefreshTokenResponse>().ReverseMap();
         }
     }
 }

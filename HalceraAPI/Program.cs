@@ -31,7 +31,7 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 builder.Services.AddAuthentication().AddJwtBearer(
-    // verify and validate issuer signing key
+    // Verify and validate issuer signing key
     options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -45,6 +45,9 @@ builder.Services.AddAuthentication().AddJwtBearer(
 
     });
 builder.Services.AddSwaggerGenNewtonsoftSupport();
+
+// Adds default Implementation for IHttpContextAccessor service
+builder.Services.AddHttpContextAccessor();
 
 // Automapper
 builder.Services.AddAutoMapper(typeof(Program).Assembly);

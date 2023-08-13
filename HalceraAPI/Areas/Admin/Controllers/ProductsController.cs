@@ -1,4 +1,5 @@
-﻿using HalceraAPI.Models.Requests.Product;
+﻿using HalceraAPI.Common.Utilities;
+using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +21,6 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         // [HttpGet("category/{categoryId}")]
-        [Authorize]
         [HttpGet]
         [Route("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<ProductResponse>), 200)]
@@ -55,6 +55,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
         }
 
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpPost]
         [Route("CreateProduct")]
         [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
@@ -72,6 +73,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
         }
 
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpPut]
         [Route("UpdateProduct/{productId}")]
         [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
@@ -90,6 +92,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
         }
 
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpDelete]
         [Route("DeleteProduct/{productId}")]
         [ProducesResponseType(typeof(bool), 200)]

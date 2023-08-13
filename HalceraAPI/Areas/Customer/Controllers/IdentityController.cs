@@ -1,5 +1,7 @@
 ﻿using HalceraAPI.Models.Requests.ApplicationUser;
+using HalceraAPI.Models.Requests.RefreshToken;
 using HalceraAPI.Services.Contract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HalceraAPI.Areas.Customer.Controllers
@@ -41,6 +43,24 @@ namespace HalceraAPI.Areas.Customer.Controllers
             try
             {
                 UserResponse applicationUser = await _applicationUserOperation.Login(loginRequest);
+                return Ok(applicationUser);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("RefreshToken")]
+        [ProducesResponseType(typeof(UserResponse), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<UserResponse>> RefreshToken([FromBody] RefreshTokenRequest refreshTokenRequest)
+        {
+            try
+            {
+                UserResponse applicationUser = await _applicationUserOperation.RefreshToken(refreshTokenRequest);
                 return Ok(applicationUser);
             }
             catch (Exception exception)

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HalceraAPI.Models
 {
@@ -28,5 +29,9 @@ namespace HalceraAPI.Models
         public DateTime? UserCreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? DateLastModified { get; set; }
         public DateTime? LastLoginDate { get; set; }
+        public ICollection<Roles>? Roles { get; set; }
+        public int? RefreshTokenId { get; set; }
+        [ForeignKey(nameof(RefreshTokenId))]
+        public RefreshToken? RefreshToken { get; set; }
     }
 }

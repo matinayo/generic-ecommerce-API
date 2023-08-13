@@ -1,5 +1,6 @@
 ﻿using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.ApplicationUser;
+using HalceraAPI.Models.Requests.RefreshToken;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -12,6 +13,23 @@ namespace HalceraAPI.Services.Contract
         /// <returns>User information</returns>
         public Task<UserResponse> Register(RegisterRequest registerRequest);
 
+        /// <summary>
+        /// Login Request
+        /// </summary>
+        /// <param name="loginRequest">Login user request</param>
+        /// <returns>User Information</returns>
         public Task<UserResponse> Login(LoginRequest loginRequest);
+
+        /// <summary>
+        /// Refresh the refresh token; generate new JWT and Refresh Token
+        /// </summary>
+        /// <returns>User response with new refresh token</returns>
+        public Task<UserResponse> RefreshToken(RefreshTokenRequest refreshTokenRequest);
+
+        /// <summary>
+        /// Get Logged-In user from JWT claims
+        /// </summary>
+        /// <returns>Current application user</returns>
+        public Task<ApplicationUser> GetLoggedInUser();
     }
 }
