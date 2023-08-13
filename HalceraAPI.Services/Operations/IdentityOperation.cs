@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using HalceraAPI.Common.AppsettingsOptions;
+using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Models.Requests.RefreshToken;
+using HalceraAPI.Models.Requests.Role;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -48,6 +50,8 @@ namespace HalceraAPI.Services.Operations
                     PasswordHash = passwordHash
                 };
                 _mapper.Map(registerRequest, applicationUser);
+
+                await SetUserRole(registerRequest.RolesId, applicationUser);
 
                 applicationUser.LastLoginDate = DateTime.UtcNow;
                 applicationUser.RefreshToken = GenerateRefreshToken();
@@ -99,11 +103,11 @@ namespace HalceraAPI.Services.Operations
         public async Task<UserResponse> RefreshToken(RefreshTokenRequest refreshTokenRequest)
         {
             ApplicationUser applicationUser = await GetLoggedInUser();
-            if(applicationUser.RefreshToken == null || !applicationUser.RefreshToken.Token.Equals(refreshTokenRequest.Token))
+            if (applicationUser.RefreshToken == null || !applicationUser.RefreshToken.Token.Equals(refreshTokenRequest.Token))
             {
                 throw new UnauthorizedAccessException("Invalid Refresh Token");
             }
-            else if(applicationUser.RefreshToken.DateExpires  < DateTime.UtcNow)
+            else if (applicationUser.RefreshToken.DateExpires < DateTime.UtcNow)
             {
                 throw new UnauthorizedAccessException("Token expired");
             }
@@ -143,6 +147,18 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
+        public async Task<IEnumerable<RoleResponse>> GetApplicationRoles()
+        {
+            try
+            {
+                var roles = await _unitOfWork.Roles.GetAll();
+                return _mapper.Map<IEnumerable<RoleResponse>>(roles);
+            }catch(Exception)
+            {
+                throw;
+            }
+        }
+
         /// <summary>
         /// Get user email
         /// </summary>
@@ -157,7 +173,7 @@ namespace HalceraAPI.Services.Operations
             }
 
             ApplicationUser? userFromDb = await _unitOfWork.ApplicationUser
-                .GetFirstOrDefault(user => user.Email.Trim().ToLower().Equals(email.Trim().ToLower()));
+                .GetFirstOrDefault(user => user.Email.Trim().ToLower().Equals(email.Trim().ToLower()), includeProperties: nameof(ApplicationUser.Roles));
             return userFromDb;
         }
 
@@ -280,6 +296,27 @@ namespace HalceraAPI.Services.Operations
                 DateExpires = DateTime.UtcNow.AddDays(29),
                 DateCreated = DateTime.UtcNow
             };
+        }
+
+        private async Task SetUserRole(IEnumerable<RoleRequest>? rolesId, ApplicationUser applicationUser)
+        {
+            if (rolesId != null && rolesId.Any())
+            {
+                var selectedRoles = await _unitOfWork.Roles.GetAll(role => rolesId.Select(opt => opt.Id).Contains(role.Id));
+                if (selectedRoles != null && selectedRoles.Any())
+                {
+                    applicationUser.Roles = selectedRoles.ToList();
+                }
+            }
+            if (applicationUser.Roles == null)
+            {
+                // assign new role
+                Roles? roleId = await _unitOfWork.Roles.GetFirstOrDefault(u => u.Name.Equals(RoleDefinition.Customer));
+                if (roleId != null)
+                {
+                    applicationUser.Roles = new List<Roles> { roleId };
+                }
+            }
         }
     }
 }

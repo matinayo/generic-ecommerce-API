@@ -1,6 +1,7 @@
 ﻿using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Models.Requests.RefreshToken;
+using HalceraAPI.Models.Requests.Role;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -31,5 +32,11 @@ namespace HalceraAPI.Services.Contract
         /// </summary>
         /// <returns>Current application user</returns>
         public Task<ApplicationUser> GetLoggedInUser();
+
+        /// <summary>
+        /// Get all roles
+        /// </summary>
+        /// <returns>List of application roles</returns>
+        public Task<IEnumerable<RoleResponse>> GetApplicationRoles();
     }
 }

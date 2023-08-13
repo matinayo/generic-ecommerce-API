@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HalceraAPI.Models.Requests.Role;
+using System.ComponentModel.DataAnnotations;
 
 namespace HalceraAPI.Models.Requests.ApplicationUser
 {
@@ -24,5 +25,6 @@ namespace HalceraAPI.Models.Requests.ApplicationUser
         [DataType(DataType.Password)]
         [Compare(nameof(Password))]
         public string? ConfirmPassword { get; set; }
+        public ICollection<RoleRequest>? RolesId { get; set; }
     }
 }
