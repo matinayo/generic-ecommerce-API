@@ -35,7 +35,10 @@ namespace HalceraAPI.Services.Operations
                 if (productRequest.Categories != null && productRequest.Categories.Any())
                 {
                     var categories = await _unitOfWork.Category.GetAll(category => productRequest.Categories != null && productRequest.Categories.Select(opt => opt.CategoryId).Contains(category.Id));
-                    product.Categories = categories.ToList();
+                    if (categories != null && categories.Any())
+                    {
+                        product.Categories = categories.ToList();
+                    }
                 }
                 await _unitOfWork.Product.Add(product);
                 await _unitOfWork.SaveAsync();

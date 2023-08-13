@@ -1,4 +1,7 @@
-﻿namespace HalceraAPI.Models.Requests.ApplicationUser
+﻿using HalceraAPI.Models.Requests.RefreshToken;
+using HalceraAPI.Models.Requests.Role;
+
+namespace HalceraAPI.Models.Requests.ApplicationUser
 {
     /// <summary>
     /// User response
@@ -13,5 +16,7 @@
         public DateTime? UserCreatedDate { get; set; }
         public DateTime? DateLastModified { get; set; }
         public string? Token { get; set; }
+        public RefreshTokenResponse? RefreshToken { get; set; }
+        public ICollection<RoleResponse>? Roles { get; set; }
     }
 }

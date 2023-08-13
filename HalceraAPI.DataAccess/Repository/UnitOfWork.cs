@@ -24,6 +24,8 @@ namespace HalceraAPI.DataAccess.Repository
             Product = new Repository<Product>(_context);
             Rating = new Repository<Rating>(_context);
             ShoppingCart = new Repository<ShoppingCart>(_context);
+            Roles = new Repository<Roles>(_context);
+            RefreshToken = new Repository<RefreshToken>(_context);
         }
 
         public IRepository<ApplicationUser> ApplicationUser { get; private set; }
@@ -36,6 +38,8 @@ namespace HalceraAPI.DataAccess.Repository
         public IRepository<Product> Product { get; private set; }
         public IRepository<Rating> Rating { get; private set; }
         public IRepository<ShoppingCart> ShoppingCart { get; private set; }
+        public IRepository<Roles> Roles { get; private set; }
+        public IRepository<RefreshToken> RefreshToken { get; private set; }
 
         public void Dispose()
         {
