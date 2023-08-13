@@ -202,7 +202,7 @@ namespace HalceraAPI.Services.Operations
             // key to create and verify JWT
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Token));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-            var token = new JwtSecurityToken(claims: claims, expires: DateTime.UtcNow.AddDays(1), signingCredentials: credentials);
+            var token = new JwtSecurityToken(claims: claims, expires: DateTime.UtcNow.AddDays(29), signingCredentials: credentials);
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;

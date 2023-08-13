@@ -23,7 +23,6 @@ namespace HalceraAPI.Areas.Customer.Controllers
         {
             try
             {
-                U
                 UserResponse applicationUser = await _applicationUserOperation.Register(registerRequest);
                 return Ok(applicationUser);
             }

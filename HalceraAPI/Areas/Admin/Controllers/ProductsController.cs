@@ -1,5 +1,6 @@
 ﻿using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Services.Contract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HalceraAPI.Areas.Admin.Controllers
@@ -19,6 +20,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         // [HttpGet("category/{categoryId}")]
+        [Authorize]
         [HttpGet]
         [Route("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<ProductResponse>), 200)]
