@@ -311,7 +311,7 @@ namespace HalceraAPI.Services.Operations
             if (applicationUser.Roles == null)
             {
                 // assign new role
-                Roles? roleId = await _unitOfWork.Roles.GetFirstOrDefault(u => u.Name.Equals(RoleDefinition.Customer));
+                Roles? roleId = await _unitOfWork.Roles.GetFirstOrDefault(u => u.Title.Equals(RoleDefinition.Customer));
                 if (roleId != null)
                 {
                     applicationUser.Roles = new List<Roles> { roleId };

@@ -1,6 +1,7 @@
 ﻿using HalceraAPI.Common.AppsettingsOptions;
 using HalceraAPI.DataAccess;
 using HalceraAPI.DataAccess.Contract;
+using HalceraAPI.DataAccess.DbInitializer;
 using HalceraAPI.DataAccess.Repository;
 using HalceraAPI.Services.Contract;
 using HalceraAPI.Services.Operations;
@@ -22,6 +23,7 @@ namespace HalceraAPI.Utilities.Extensions
             });
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IDbInitializer, DbInitializer>();
             services.Configure<JWTOptions>(configuration.GetSection("JWTOptions"));
         }
 
