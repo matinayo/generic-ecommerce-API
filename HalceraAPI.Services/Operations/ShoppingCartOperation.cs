@@ -11,17 +11,22 @@ namespace HalceraAPI.Services.Operations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public ShoppingCartOperation(IUnitOfWork unitOfWork, IMapper mapper)
+        private readonly IIdentityOperation _identityOperation;
+
+        public ShoppingCartOperation(IUnitOfWork unitOfWork, IMapper mapper, IIdentityOperation identityOperation)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _identityOperation = identityOperation;
         }
 
         public async Task<ShoppingCartResponse> AddProductToCart(int productId, ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {
-                ShoppingCart? cart = await _unitOfWork.ShoppingCart.GetFirstOrDefault(cart => cart.ProductId == productId, includeProperties: $"{nameof(ShoppingCart.Product)}");
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+
+                ShoppingCart? cart = await _unitOfWork.ShoppingCart.GetFirstOrDefault(cart => cart.ApplicationUserId != null && cart.ApplicationUserId.Equals(applicationUser.Id) && cart.ProductId == productId, includeProperties: $"{nameof(ShoppingCart.Product)}");
                 int requestedQuantity = shoppingCartRequest?.Quantity ?? 1;
 
                 if (cart == null)
@@ -33,8 +38,7 @@ namespace HalceraAPI.Services.Operations
                         throw new Exception($"Only {productItem?.Quantity} item(s) available in stock");
                     }
 
-                    // TODO: add ApplicationUser from Token
-                    cart = new ShoppingCart() { ProductId = productId, Quantity = requestedQuantity };
+                    cart = new ShoppingCart() { ProductId = productId, Quantity = requestedQuantity, ApplicationUserId = applicationUser.Id };
                     // if product item does not exist in cart, add new item
                     await _unitOfWork.ShoppingCart.Add(cart);
                 }
@@ -57,7 +61,9 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId, includeProperties: $"{nameof(ShoppingCart.Product)}");
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+
+                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.ApplicationUserId != null && shoppingCart.ApplicationUserId.Equals(applicationUser.Id) && shoppingCart.Id == shoppingCartId, includeProperties: $"{nameof(ShoppingCart.Product)}");
                 if (cartItemFromDb == null || cartItemFromDb.Product == null)
                     throw new Exception("Item not found");
 
@@ -92,10 +98,12 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.ApplicationUserId != null && shoppingCart.ApplicationUserId.Equals(applicationUser.Id) && shoppingCart.Id == shoppingCartId);
                 if (cartItemFromDb == null)
                     throw new Exception("Item not found");
                 _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
+                await _unitOfWork.SaveAsync();
                 return true;
             }
             catch (Exception)
@@ -108,8 +116,10 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                // TODO: get items for requesting user
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+
                 IEnumerable<ShoppingCart>? shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
+                    shoppingCart => shoppingCart.ApplicationUserId != null && shoppingCart.ApplicationUserId.Equals(applicationUser.Id),
                     includeProperties: $"{nameof(ShoppingCart.Product)},Product.Categories,Product.MediaCollection,Product.Prices");
                 var response = _mapper.Map<IEnumerable<ShoppingCartDetailsResponse>>(shoppingItemsFromDb);
                 return response;
@@ -124,7 +134,8 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ShoppingCart? shoppingCartFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId,
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ShoppingCart? shoppingCartFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.ApplicationUserId != null && shoppingCart.ApplicationUserId.Equals(applicationUser.Id) && shoppingCart.Id == shoppingCartId,
                     includeProperties: $"{nameof(ShoppingCart.Product)},Product.Categories,Product.MediaCollection,Product.Prices");
                 if(shoppingCartFromDb == null)
                 {
@@ -143,7 +154,8 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId, includeProperties: $"{nameof(ShoppingCart.Product)}");
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(shoppingCart => shoppingCart.ApplicationUserId != null && shoppingCart.ApplicationUserId.Equals(applicationUser.Id) && shoppingCart.Id == shoppingCartId, includeProperties: $"{nameof(ShoppingCart.Product)}");
                 if (cartItemFromDb == null)
                     throw new Exception("Item not found");
 

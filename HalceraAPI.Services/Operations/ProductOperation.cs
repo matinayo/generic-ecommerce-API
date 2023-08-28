@@ -160,8 +160,14 @@ namespace HalceraAPI.Services.Operations
                 {
                     productFromDb.Categories = categories.ToList();
                 }
-
+                bool tempActiveValue = productFromDb.Active;
                 _mapper.Map(productRequest, productFromDb);
+                // restore Active value
+                if(productRequest.Active == null)
+                {
+                    productFromDb.Active = tempActiveValue;
+                }
+
                 productFromDb.DateLastModified = DateTime.UtcNow;
                 await _unitOfWork.SaveAsync();
 

@@ -1,5 +1,6 @@
 ﻿using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HalceraAPI.Areas.Customer.Controllers
@@ -7,6 +8,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
     /// <summary>
     /// Shopping controller defining customers endpoint
     /// </summary>
+    [Authorize]
     [Area("Customer")]
     [Route("api/[area]/[controller]")]
     [ApiController]
@@ -61,7 +63,6 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
         }
 
-
         [HttpGet]
         [Route("GetItem/{shoppingCartId}")]
         [ProducesResponseType(typeof(ShoppingCartDetailsResponse), 200)]
@@ -79,7 +80,6 @@ namespace HalceraAPI.Areas.Customer.Controllers
                 return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
-
 
         [HttpPost]
         [Route("IncreaseItem/{shoppingCartId}")]

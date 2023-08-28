@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Elfie.Serialization;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Models.Requests.Category;
@@ -27,7 +28,9 @@ namespace HalceraAPI.Utilities.Automapper
             CreateMap<Category, CategoryLabelResponse>().ReverseMap();
 
             // Product Request
-            CreateMap<CreateProductRequest, Product>().ReverseMap();
+            CreateMap<CreateProductRequest, Product>()
+                .ForMember(destination => destination.Categories, opt => opt.Ignore())
+                .ReverseMap();
             CreateMap<Product, ProductResponse>().ReverseMap();
             CreateMap<Product, ProductDetailsResponse>().ReverseMap();
             CreateMap<UpdateProductRequest, Product>()
