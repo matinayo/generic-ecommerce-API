@@ -2,6 +2,7 @@
 using Elfie.Serialization;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.ApplicationUser;
+using HalceraAPI.Models.Requests.BaseAddress;
 using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Models.Requests.Composition;
 using HalceraAPI.Models.Requests.Composition.CompositionData;
@@ -89,6 +90,12 @@ namespace HalceraAPI.Utilities.Automapper
             // Roles
             CreateMap<RoleRequest, Roles>().ReverseMap();
             CreateMap<Roles, RoleResponse>().ReverseMap();
+
+            // Payment Details
+            CreateMap<PaymentDetailsRequest, PaymentDetails>().ReverseMap();
+
+            // Shipping Address
+            CreateMap<AddressRequest, BaseAddress>().ReverseMap();
         }
     }
 }

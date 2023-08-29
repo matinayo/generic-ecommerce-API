@@ -2,6 +2,7 @@
 {
     public enum PaymentStatus : int
     {
+        PartialPayment = 0,
         PaymentPending = 1,
         PaymentSucceeded = 2,
         PaymentFailed = 3,

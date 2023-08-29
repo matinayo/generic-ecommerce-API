@@ -14,12 +14,12 @@ namespace HalceraAPI.Models.Requests.Price
     public class UpdatePriceRequest
     {
         public int? Id { get; set; }
-        public double? Amount { get; set; }
+        public decimal? Amount { get; set; }
         public Currency? Currency { get; set; }
 
         /// <summary>
         /// indicate if price is discounted
         /// </summary>
-        public double? DiscountAmount { get; set; }
+        public decimal? DiscountAmount { get; set; }
     }
 }

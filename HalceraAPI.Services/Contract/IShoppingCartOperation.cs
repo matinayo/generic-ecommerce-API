@@ -44,6 +44,11 @@ namespace HalceraAPI.Services.Contract
         /// </summary>
         /// <param name="shoppingCartId">Id of item in cart</param>
         /// <returns>bool to indicate if delete operation was successful</returns>
-        Task<bool> DeleteItemInCart(int shoppingCartId);
+        Task<bool> DeleteItemInCart(int shoppingCartId);        
+        /// <summary>
+        /// User checkout, Validate payment
+        /// </summary>
+        /// <returns>Order Id</returns>
+        Task<int> Checkout(CheckoutRequest checkoutRequest);
     }
 }

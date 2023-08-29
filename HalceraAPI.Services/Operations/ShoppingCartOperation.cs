@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
+using HalceraAPI.Models.Enums;
+using HalceraAPI.Models.Requests.BaseAddress;
 using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
 
@@ -10,7 +12,6 @@ namespace HalceraAPI.Services.Operations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-
         private readonly IIdentityOperation _identityOperation;
 
         public ShoppingCartOperation(IUnitOfWork unitOfWork, IMapper mapper, IIdentityOperation identityOperation)
@@ -171,6 +172,36 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
+        public async Task<int> Checkout(CheckoutRequest checkoutRequest)
+        {
+            try
+            {
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                
+                IEnumerable<ShoppingCart> cartItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(shoppingCart => shoppingCart.ApplicationUserId != null && shoppingCart.ApplicationUserId == applicationUser.Id, includeProperties: $"{nameof(ShoppingCart.Product)},Product.Prices");
+                if (cartItemsFromDb == null) throw new Exception("No items found in cart");
+
+                // TODO: Verify Payment
+                OrderHeader orderHeader = new()
+                {
+                    OrderStatus = OrderStatus.Pending,
+                    PaymentDetails = ProcessPaymentOrderDetails(checkoutRequest.PaymentDetailsRequest, cartItemsFromDb),
+                    OrderDetails = ProcessOrderDetails(cartItemsFromDb, checkoutRequest.PaymentDetailsRequest.Currency),
+                    ShippingDetails = ProcessShippingOrderDetails(checkoutRequest.ShippingAddress),
+                    ApplicationUserId = applicationUser.Id,
+                };
+                
+                await _unitOfWork.OrderHeader.Add(orderHeader);
+                await _unitOfWork.SaveAsync();
+
+                return orderHeader.Id;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         /// <summary>
         /// Checks if a product is available for purchase, i.e. being added to cart
         /// </summary>
@@ -208,6 +239,104 @@ namespace HalceraAPI.Services.Operations
             }
             // update quantity
             cart.Quantity = totalQuantity;
+        }
+
+        /// <summary>
+        /// Get Info of Payment Details for Order
+        /// </summary>
+        /// <param name="paymentDetailsRequest">Payment Details request</param>
+        /// <param name="cartItemsFromDb">Application User Shopping Cart Items including Product.Price</param>
+        /// <returns>Order Payment Details</returns>
+        private PaymentDetails ProcessPaymentOrderDetails(PaymentDetailsRequest paymentDetailsRequest, IEnumerable<ShoppingCart> cartItemsFromDb)
+        {
+            // Payment order details
+            PaymentDetails paymentDetails = _mapper.Map<PaymentDetails>(paymentDetailsRequest);
+            // Total Amount to be paid and Order Header
+            paymentDetails.TotalAmount = GetTotalAmountToBePaidDuringCheckout(cartItemsFromDb, paymentDetailsRequest.Currency);
+            // Payment status
+            paymentDetails.PaymentStatus =
+                paymentDetails.TotalAmount > paymentDetails.AmountPaid ? PaymentStatus.PartialPayment : PaymentStatus.PaymentSucceeded;
+            return paymentDetails;
+        }
+
+        /// <summary>
+        /// Calculate total amount of Items added in Shopping Cart
+        /// </summary>
+        /// <param name="cartItemsFromDb">ShoppingCart Items of User Id Including Product.Price</param>
+        /// <param name="currencyToBePaidIn">Currency of Product Price to be calculated</param>
+        /// <returns>Product total amount</returns>
+        private static decimal GetTotalAmountToBePaidDuringCheckout(IEnumerable<ShoppingCart> cartItemsFromDb, Currency currencyToBePaidIn)
+        {
+            decimal totalAmount = 0.0M;
+            List<OrderDetails> orderDetails = new();
+
+            foreach (var cartItem in cartItemsFromDb)
+            {
+                if (cartItem.Product != null && cartItem.Product.Prices != null)
+                {
+                    Price? productSelectedPrice = cartItem.Product.Prices.FirstOrDefault(price => price.Currency != null && price.Currency == currencyToBePaidIn);
+                    if (productSelectedPrice != null)
+                    {
+                        // Total amount
+                        decimal productAmount = productSelectedPrice.DiscountAmount ?? productSelectedPrice.Amount ?? 0M;
+                        totalAmount += (productAmount * cartItem.Quantity);
+                    }
+                }
+            }
+            return totalAmount;
+        }
+
+        /// <summary>
+        /// Process Order Shipping Address and Data
+        /// </summary>
+        /// <param name="shippingAddressRequest">Shipping Address request</param>
+        /// <returns>Shipping Details</returns>
+        private ShippingDetails ProcessShippingOrderDetails(AddressRequest shippingAddressRequest)
+        {
+            BaseAddress baseAddress = _mapper.Map<BaseAddress>(shippingAddressRequest);
+            ShippingDetails shippingDetails = new()
+            {
+                ShippingAddress = baseAddress
+            };
+            return shippingDetails;
+        }
+
+        /// <summary>
+        /// Process Order details
+        /// </summary>
+        /// <param name="cartItemsFromDb">User Cart items from including Product Price</param>
+        /// <param name="currencyToBePaidIn">User checkout currency</param>
+        /// <returns>List of Order Details</returns>
+        private static ICollection<OrderDetails> ProcessOrderDetails(IEnumerable<ShoppingCart> cartItemsFromDb, Currency currencyToBePaidIn)
+        {
+            List<OrderDetails> orderDetails = new();
+            foreach (var cartItem in cartItemsFromDb)
+            {
+                if (cartItem.Product != null && cartItem.Product.Prices != null)
+                {
+                    Price? productSelectedPrice = cartItem.Product.Prices.FirstOrDefault(price => price.Currency != null && price.Currency == currencyToBePaidIn);
+                    if (productSelectedPrice != null)
+                    {
+                        // Order details
+                        OrderDetails orderDetail = new()
+                        {
+                            ProductId = cartItem.ProductId,
+                            // Purchase details
+                            PurchaseDetails = new()
+                            {
+                                ApplicationUserId = cartItem.ApplicationUserId,
+                                Currency = productSelectedPrice?.Currency,
+                                DiscountAmount = productSelectedPrice?.DiscountAmount,
+                                ProductAmountAtPurchase = productSelectedPrice?.Amount,
+                                Quantity = cartItem.Quantity,
+                                PurchaseDate = DateTime.UtcNow
+                            }
+                        };
+                        orderDetails.Add(orderDetail);
+                    }
+                }
+            }
+            return orderDetails;
         }
     }
 }

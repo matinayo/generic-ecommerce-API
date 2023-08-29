@@ -131,5 +131,22 @@ namespace HalceraAPI.Areas.Customer.Controllers
                 return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
+
+        [HttpPost]
+        [Route("Checkout")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<int?>> Checkout([FromBody] CheckoutRequest checkoutRequest)
+        {
+            try
+            {
+                int orderId = await _shoppingCartOperation.Checkout(checkoutRequest);
+                return Ok(orderId);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+            }
+        }
     }
 }

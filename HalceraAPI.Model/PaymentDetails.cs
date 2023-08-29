@@ -11,9 +11,15 @@ namespace HalceraAPI.Models
         [Key]
         public int Id { get; set; }
         [Required]
-        public double? AmountPaid { get; set; }
+        public decimal AmountPaid { get; set; }
+        [Required]
+        public Currency? Currency { get; set; }
+        /// <summary>
+        /// Total Amount to be paid
+        /// </summary>
+        public decimal? TotalAmount { get; set; }
         public PaymentStatus? PaymentStatus { get; set; }
-        public DateTime? PaymentDate { get; set; }
+        public DateTime? PaymentDate { get; set; } = DateTime.UtcNow;
         public DateTime? PaymentDueDate { get; set; }
         public string? TransactionId { get; set; }
     }
