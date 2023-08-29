@@ -26,6 +26,11 @@ namespace HalceraAPI.DataAccess.Repository
             ShoppingCart = new Repository<ShoppingCart>(_context);
             Roles = new Repository<Roles>(_context);
             RefreshToken = new Repository<RefreshToken>(_context);
+            OrderHeader = new Repository<OrderHeader>(_context);
+            PaymentDetails = new Repository<PaymentDetails>(_context);
+            ShippingDetails = new Repository<ShippingDetails>(_context);
+            OrderDetails = new Repository<OrderDetails>(_context);
+            PurchaseDetails = new Repository<PurchaseDetails>(_context);
         }
 
         public IRepository<ApplicationUser> ApplicationUser { get; private set; }
@@ -40,6 +45,11 @@ namespace HalceraAPI.DataAccess.Repository
         public IRepository<ShoppingCart> ShoppingCart { get; private set; }
         public IRepository<Roles> Roles { get; private set; }
         public IRepository<RefreshToken> RefreshToken { get; private set; }
+        public IRepository<OrderHeader> OrderHeader { get; private set; }
+        public IRepository<PaymentDetails> PaymentDetails { get; private set; }
+        public IRepository<ShippingDetails> ShippingDetails { get; private set; }
+        public IRepository<OrderDetails> OrderDetails { get; private set; }
+        public IRepository<PurchaseDetails> PurchaseDetails { get; private set; }
 
         public void Dispose()
         {

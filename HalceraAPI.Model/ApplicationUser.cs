@@ -33,5 +33,9 @@ namespace HalceraAPI.Models
         public int? RefreshTokenId { get; set; }
         [ForeignKey(nameof(RefreshTokenId))]
         public RefreshToken? RefreshToken { get; set; }
+
+        public int? AddressId { get; set; }
+        [ForeignKey(nameof(AddressId))]
+        public BaseAddress? Address { get; set; }
     }
 }

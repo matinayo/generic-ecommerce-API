@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HalceraAPI.Models
 {
@@ -20,10 +19,6 @@ namespace HalceraAPI.Models
         public string? State { get; set; }
         [StringLength(10, ErrorMessage = "Field has a maximum length of '10'")]
         public string? PostalCode { get; set; }
-
-        [Required]
-        public string? ApplicationUserId { get; set; }
-        [ForeignKey(nameof(ApplicationUserId))]
-        public ApplicationUser? ApplicationUser { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 }
