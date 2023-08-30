@@ -10,9 +10,7 @@ namespace HalceraAPI.Models
     public class OrderHeader
     {
         [Key]
-        public int Id { get; set; }
-        public string? OrderReferenceId { get; set; }
-
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         public OrderStatus? OrderStatus { get; set; }
 
         public DateTime? OrderDate { get; set; } = DateTime.UtcNow;

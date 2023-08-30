@@ -184,7 +184,6 @@ namespace HalceraAPI.Services.Operations
                 // TODO: Verify Payment, Verify Delivery, Estimated delivery date
                 OrderHeader orderHeader = new()
                 {
-                    OrderReferenceId = Guid.NewGuid().ToString(),
                     OrderStatus = OrderStatus.Pending,
                     PaymentDetails = ProcessPaymentOrderDetails(checkoutRequest.PaymentDetailsRequest, cartItemsFromDb),
                     OrderDetails = ProcessOrderDetails(cartItemsFromDb, checkoutRequest.PaymentDetailsRequest.Currency),
@@ -336,6 +335,8 @@ namespace HalceraAPI.Services.Operations
                             }
                         };
                         orderDetails.Add(orderDetail);
+                        // Update product quantity in stock
+                        cartItem.Product.Quantity -= cartItem.Quantity;
                     }
                 }
             }

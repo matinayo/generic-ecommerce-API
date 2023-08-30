@@ -15,6 +15,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
     public class ShoppingCartController : ControllerBase
     {
         private readonly IShoppingCartOperation _shoppingCartOperation;
+
         public ShoppingCartController(IShoppingCartOperation shoppingCartOperation)
         {
             _shoppingCartOperation = shoppingCartOperation;

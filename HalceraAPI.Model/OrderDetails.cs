@@ -17,7 +17,7 @@ namespace HalceraAPI.Models
         public PurchaseDetails? PurchaseDetails { get; set; }
 
         [Required]
-        public int OrderHeaderId { get; set; }
+        public string? OrderHeaderId { get; set; }
         [ForeignKey(nameof(OrderHeaderId))]
         public OrderHeader? OrderHeader { get; set; }
 
