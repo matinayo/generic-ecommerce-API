@@ -11,6 +11,7 @@ namespace HalceraAPI.Models
     {
         [Key]
         public int Id { get; set; }
+        public string? OrderReferenceId { get; set; }
 
         public OrderStatus? OrderStatus { get; set; }
 

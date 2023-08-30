@@ -96,6 +96,9 @@ namespace HalceraAPI.Utilities.Automapper
 
             // Shipping Address
             CreateMap<AddressRequest, BaseAddress>().ReverseMap();
+
+            // Order Header
+            CreateMap<OrderHeader, CheckoutResponse>().ReverseMap();
         }
     }
 }

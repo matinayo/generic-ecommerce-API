@@ -49,6 +49,6 @@ namespace HalceraAPI.Services.Contract
         /// User checkout, Validate payment
         /// </summary>
         /// <returns>Order Id</returns>
-        Task<int> Checkout(CheckoutRequest checkoutRequest);
+        Task<CheckoutResponse> Checkout(CheckoutRequest checkoutRequest);
     }
 }

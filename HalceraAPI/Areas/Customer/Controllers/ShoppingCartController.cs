@@ -134,14 +134,14 @@ namespace HalceraAPI.Areas.Customer.Controllers
 
         [HttpPost]
         [Route("Checkout")]
-        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(CheckoutResponse), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<int?>> Checkout([FromBody] CheckoutRequest checkoutRequest)
+        public async Task<ActionResult<CheckoutResponse?>> Checkout([FromBody] CheckoutRequest checkoutRequest)
         {
             try
             {
-                int orderId = await _shoppingCartOperation.Checkout(checkoutRequest);
-                return Ok(orderId);
+                CheckoutResponse checkoutResponse = await _shoppingCartOperation.Checkout(checkoutRequest);
+                return Ok(checkoutResponse);
             }
             catch (Exception exception)
             {

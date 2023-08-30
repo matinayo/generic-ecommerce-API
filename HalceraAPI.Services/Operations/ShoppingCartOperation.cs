@@ -172,7 +172,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<int> Checkout(CheckoutRequest checkoutRequest)
+        public async Task<CheckoutResponse> Checkout(CheckoutRequest checkoutRequest)
         {
             try
             {
@@ -181,9 +181,10 @@ namespace HalceraAPI.Services.Operations
                 IEnumerable<ShoppingCart> cartItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(shoppingCart => shoppingCart.ApplicationUserId != null && shoppingCart.ApplicationUserId == applicationUser.Id, includeProperties: $"{nameof(ShoppingCart.Product)},Product.Prices");
                 if (cartItemsFromDb == null) throw new Exception("No items found in cart");
 
-                // TODO: Verify Payment
+                // TODO: Verify Payment, Verify Delivery, Estimated delivery date
                 OrderHeader orderHeader = new()
                 {
+                    OrderReferenceId = Guid.NewGuid().ToString(),
                     OrderStatus = OrderStatus.Pending,
                     PaymentDetails = ProcessPaymentOrderDetails(checkoutRequest.PaymentDetailsRequest, cartItemsFromDb),
                     OrderDetails = ProcessOrderDetails(cartItemsFromDb, checkoutRequest.PaymentDetailsRequest.Currency),
@@ -192,9 +193,11 @@ namespace HalceraAPI.Services.Operations
                 };
                 
                 await _unitOfWork.OrderHeader.Add(orderHeader);
+                // Reset User Shopping Cart
+                _unitOfWork.ShoppingCart.RemoveRange(cartItemsFromDb);
                 await _unitOfWork.SaveAsync();
 
-                return orderHeader.Id;
+                return _mapper.Map<CheckoutResponse>(orderHeader);
             }
             catch (Exception)
             {
