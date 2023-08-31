@@ -45,5 +45,10 @@ namespace HalceraAPI.Services.Operations
         {
             throw new NotImplementedException();
         }
+
+        Task IAdminOrderOperation.GetOrderDetails(string orderId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

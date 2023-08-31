@@ -25,9 +25,19 @@ namespace HalceraAPI.Services.Operations
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<CustomerOrderResponse>> GetAllOrders(OrderStatus? orderStatus)
+        public async Task<IEnumerable<CustomerOrderResponse>?> GetAllOrders(OrderStatus? orderStatus)
         {
-            throw new NotImplementedException();
+            try
+            {
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                return await _unitOfWork.OrderHeader.GetAll<CustomerOrderResponse>(order => order.OrderStatus == orderStatus, 
+                    orderBy: order => order.OrderBy(entity => entity.OrderDate),
+                    includeProperties: $"{nameof(OrderHeader.PaymentDetails)},{nameof(OrderHeader.OrderDetails)},OrderDetails.PurchaseDetails,OrderDetails.Product,OrderDetails.Product.Prices");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<CustomerOrderResponse> GetOrderDetails(string orderId)
@@ -39,7 +49,7 @@ namespace HalceraAPI.Services.Operations
                     includeProperties: $"{nameof(OrderHeader.PaymentDetails)},{nameof(OrderHeader.OrderDetails)},OrderDetails.PurchaseDetails,OrderDetails.Product,OrderDetails.Product.Prices");
                 if (orderHeaderFromDb == null)
                 {
-                    throw new Exception("This order cannot be found");
+                    throw new Exception("This order cannot be found.");
                 }
 
                 return _mapper.Map<CustomerOrderResponse>(orderHeaderFromDb);

@@ -17,7 +17,7 @@ namespace HalceraAPI.Services.Contract
         /// Customer is only able to view personal orders
         /// </summary>
         /// <param name="orderStatus">Status of Orders to be retrieved</param>
-        public Task<IEnumerable<CustomerOrderResponse>> GetAllOrders(OrderStatus? orderStatus);
+        public Task<IEnumerable<CustomerOrderResponse>?> GetAllOrders(OrderStatus? orderStatus);
 
         /// <summary>
         /// Cancel order before Order is in Delivery process

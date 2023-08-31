@@ -17,6 +17,7 @@ namespace HalceraAPI.Models
         [Key]
         public int Id { get; set; }
         [Required]
+        [Column(TypeName = "decimal(10,4)")]
         public decimal? Amount { get; set; }
         [Required]
         public Currency? Currency { get; set; }
@@ -24,6 +25,7 @@ namespace HalceraAPI.Models
         /// <summary>
         /// indicate if price is discounted
         /// </summary>
+        [Column(TypeName = "decimal(10,4)")]
         public decimal? DiscountAmount { get; set; }
 
         public int? ProductId { get; set; }

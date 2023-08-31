@@ -7,6 +7,10 @@ using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Models.Requests.Composition;
 using HalceraAPI.Models.Requests.Composition.CompositionData;
 using HalceraAPI.Models.Requests.Media;
+using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse;
+using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse.CustomerOrderDetails;
+using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse.PurchaseDetails;
+using HalceraAPI.Models.Requests.PaymentDetails;
 using HalceraAPI.Models.Requests.Price;
 using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Models.Requests.RefreshToken;
@@ -93,12 +97,19 @@ namespace HalceraAPI.Utilities.Automapper
 
             // Payment Details
             CreateMap<PaymentDetailsRequest, PaymentDetails>().ReverseMap();
+            CreateMap<PaymentDetails, CustomerPaymentResponse>().ReverseMap();
 
             // Shipping Address
             CreateMap<AddressRequest, BaseAddress>().ReverseMap();
 
             // Order Header
             CreateMap<OrderHeader, CheckoutResponse>().ReverseMap();
+            CreateMap<OrderHeader, CustomerOrderResponse>().ReverseMap();
+            CreateMap<OrderDetails, CustomerOrderDetailsResponse>().ReverseMap();
+            CreateMap<Product, ProductSummaryResponse>();
+
+            // Order Purchase
+            CreateMap<PurchaseDetails, PurchaseDetailsSummaryResponse>().ReverseMap();
         }
     }
 }

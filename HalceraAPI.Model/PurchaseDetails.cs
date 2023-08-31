@@ -11,10 +11,12 @@ namespace HalceraAPI.Models
     {
         [Key]
         public int Id { get; set; }
+        [Column(TypeName = "decimal(10,4)")]
         public decimal? ProductAmountAtPurchase { get; set; }
         /// <summary>
         /// indicate if product price was at a discounted rate
         /// </summary>
+        [Column(TypeName = "decimal(10,4)")]
         public decimal? DiscountAmount { get; set; }
         [Required]
         public Currency? Currency { get; set; }
