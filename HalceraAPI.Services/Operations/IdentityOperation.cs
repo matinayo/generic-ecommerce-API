@@ -160,7 +160,7 @@ namespace HalceraAPI.Services.Operations
         }
 
         /// <summary>
-        /// Get user email
+        /// Get user email including roles
         /// </summary>
         /// <param name="email">Email</param>
         /// <returns>ApplicaitonUser associated with email</returns>
@@ -275,6 +275,14 @@ namespace HalceraAPI.Services.Operations
                 new Claim(ClaimTypes.Email, applicationUser.Email)
             };
 
+            if(applicationUser.Roles != null && applicationUser.Roles.Any())
+            {
+                foreach(var role in applicationUser.Roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role.Title));
+                }
+            }
+
             // key to create and verify JWT
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Token));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -311,7 +319,7 @@ namespace HalceraAPI.Services.Operations
             if (applicationUser.Roles == null)
             {
                 // assign new role
-                Roles? roleId = await _unitOfWork.Roles.GetFirstOrDefault(u => u.Name.Equals(RoleDefinition.Customer));
+                Roles? roleId = await _unitOfWork.Roles.GetFirstOrDefault(u => u.Title.Equals(RoleDefinition.Customer));
                 if (roleId != null)
                 {
                     applicationUser.Roles = new List<Roles> { roleId };

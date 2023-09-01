@@ -3,6 +3,7 @@ using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Services.Contract;
+using System.Linq.Expressions;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -68,33 +69,20 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                IEnumerable<CategoryResponse> response;
-                IEnumerable<Category>? listOfCategories;
-
+                Expression<Func<Category, bool>>? filterExpression = null; 
                 if (active.HasValue && featured != null)
                 {
-                    listOfCategories = await _unitOfWork.Category.GetAll(
-                        category => category.Active == active && category.Featured == featured, includeProperties: nameof(Category.MediaCollection));
+                    filterExpression = category => category.Active == active && category.Featured == featured;
                 }
                 else if (active != null)
                 {
-                    listOfCategories = await _unitOfWork.Category.GetAll(category => category.Active == active, includeProperties: nameof(Category.MediaCollection));
+                    filterExpression = category => category.Active == active;
                 }
                 else if (featured != null)
                 {
-                    listOfCategories = await _unitOfWork.Category.GetAll(category => category.Featured == featured, includeProperties: nameof(Category.MediaCollection));
+                    filterExpression = category => category.Featured == featured;
                 }
-                else
-                {
-                    listOfCategories = await _unitOfWork.Category.GetAll(includeProperties: nameof(Category.MediaCollection));
-                }
-
-                if (listOfCategories is not null && listOfCategories.Any())
-                    response = _mapper.Map<IEnumerable<CategoryResponse>>(listOfCategories);
-                else
-                    response = Enumerable.Empty<CategoryResponse>();
-
-                return response;
+                return await _unitOfWork.Category.GetAll<CategoryResponse>(filter: filterExpression, includeProperties: nameof(Category.MediaCollection));
             }
             catch (Exception)
             {

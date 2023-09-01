@@ -10,7 +10,12 @@ namespace HalceraAPI.DataAccess.Contract
       where T : class
     {
         Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>,
-            IOrderedQueryable<T>>? orderBy = null, string? includeProperties = null);
+            IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null);
+
+        /// <summary>
+        /// Select with defined Entity of different types: T and TResult
+        /// </summary>
+        Task<IEnumerable<TResult>> GetAll<TResult>(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null);
 
         Task<T?> GetFirstOrDefault(
             Expression<Func<T, bool>>? filter = null,

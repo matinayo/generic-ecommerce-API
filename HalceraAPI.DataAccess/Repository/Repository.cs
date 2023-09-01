@@ -1,4 +1,5 @@
-﻿using HalceraAPI.DataAccess.Contract;
+﻿using AutoMapper;
+using HalceraAPI.DataAccess.Contract;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -13,11 +14,13 @@ namespace HalceraAPI.DataAccess.Repository
         where T : class
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
         internal DbSet<T> dbSet;
 
-        public Repository(ApplicationDbContext context)
+        public Repository(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
             dbSet = _context.Set<T>();
         }
 
@@ -31,7 +34,19 @@ namespace HalceraAPI.DataAccess.Repository
             await dbSet.AddRangeAsync(entities);
         }
 
-        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, string? includeProperties = null)
+        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null)
+        {
+            IQueryable<T> query = GetAllQuery(filter, orderBy, skip, take, includeProperties);
+            return await query.ToListAsync();
+        }
+
+        public async Task<IEnumerable<TResult>> GetAll<TResult>(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null)
+        {
+            IQueryable<T> query = GetAllQuery(filter, orderBy, skip, take, includeProperties);
+            return await _mapper.ProjectTo<TResult>(query).ToListAsync();
+        }
+
+        private IQueryable<T> GetAllQuery(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
 
@@ -39,7 +54,18 @@ namespace HalceraAPI.DataAccess.Repository
             {
                 query = query.Where(filter);
             }
-
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+            if (skip != null)
+            {
+                query = query.Skip(skip.Value);
+            }
+            if (take != null)
+            {
+                query = query.Take(take.Value);
+            }
             if (includeProperties != null)
             {
                 foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
@@ -47,13 +73,7 @@ namespace HalceraAPI.DataAccess.Repository
                     query = query.Include(includeProp);
                 }
             }
-
-            if (orderBy != null)
-            {
-                return await orderBy(query).ToListAsync();
-            }
-
-            return await query.ToListAsync();
+            return query;
         }
 
         public async Task<T?> GetFirstOrDefault(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)

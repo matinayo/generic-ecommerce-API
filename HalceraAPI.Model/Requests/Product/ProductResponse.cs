@@ -8,6 +8,7 @@ namespace HalceraAPI.Models.Requests.Product
     {
         public int Id { get; set; }
         public string? Title { get; set; }
+        public int? Quantity { get; set; }
         /// <summary>
         /// if product is active
         /// </summary>

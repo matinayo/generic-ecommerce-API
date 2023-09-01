@@ -1,6 +1,7 @@
-﻿using HalceraAPI.Models;
+﻿using HalceraAPI.Common.Utilities;
 using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Services.Contract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HalceraAPI.Areas.Admin.Controllers
@@ -54,6 +55,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
         }
 
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpPost]
         [Route("CreateCategory")]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
@@ -71,6 +73,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
         }
 
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpPut]
         [Route("UpdateCategory/{categoryId}")]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
@@ -89,6 +92,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
         }
 
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpDelete]
         [Route("DeleteCategory/{categoryId}")]
         [ProducesResponseType(typeof(bool), 200)]

@@ -1,10 +1,16 @@
 ﻿using AutoMapper;
+using Elfie.Serialization;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.ApplicationUser;
+using HalceraAPI.Models.Requests.BaseAddress;
 using HalceraAPI.Models.Requests.Category;
 using HalceraAPI.Models.Requests.Composition;
 using HalceraAPI.Models.Requests.Composition.CompositionData;
 using HalceraAPI.Models.Requests.Media;
+using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse;
+using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse.CustomerOrderDetails;
+using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse.PurchaseDetails;
+using HalceraAPI.Models.Requests.PaymentDetails;
 using HalceraAPI.Models.Requests.Price;
 using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Models.Requests.RefreshToken;
@@ -27,7 +33,9 @@ namespace HalceraAPI.Utilities.Automapper
             CreateMap<Category, CategoryLabelResponse>().ReverseMap();
 
             // Product Request
-            CreateMap<CreateProductRequest, Product>().ReverseMap();
+            CreateMap<CreateProductRequest, Product>()
+                .ForMember(destination => destination.Categories, opt => opt.Ignore())
+                .ReverseMap();
             CreateMap<Product, ProductResponse>().ReverseMap();
             CreateMap<Product, ProductDetailsResponse>().ReverseMap();
             CreateMap<UpdateProductRequest, Product>()
@@ -86,6 +94,22 @@ namespace HalceraAPI.Utilities.Automapper
             // Roles
             CreateMap<RoleRequest, Roles>().ReverseMap();
             CreateMap<Roles, RoleResponse>().ReverseMap();
+
+            // Payment Details
+            CreateMap<PaymentDetailsRequest, PaymentDetails>().ReverseMap();
+            CreateMap<PaymentDetails, CustomerPaymentResponse>().ReverseMap();
+
+            // Shipping Address
+            CreateMap<AddressRequest, BaseAddress>().ReverseMap();
+
+            // Order Header
+            CreateMap<OrderHeader, CheckoutResponse>().ReverseMap();
+            CreateMap<OrderHeader, CustomerOrderResponse>().ReverseMap();
+            CreateMap<OrderDetails, CustomerOrderDetailsResponse>().ReverseMap();
+            CreateMap<Product, ProductSummaryResponse>();
+
+            // Order Purchase
+            CreateMap<PurchaseDetails, PurchaseDetailsSummaryResponse>().ReverseMap();
         }
     }
 }

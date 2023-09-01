@@ -1,14 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HalceraAPI.Models
+namespace HalceraAPI.Models.Requests.BaseAddress
 {
-    /// <summary>
-    /// User Base Addresses
-    /// </summary>
-    public class BaseAddress
+    public class AddressRequest
     {
-        [Key]
-        public int Id { get; set; }
         [Required]
         [StringLength(80, ErrorMessage = "Field has a maximum length of '80'")]
         public string? StreetAddress { get; set; }

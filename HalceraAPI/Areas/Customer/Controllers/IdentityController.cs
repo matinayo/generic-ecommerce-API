@@ -70,6 +70,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet]
         [Route("GetRoles")]
         [ProducesResponseType(typeof(IEnumerable<RoleResponse>), 200)]

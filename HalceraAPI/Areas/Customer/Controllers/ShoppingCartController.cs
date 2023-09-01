@@ -1,5 +1,6 @@
 ﻿using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HalceraAPI.Areas.Customer.Controllers
@@ -7,12 +8,14 @@ namespace HalceraAPI.Areas.Customer.Controllers
     /// <summary>
     /// Shopping controller defining customers endpoint
     /// </summary>
+    [Authorize]
     [Area("Customer")]
     [Route("api/[area]/[controller]")]
     [ApiController]
     public class ShoppingCartController : ControllerBase
     {
         private readonly IShoppingCartOperation _shoppingCartOperation;
+
         public ShoppingCartController(IShoppingCartOperation shoppingCartOperation)
         {
             _shoppingCartOperation = shoppingCartOperation;
@@ -61,7 +64,6 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
         }
 
-
         [HttpGet]
         [Route("GetItem/{shoppingCartId}")]
         [ProducesResponseType(typeof(ShoppingCartDetailsResponse), 200)]
@@ -79,7 +81,6 @@ namespace HalceraAPI.Areas.Customer.Controllers
                 return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
-
 
         [HttpPost]
         [Route("IncreaseItem/{shoppingCartId}")]
@@ -125,6 +126,23 @@ namespace HalceraAPI.Areas.Customer.Controllers
             {
                 bool result = await _shoppingCartOperation.DeleteItemInCart(shoppingCartId);
                 return Ok(result);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+            }
+        }
+
+        [HttpPost]
+        [Route("Checkout")]
+        [ProducesResponseType(typeof(CheckoutResponse), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<CheckoutResponse?>> Checkout([FromBody] CheckoutRequest checkoutRequest)
+        {
+            try
+            {
+                CheckoutResponse checkoutResponse = await _shoppingCartOperation.Checkout(checkoutRequest);
+                return Ok(checkoutResponse);
             }
             catch (Exception exception)
             {

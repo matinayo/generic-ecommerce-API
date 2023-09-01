@@ -16,6 +16,11 @@ namespace HalceraAPI.DataAccess.Contract
         IRepository<ShoppingCart> ShoppingCart { get; }
         IRepository<Roles> Roles { get; }
         IRepository<RefreshToken> RefreshToken { get; }
+        public IRepository<OrderHeader> OrderHeader { get; }
+        public IRepository<PaymentDetails> PaymentDetails { get; }
+        public IRepository<ShippingDetails> ShippingDetails { get; }
+        public IRepository<OrderDetails> OrderDetails { get; }
+        public IRepository<PurchaseDetails> PurchaseDetails { get; }
         Task SaveAsync();
     }
 }
