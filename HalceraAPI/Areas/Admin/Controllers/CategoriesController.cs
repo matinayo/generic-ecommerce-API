@@ -12,23 +12,24 @@ namespace HalceraAPI.Areas.Admin.Controllers
     [Area("Admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]
-    public class CategoryController : ControllerBase
+    public class CategoriesController : ControllerBase
     {
         private readonly ICategoryOperation _categoryOperation;
-        public CategoryController(ICategoryOperation categoryOperation)
+        public CategoriesController(ICategoryOperation categoryOperation)
         {
             _categoryOperation = categoryOperation;
         }
 
         [HttpGet]
-        [Route("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<CategoryResponse>), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<CategoryResponse>?>> GetAll(bool? active, bool? featured = null)
+        public async Task<ActionResult<IEnumerable<CategoryResponse>?>> GetCategories(bool? active, bool? featured = null)
         {
             try
             {
-                IEnumerable<CategoryResponse>? listOfCategories = await _categoryOperation.GetAllCategories(active: active, featured: featured);
+                IEnumerable<CategoryResponse>? listOfCategories = 
+                    await _categoryOperation.GetAllCategories(active: active, featured: featured);
+
                 return Ok(listOfCategories);
             }
             catch (Exception exception)
@@ -37,8 +38,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("GetCategory/{categoryId}")]
+        [HttpGet("{categoryId}")]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
@@ -47,6 +47,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             try
             {
                 CategoryResponse? categoryDetails = await _categoryOperation.GetCategory(categoryId);
+
                 return Ok(categoryDetails);
             }
             catch (Exception exception)
@@ -57,7 +58,6 @@ namespace HalceraAPI.Areas.Admin.Controllers
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpPost]
-        [Route("CreateCategory")]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<CategoryResponse?>> CreateCategory([FromBody] CreateCategoryRequest category)
@@ -74,8 +74,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpPut]
-        [Route("UpdateCategory/{categoryId}")]
+        [HttpPut("{categoryId}")]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
@@ -93,8 +92,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpDelete]
-        [Route("DeleteCategory/{categoryId}")]
+        [HttpDelete("{categoryId}")]
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]

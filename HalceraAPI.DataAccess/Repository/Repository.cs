@@ -46,6 +46,33 @@ namespace HalceraAPI.DataAccess.Repository
             return await _mapper.ProjectTo<TResult>(query).ToListAsync();
         }
 
+        public async Task<T?> GetFirstOrDefault(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
+        {
+            IQueryable<T> query = GetFirstOrDefaultQuery(filter, includeProperties);
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<TResult?> GetFirstOrDefault<TResult>(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
+        {
+            IQueryable<T> query = GetFirstOrDefaultQuery(filter, includeProperties);
+            return await _mapper.ProjectTo<TResult>(query).FirstOrDefaultAsync();
+        }
+
+        public void Remove(T entity)
+        {
+            dbSet.Remove(entity);
+        }
+
+        public void RemoveRange(IEnumerable<T> entities)
+        {
+            dbSet.RemoveRange(entities);
+        }
+
+        public void Update(T entity)
+        {
+            dbSet.Update(entity);
+        }
+
         private IQueryable<T> GetAllQuery(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
@@ -76,7 +103,7 @@ namespace HalceraAPI.DataAccess.Repository
             return query;
         }
 
-        public async Task<T?> GetFirstOrDefault(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
+        private IQueryable<T> GetFirstOrDefaultQuery(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
 
@@ -84,7 +111,6 @@ namespace HalceraAPI.DataAccess.Repository
             {
                 query = query.Where(filter);
             }
-
             if (includeProperties != null)
             {
                 foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
@@ -92,23 +118,7 @@ namespace HalceraAPI.DataAccess.Repository
                     query = query.Include(includeProp);
                 }
             }
-
-            return await query.FirstOrDefaultAsync();
-        }
-
-        public void Remove(T entity)
-        {
-            dbSet.Remove(entity);
-        }
-
-        public void RemoveRange(IEnumerable<T> entities)
-        {
-            dbSet.RemoveRange(entities);
-        }
-
-        public void Update(T entity)
-        {
-            dbSet.Update(entity);
+            return query;
         }
     }
 }

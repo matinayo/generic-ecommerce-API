@@ -11,7 +11,7 @@ namespace HalceraAPI.Models
     {
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
-        public OrderStatus? OrderStatus { get; set; }
+        public OrderStatus OrderStatus { get; set; }
 
         public DateTime? OrderDate { get; set; } = DateTime.UtcNow;
 

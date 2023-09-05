@@ -178,7 +178,10 @@ namespace HalceraAPI.Services.Operations
             {
                 ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
                 
-                IEnumerable<ShoppingCart> cartItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(shoppingCart => shoppingCart.ApplicationUserId != null && shoppingCart.ApplicationUserId == applicationUser.Id, includeProperties: $"{nameof(ShoppingCart.Product)},Product.Prices");
+                IEnumerable<ShoppingCart> cartItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
+                    filter: shoppingCart => shoppingCart.ApplicationUserId != null && shoppingCart.ApplicationUserId == applicationUser.Id, 
+                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Prices");
+
                 if (cartItemsFromDb == null) throw new Exception("No items found in cart");
 
                 // TODO: Verify Payment, Verify Delivery, Estimated delivery date

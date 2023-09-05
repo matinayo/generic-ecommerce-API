@@ -7,47 +7,47 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HalceraAPI.Models.Requests.Product
 {
-    public class CreateProductRequest
+    public record CreateProductRequest
     {
         [Required]
         [StringLength(20, ErrorMessage = "Field has a minimum length of '2' and maximum length of '20'", MinimumLength = 2)]
-        public string? Title { get; set; }
+        public string? Title { get; init; }
 
         [Required]
         [StringLength(100, ErrorMessage = "Field has a minimum length of 10 and maximum length of '100'", MinimumLength = 10)]
-        public string? Description { get; set; }
+        public string? Description { get; init; }
 
-        public int? Quantity { get; set; }
+        public int? Quantity { get; init; }
 
         /// <summary>
         /// Indicates if a product is active
         /// </summary>
-        public bool Active { get; set; } = true;
+        public bool Active { get; init; } = true;
 
         /// <summary>
         /// Featured Product
         /// </summary>
-        public bool? Featured { get; set; }
+        public bool? Featured { get; init; }
 
         /// <summary>
         /// Define Price for Product
         /// </summary>
         [Required]
-        public ICollection<CreatePriceRequest>? Prices { get; set; }
+        public ICollection<CreatePriceRequest>? Prices { get; init; }
         
         /// <summary>
         /// Define Product Medias
         /// </summary>
-        public ICollection<CreateMediaRequest>? MediaCollection { get; set; }
+        public ICollection<CreateMediaRequest>? MediaCollection { get; init; }
 
         /// <summary>
         /// Define Product Composition
         /// </summary>
-        public ICollection<CreateCompositionRequest>? ProductCompositions { get; set; }
+        public ICollection<CreateCompositionRequest>? ProductCompositions { get; init; }
 
         /// <summary>
         /// Product Categories
         /// </summary>
-        public ICollection<ProductCategoryRequest>? Categories { get; set; }
+        public ICollection<ProductCategoryRequest>? Categories { get; init; }
     }
 }

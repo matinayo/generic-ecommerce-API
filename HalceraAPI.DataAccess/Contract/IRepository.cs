@@ -21,6 +21,13 @@ namespace HalceraAPI.DataAccess.Contract
             Expression<Func<T, bool>>? filter = null,
             string? includeProperties = null);
 
+        /// <summary>
+        /// Select with defined Entity 
+        /// </summary>
+        Task<TResult?> GetFirstOrDefault<TResult>(
+            Expression<Func<T, bool>>? filter = null,
+            string? includeProperties = null);
+
         Task Add(T entity);
 
         Task AddRange(IEnumerable<T> entities);

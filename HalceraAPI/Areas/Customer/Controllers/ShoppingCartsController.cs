@@ -12,11 +12,11 @@ namespace HalceraAPI.Areas.Customer.Controllers
     [Area("Customer")]
     [Route("api/[area]/[controller]")]
     [ApiController]
-    public class ShoppingCartController : ControllerBase
+    public class ShoppingCartsController : ControllerBase
     {
         private readonly IShoppingCartOperation _shoppingCartOperation;
 
-        public ShoppingCartController(IShoppingCartOperation shoppingCartOperation)
+        public ShoppingCartsController(IShoppingCartOperation shoppingCartOperation)
         {
             _shoppingCartOperation = shoppingCartOperation;
         }
