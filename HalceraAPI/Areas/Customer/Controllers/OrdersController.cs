@@ -54,14 +54,14 @@ namespace HalceraAPI.Areas.Customer.Controllers
         }
 
         [HttpGet("CancelOrder/{orderId}")]
-        [ProducesResponseType(typeof(OrderStatusUpdateResponse), 200)]
+        [ProducesResponseType(typeof(UpdateOrderStatusResponse), 200)]
         [ProducesResponseType(400)]
 
-        public async Task<ActionResult<OrderStatusUpdateResponse>> CancelOrder(string orderId)
+        public async Task<ActionResult<UpdateOrderStatusResponse>> CancelOrder(string orderId)
         {
             try
             {
-                OrderStatusUpdateResponse orderStatusUpdateResponse = await _customerOrderOperation.CancelOrderAsync(orderId);
+                UpdateOrderStatusResponse orderStatusUpdateResponse = await _customerOrderOperation.CancelOrderAsync(orderId);
 
                 return Ok(orderStatusUpdateResponse);
             }

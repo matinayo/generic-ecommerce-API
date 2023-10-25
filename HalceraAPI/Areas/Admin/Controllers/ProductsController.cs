@@ -20,26 +20,27 @@ namespace HalceraAPI.Areas.Admin.Controllers
             _productOperation = productOperation;
         }
 
-        // [HttpGet("category/{categoryId}")]
         [HttpGet]
-        [Route("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<ProductResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<ProductResponse>>> GetAll(bool? active, bool? featured, int? categoryId)
+        public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProducts(bool? active, bool? featured, int? categoryId)
         {
             try
             {
-                IEnumerable<ProductResponse>? listOfProducts = await _productOperation.GetAllProducts(active: active, featured: featured, categoryId: categoryId);
+                IEnumerable<ProductResponse>? listOfProducts = await _productOperation.GetAllProducts(active, featured, categoryId);
+                
                 return Ok(listOfProducts);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
+                return BadRequest(
+                    Problem(
+                        statusCode: StatusCodes.Status400BadRequest, 
+                        detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
-        [HttpGet]
-        [Route("GetProduct/{productId}")]
+        [HttpGet("{productId}")]
         [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<IEnumerable<ProductDetailsResponse>?>> GetProductById(int productId)
@@ -47,6 +48,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             try
             {
                 ProductDetailsResponse? productDetails = await _productOperation.GetProductById(productId);
+
                 return Ok(productDetails);
             }
             catch (Exception exception)
@@ -57,7 +59,6 @@ namespace HalceraAPI.Areas.Admin.Controllers
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpPost]
-        [Route("CreateProduct")]
         [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<ProductDetailsResponse?>> CreateProduct([FromBody] CreateProductRequest productRequest)
@@ -65,6 +66,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             try
             {
                 ProductDetailsResponse productDetails = await _productOperation.CreateProduct(productRequest);
+
                 return Ok(productDetails);
             }
             catch (Exception exception)
@@ -74,8 +76,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpPut]
-        [Route("UpdateProduct/{productId}")]
+        [HttpPut("{productId}")]
         [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
@@ -84,6 +85,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             try
             {
                 ProductDetailsResponse productDetails = await _productOperation.UpdateProduct(productId, productRequest);
+
                 return Ok(productDetails);
             }
             catch (Exception exception)
@@ -93,8 +95,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpDelete]
-        [Route("DeleteProduct/{productId}")]
+        [HttpDelete("{productId}")]
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
@@ -103,6 +104,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             try
             {
                 bool result = await _productOperation.DeleteProduct(productId);
+
                 return Ok(result);
             }
             catch (Exception exception)

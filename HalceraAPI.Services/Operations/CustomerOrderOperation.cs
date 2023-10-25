@@ -22,7 +22,7 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
-        public async Task<OrderStatusUpdateResponse> CancelOrderAsync(string orderId)
+        public async Task<UpdateOrderStatusResponse> CancelOrderAsync(string orderId)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace HalceraAPI.Services.Operations
                 orderHeaderFromDb.OrderStatus = OrderStatus.Cancelled;
                 await _unitOfWork.SaveAsync();
 
-                return new OrderStatusUpdateResponse() {
+                return new UpdateOrderStatusResponse() {
                     OrderId = orderHeaderFromDb.Id,
                     OrderStatus = orderHeaderFromDb.OrderStatus};
             }
@@ -68,7 +68,7 @@ namespace HalceraAPI.Services.Operations
                     filter: filterExpression,
                     orderBy: order => order.OrderBy(entity => entity.OrderDate),
                     includeProperties:
-                        $"{nameof(OrderHeader.PaymentDetails)},{nameof(OrderHeader.OrderDetails)},OrderDetails.PurchaseDetails,OrderDetails.Product,OrderDetails.Product.Prices");
+                        $"{nameof(OrderHeader.PaymentDetails)},{nameof(OrderHeader.OrderDetails)},OrderDetails.PurchaseDetails,OrderDetails.Product,OrderDetails.Product.Prices,OrderHeader.ShippingDetails,OrderHeader.ShippingDetails.ShippingAddress");
             }
             catch (Exception)
             {

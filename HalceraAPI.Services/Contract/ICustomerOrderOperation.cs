@@ -1,6 +1,7 @@
 ﻿using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.OrderHeader;
 using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse;
+using HalceraAPI.Models.Requests.Shipping;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -24,13 +25,13 @@ namespace HalceraAPI.Services.Contract
         /// Cancel order before Order is in Delivery process
         /// </summary>
         /// <param name="orderId">Id of Order</param>
-        public Task<OrderStatusUpdateResponse> CancelOrderAsync(string orderId);
+        public Task<UpdateOrderStatusResponse> CancelOrderAsync(string orderId);
 
         /// <summary>
         /// Update Order details
         /// Customer Update / Admin Update
         /// </summary>
         /// <param name="orderId">Order Id</param>
-        public void UpdateOrderAsync(string orderId);
+        //public Task<ShippingDetailsResponse> UpdateOrderShippingAddressAsync(string shippingId, UpdateShippingAddressRequest shippingAddressRequest);
     }
 }

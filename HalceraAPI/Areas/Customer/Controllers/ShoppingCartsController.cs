@@ -26,8 +26,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
         /// </summary>
         /// <param name="productId">Id of product</param>
         /// <returns>id of item in cart</returns>
-        [HttpPost]
-        [Route("AddProductToCart/{productId}")]
+        [HttpPost("{productId}")]
         [ProducesResponseType(typeof(ShoppingCartResponse), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<ShoppingCartResponse?>> AddProductToCart(int productId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
@@ -35,6 +34,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             try
             {
                 var response = await _shoppingCartOperation.AddProductToCart(productId, shoppingCartRequest);
+
                 return Ok(response);
             }
             catch (Exception exception)
@@ -48,7 +48,6 @@ namespace HalceraAPI.Areas.Customer.Controllers
         /// </summary>
         /// <returns>List of shopping cart items</returns>
         [HttpGet]
-        [Route("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<ShoppingCartDetailsResponse>), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<IEnumerable<ShoppingCartDetailsResponse>?>> GetAllItemsInCart()
@@ -56,6 +55,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             try
             {
                 IEnumerable<ShoppingCartDetailsResponse>? listOfShoppingCartItems = await _shoppingCartOperation.GetAllItemsInCart();
+
                 return Ok(listOfShoppingCartItems);
             }
             catch (Exception exception)
@@ -64,8 +64,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("GetItem/{shoppingCartId}")]
+        [HttpGet("{shoppingCartId}")]
         [ProducesResponseType(typeof(ShoppingCartDetailsResponse), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
@@ -74,6 +73,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             try
             {
                 ShoppingCartDetailsResponse? itemFromDb = await _shoppingCartOperation.GetItemInCart(shoppingCartId);
+
                 return Ok(itemFromDb);
             }
             catch (Exception exception)
@@ -82,8 +82,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("IncreaseItem/{shoppingCartId}")]
+        [HttpPost("IncreaseItem/{shoppingCartId}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<int?>> IncreaseItemInCart(int shoppingCartId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
@@ -91,6 +90,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             try
             {
                 int totalNumberOfItemsInCart = await _shoppingCartOperation.IncreaseItemInCart(shoppingCartId, shoppingCartRequest);
+
                 return Ok(totalNumberOfItemsInCart);
             }
             catch (Exception exception)
@@ -99,8 +99,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("DecreaseItem/{shoppingCartId}")]
+        [HttpPost("DecreaseItem/{shoppingCartId}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<int?>> DecreaseItemInCart(int shoppingCartId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
@@ -108,6 +107,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             try
             {
                 int totalNumberOfItemsInCart = await _shoppingCartOperation.DecreaseItemInCart(shoppingCartId, shoppingCartRequest);
+
                 return Ok(totalNumberOfItemsInCart);
             }
             catch (Exception exception)
@@ -116,8 +116,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
         }
 
-        [HttpDelete]
-        [Route("DeleteItem/{shoppingCartId}")]
+        [HttpDelete("{shoppingCartId}")]
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<int?>> Delete(int shoppingCartId)
@@ -125,6 +124,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             try
             {
                 bool result = await _shoppingCartOperation.DeleteItemInCart(shoppingCartId);
+
                 return Ok(result);
             }
             catch (Exception exception)
@@ -133,8 +133,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("Checkout")]
+        [HttpPost("Checkout")]
         [ProducesResponseType(typeof(CheckoutResponse), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<CheckoutResponse?>> Checkout([FromBody] CheckoutRequest checkoutRequest)
@@ -142,6 +141,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             try
             {
                 CheckoutResponse checkoutResponse = await _shoppingCartOperation.Checkout(checkoutRequest);
+
                 return Ok(checkoutResponse);
             }
             catch (Exception exception)
