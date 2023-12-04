@@ -15,6 +15,7 @@ using HalceraAPI.Models.Requests.Price;
 using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Models.Requests.RefreshToken;
 using HalceraAPI.Models.Requests.Role;
+using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Models.Requests.ShoppingCart;
 
 namespace HalceraAPI.Utilities.Automapper
@@ -101,6 +102,10 @@ namespace HalceraAPI.Utilities.Automapper
 
             // Shipping Address
             CreateMap<AddressRequest, BaseAddress>().ReverseMap();
+            CreateMap<ShippingDetails, ShippingDetailsResponse>().ReverseMap();
+            CreateMap<BaseAddress, ShippingAddressResponse>().ReverseMap();
+            CreateMap<UpdateShippingAddressRequest, BaseAddress>()
+                .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
 
             // Order Header
             CreateMap<OrderHeader, CheckoutResponse>().ReverseMap();

@@ -4,6 +4,7 @@ using HalceraAPI.Models;
 using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.OrderHeader;
 using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse;
+using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
 using System.Linq.Expressions;
 
@@ -33,19 +34,21 @@ namespace HalceraAPI.Services.Operations
 
                 if (orderHeaderFromDb == null)
                 {
-                    throw new Exception("Uh-oh! It appears that this order has pulled off a magic trick and disappeared into thin air!");
+                    throw new Exception("Order cannot be found");
                 }
                 if (orderHeaderFromDb.OrderStatus != OrderStatus.Pending)
                 {
-                    throw new Exception($"This order is like a determined superhero – once it's {orderHeaderFromDb.OrderStatus}, there's no turning back!");
+                    throw new Exception($"Only {OrderStatus.Pending} orders are eligble for cancellation");
                 }
 
                 orderHeaderFromDb.OrderStatus = OrderStatus.Cancelled;
                 await _unitOfWork.SaveAsync();
 
-                return new UpdateOrderStatusResponse() {
+                return new UpdateOrderStatusResponse()
+                {
                     OrderId = orderHeaderFromDb.Id,
-                    OrderStatus = orderHeaderFromDb.OrderStatus};
+                    OrderStatus = orderHeaderFromDb.OrderStatus
+                };
             }
             catch (Exception)
             {
@@ -66,9 +69,7 @@ namespace HalceraAPI.Services.Operations
 
                 return await _unitOfWork.OrderHeader.GetAll<CustomerOrderResponse>(
                     filter: filterExpression,
-                    orderBy: order => order.OrderBy(entity => entity.OrderDate),
-                    includeProperties:
-                        $"{nameof(OrderHeader.PaymentDetails)},{nameof(OrderHeader.OrderDetails)},OrderDetails.PurchaseDetails,OrderDetails.Product,OrderDetails.Product.Prices,OrderHeader.ShippingDetails,OrderHeader.ShippingDetails.ShippingAddress");
+                    orderBy: order => order.OrderBy(entity => entity.OrderDate));
             }
             catch (Exception)
             {
@@ -81,17 +82,13 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
-                CustomerOrderResponse? orderHeaderFromDb = await _unitOfWork.OrderHeader.GetFirstOrDefault<CustomerOrderResponse>(
-                    filter: order => applicationUser.Id == order.ApplicationUserId && order.Id.ToLower().Equals(orderId.ToLower()),
-                    includeProperties:
-                        $"{nameof(OrderHeader.PaymentDetails)},{nameof(OrderHeader.OrderDetails)},OrderDetails.PurchaseDetails,OrderDetails.Product,OrderDetails.Product.Prices");
+                CustomerOrderResponse? orderHeaderFromDb = 
+                    await _unitOfWork.OrderHeader.GetFirstOrDefault<CustomerOrderResponse>(
+                        filter: order => 
+                        applicationUser.Id == order.ApplicationUserId
+                        && order.Id.ToLower().Equals(orderId.ToLower()));
 
-                if (orderHeaderFromDb == null)
-                {
-                    throw new Exception("Uh-oh! It appears that this order has pulled off a magic trick and disappeared into thin air!");
-                }
-
-                return orderHeaderFromDb;
+                return orderHeaderFromDb == null ? throw new Exception("Order cannot be found") : orderHeaderFromDb;
             }
             catch (Exception)
             {
@@ -102,6 +99,29 @@ namespace HalceraAPI.Services.Operations
         public void UpdateOrderAsync(string orderId)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<ShippingDetailsResponse> UpdateOrderShippingAddressAsync(string orderId, UpdateShippingAddressRequest shippingAddressRequest)
+        {
+            try
+            {
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                OrderHeader orderHeader = await _unitOfWork.OrderHeader.GetFirstOrDefault(
+                    filter: orderHeader => applicationUser.Id == orderHeader.ApplicationUserId &&
+                            orderHeader.Id.ToLower().Equals(orderId.ToLower()),
+                    includeProperties: "ShippingDetails.ShippingAddress") ?? throw new Exception("Order cannot be found");
+
+                orderHeader.ShippingDetails ??= new();
+
+                _mapper.Map(shippingAddressRequest, orderHeader.ShippingDetails.ShippingAddress);
+                await _unitOfWork.SaveAsync();
+
+                return _mapper.Map<ShippingDetailsResponse>(orderHeader.ShippingDetails);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

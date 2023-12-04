@@ -33,5 +33,10 @@ namespace HalceraAPI.Models
         [ForeignKey(nameof(ApplicationUserId))]
         public ApplicationUser? ApplicationUser { get; set; }
 
+        public bool OrderIdEquals(string orderId)
+        {
+            return orderId.ToLower().Equals(Id.ToLower());
+        }
     }
+
 }

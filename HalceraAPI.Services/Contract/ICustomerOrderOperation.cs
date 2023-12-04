@@ -32,6 +32,6 @@ namespace HalceraAPI.Services.Contract
         /// Customer Update / Admin Update
         /// </summary>
         /// <param name="orderId">Order Id</param>
-        //public Task<ShippingDetailsResponse> UpdateOrderShippingAddressAsync(string shippingId, UpdateShippingAddressRequest shippingAddressRequest);
+        public Task<ShippingDetailsResponse> UpdateOrderShippingAddressAsync(string orderId, UpdateShippingAddressRequest shippingAddressRequest);
     }
 }

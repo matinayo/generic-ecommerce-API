@@ -1,6 +1,7 @@
 ﻿using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.OrderHeader;
 using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse;
+using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -56,7 +57,6 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [HttpGet("CancelOrder/{orderId}")]
         [ProducesResponseType(typeof(UpdateOrderStatusResponse), 200)]
         [ProducesResponseType(400)]
-
         public async Task<ActionResult<UpdateOrderStatusResponse>> CancelOrder(string orderId)
         {
             try
@@ -64,6 +64,23 @@ namespace HalceraAPI.Areas.Customer.Controllers
                 UpdateOrderStatusResponse orderStatusUpdateResponse = await _customerOrderOperation.CancelOrderAsync(orderId);
 
                 return Ok(orderStatusUpdateResponse);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+            }
+        }
+
+        [HttpPut]
+        [ProducesResponseType(typeof(ShippingDetailsResponse), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<ShippingDetailsResponse>> UpdateShippingAddress(string orderId, UpdateShippingAddressRequest shippingAddressRequest)
+        {
+            try
+            {
+                ShippingDetailsResponse shippingDetailsResponse = await _customerOrderOperation.UpdateOrderShippingAddressAsync(orderId, shippingAddressRequest);
+
+                return Ok(shippingDetailsResponse);
             }
             catch (Exception exception)
             {
