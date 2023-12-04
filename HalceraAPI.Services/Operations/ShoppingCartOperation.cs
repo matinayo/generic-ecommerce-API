@@ -5,6 +5,7 @@ using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.BaseAddress;
 using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -182,7 +183,7 @@ namespace HalceraAPI.Services.Operations
                     filter: shoppingCart => shoppingCart.ApplicationUserId != null && shoppingCart.ApplicationUserId == applicationUser.Id, 
                     includeProperties: $"{nameof(ShoppingCart.Product)},Product.Prices");
 
-                if (cartItemsFromDb == null) throw new Exception("No items found in cart");
+                if (cartItemsFromDb == null || cartItemsFromDb.IsNullOrEmpty()) throw new Exception("No items found in cart");
 
                 // TODO: Verify Payment, Verify Delivery, Estimated delivery date
                 OrderHeader orderHeader = new()
