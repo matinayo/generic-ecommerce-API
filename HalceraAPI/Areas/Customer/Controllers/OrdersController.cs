@@ -53,7 +53,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
         }
 
-        [HttpGet("CancelOrder/{orderId}")]
+        [HttpGet("Cancel/{orderId}")]
         [ProducesResponseType(typeof(UpdateOrderStatusResponse), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<UpdateOrderStatusResponse>> CancelOrder(string orderId)

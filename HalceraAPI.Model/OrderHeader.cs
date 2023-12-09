@@ -61,7 +61,7 @@ namespace HalceraAPI.Models
 
         private bool OrderIsEligbileForCancellation()
         {
-            if (OrderStatus == OrderStatus.Cancelled || OrderStatus == OrderStatus.Completed)
+            if (OrderStatus == OrderStatus.Cancelled || OrderStatus == OrderStatus.Completed || OrderStatus == OrderStatus.Shipped)
             {
                 throw new Exception($"This order has already been {OrderStatus.ToString().ToLower()}");
             }

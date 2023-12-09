@@ -25,6 +25,10 @@ namespace HalceraAPI.Services.Operations
                 {
                     orderHeader.CancelOrder();
                 }
+                else if(orderStatus == OrderStatus.Shipped)
+                {
+                    orderHeader.ShipOrder();
+                }
                 else
                 {
                     orderHeader.OrderStatus = orderStatus;
@@ -58,7 +62,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<OrderResponse> GetOrderById(string orderId)
+        public async Task<OrderResponse> GetOrderByIdAsync(string orderId)
         {
             try
             {
