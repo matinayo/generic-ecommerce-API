@@ -16,7 +16,7 @@ namespace HalceraAPI.Models
         public ShippingStatus? ShippingStatus { get; set; } = Enums.ShippingStatus.Pending;
         public DateTime? ShippingDate { get; set; }
         public DateTime? DateShipped { get; set; }
-
+        public DateTime? CancelledDate { get; set; }
         public int? AddressId { get; set; }
         [ForeignKey(nameof(AddressId))]
         public BaseAddress? ShippingAddress { get; set; }

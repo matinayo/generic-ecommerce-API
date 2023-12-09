@@ -1,6 +1,5 @@
 ﻿using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.OrderHeader;
-using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
@@ -21,13 +20,13 @@ namespace HalceraAPI.Areas.Customer.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<CustomerOrderResponse>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<OrderResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<CustomerOrderResponse>>> GetAll(OrderStatus? orderStatus)
+        public async Task<ActionResult<IEnumerable<OrderResponse>>> GetAll(OrderStatus? orderStatus)
         {
             try
             {
-                IEnumerable<CustomerOrderResponse>? listOfOrders = await _customerOrderOperation.GetOrdersAsync(orderStatus);
+                IEnumerable<OrderResponse>? listOfOrders = await _customerOrderOperation.GetOrdersAsync(orderStatus);
 
                 return Ok(listOfOrders);
             }
@@ -38,13 +37,13 @@ namespace HalceraAPI.Areas.Customer.Controllers
         }
 
         [HttpGet("{orderId}")]
-        [ProducesResponseType(typeof(IEnumerable<CustomerOrderResponse>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<OrderResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<CustomerOrderResponse>>> GetOrderById(string orderId)
+        public async Task<ActionResult<IEnumerable<OrderResponse>>> GetOrderById(string orderId)
         {
             try
             {
-                CustomerOrderResponse orderDetails = await _customerOrderOperation.GetOrderByIdAsync(orderId);
+                OrderResponse orderDetails = await _customerOrderOperation.GetOrderByIdAsync(orderId);
 
                 return Ok(orderDetails);
             }

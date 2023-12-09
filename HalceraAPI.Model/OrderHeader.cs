@@ -48,6 +48,17 @@ namespace HalceraAPI.Models
             }
         }
 
+        public void ShipOrder()
+        {
+            OrderStatus = OrderStatus.Shipped;
+            if (ShippingDetails != null)
+            {
+                ShippingDetails.ShippingStatus = ShippingStatus.Shipped;
+                ShippingDetails.ShippingDate = DateTime.UtcNow;
+                ShippingDetails.CancelledDate = null;
+            }
+        }
+
         private bool OrderIsEligbileForCancellation()
         {
             if (OrderStatus == OrderStatus.Cancelled || OrderStatus == OrderStatus.Completed)

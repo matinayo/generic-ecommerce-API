@@ -1,11 +1,8 @@
 ﻿using HalceraAPI.DataAccess.Contract;
+using HalceraAPI.Models;
 using HalceraAPI.Models.Enums;
+using HalceraAPI.Models.Requests.OrderHeader;
 using HalceraAPI.Services.Contract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -16,37 +13,69 @@ namespace HalceraAPI.Services.Operations
         {
             _unitOfWork = unitOfWork;
         }
-        public void CancelOrder(string orderId)
+        public async Task<UpdateOrderStatusResponse> UpdateOrderStatusAsync(string orderId, OrderStatus orderStatus)
         {
-            throw new NotImplementedException();
+            try
+            {
+                OrderHeader orderHeader = await _unitOfWork.OrderHeader
+                    .GetFirstOrDefault(order => order.Id.ToLower().Equals(orderId.ToLower()))
+                    ?? throw new Exception("Order cannot be found");
+
+                if (orderStatus == OrderStatus.Cancelled)
+                {
+                    orderHeader.CancelOrder();
+                }
+                else
+                {
+                    orderHeader.OrderStatus = orderStatus;
+                }
+
+                await _unitOfWork.SaveAsync();
+
+                return new UpdateOrderStatusResponse()
+                {
+                    OrderId = orderId,
+                    OrderStatus = orderHeader.OrderStatus
+                };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public void GetAllOrders(OrderStatus? orderStatus)
+        public async Task<IEnumerable<OrderResponse>> GetOrdersAsync(OrderStatus? orderStatus)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _unitOfWork.OrderHeader.GetAll<OrderResponse>(
+                    filter: orderStatus != null ? order => order.OrderStatus == orderStatus : null,
+                    orderBy: order => order.OrderBy(entity => entity.OrderDate));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public void GetOrderDetails(string orderId)
+        public async Task<OrderResponse> GetOrderById(string orderId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                OrderResponse? orderHeaderFromDb =
+                    await _unitOfWork.OrderHeader.GetFirstOrDefault<OrderResponse>(
+                        filter: order => order.Id.ToLower().Equals(orderId.ToLower()));
+
+                return orderHeaderFromDb ?? throw new Exception("Order cannot be found");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public void ProcessOrder()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ShipOrder()
-        {
-            throw new NotImplementedException();
-        }
 
         public void UpdateOrderDetails(string orderId)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task IAdminOrderOperation.GetOrderDetails(string orderId)
         {
             throw new NotImplementedException();
         }

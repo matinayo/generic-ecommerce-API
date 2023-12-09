@@ -4,8 +4,9 @@
     {
         Pending = 1,
         InProcess = 2,
-        Completed = 3,
-        Rejected = 4,
-        Cancelled = 5
+        Shipped = 3,
+        Completed = 4,
+        Rejected = 5,
+        Cancelled = 6
     }
 }

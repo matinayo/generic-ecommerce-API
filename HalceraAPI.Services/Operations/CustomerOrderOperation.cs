@@ -3,7 +3,6 @@ using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.OrderHeader;
-using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
 using System.Linq.Expressions;
@@ -28,20 +27,10 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
-                // Only Pending orders are eligble for cancellation
-                OrderHeader? orderHeaderFromDb = await _unitOfWork.OrderHeader.GetFirstOrDefault(
-                    filter: order => order.Id.ToLower().Equals(orderId.ToLower()));
+                OrderHeader orderHeaderFromDb = await _unitOfWork.OrderHeader.GetFirstOrDefault(
+                    filter: order => order.Id.ToLower().Equals(orderId.ToLower())) ?? throw new Exception("Order cannot be found");
 
-                if (orderHeaderFromDb == null)
-                {
-                    throw new Exception("Order cannot be found");
-                }
-                if (orderHeaderFromDb.OrderStatus != OrderStatus.Pending)
-                {
-                    throw new Exception($"Only {OrderStatus.Pending} orders are eligble for cancellation");
-                }
-
-                orderHeaderFromDb.OrderStatus = OrderStatus.Cancelled;
+                orderHeaderFromDb.CancelOrder();
                 await _unitOfWork.SaveAsync();
 
                 return new UpdateOrderStatusResponse()
@@ -56,7 +45,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<IEnumerable<CustomerOrderResponse>?> GetOrdersAsync(OrderStatus? orderStatus)
+        public async Task<IEnumerable<OrderResponse>?> GetOrdersAsync(OrderStatus? orderStatus)
         {
             try
             {
@@ -67,7 +56,7 @@ namespace HalceraAPI.Services.Operations
                     filterExpression = order => order.ApplicationUserId == applicationUser.Id && order.OrderStatus == orderStatus;
                 }
 
-                return await _unitOfWork.OrderHeader.GetAll<CustomerOrderResponse>(
+                return await _unitOfWork.OrderHeader.GetAll<OrderResponse>(
                     filter: filterExpression,
                     orderBy: order => order.OrderBy(entity => entity.OrderDate));
             }
@@ -77,18 +66,18 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<CustomerOrderResponse> GetOrderByIdAsync(string orderId)
+        public async Task<OrderResponse> GetOrderByIdAsync(string orderId)
         {
             try
             {
                 ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
-                CustomerOrderResponse? orderHeaderFromDb = 
-                    await _unitOfWork.OrderHeader.GetFirstOrDefault<CustomerOrderResponse>(
-                        filter: order => 
+                OrderResponse? orderHeaderFromDb =
+                    await _unitOfWork.OrderHeader.GetFirstOrDefault<OrderResponse>(
+                        filter: order =>
                         applicationUser.Id == order.ApplicationUserId
                         && order.Id.ToLower().Equals(orderId.ToLower()));
 
-                return orderHeaderFromDb == null ? throw new Exception("Order cannot be found") : orderHeaderFromDb;
+                return orderHeaderFromDb ?? throw new Exception("Order cannot be found");
             }
             catch (Exception)
             {

@@ -3,7 +3,7 @@ using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse.PurchaseDetails;
 
 namespace HalceraAPI.Models.Requests.OrderHeader.CustomerResponse
 {
-    public class CustomerOrderDetailsResponse
+    public class OrderDetailsResponse
     {
         // Purchase Details
         public PurchaseDetailsSummaryResponse? PurchaseDetails { get; set; }
