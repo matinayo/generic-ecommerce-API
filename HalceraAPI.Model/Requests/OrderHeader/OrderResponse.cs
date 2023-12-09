@@ -16,5 +16,6 @@ namespace HalceraAPI.Models.Requests.OrderHeader
         public PaymentDetailsResponse? PaymentDetails { get; init; }
         public ShippingDetailsResponse? ShippingDetails { get; init; }
         public ICollection<OrderDetailsResponse>? OrderDetails { get; init; }
+        public CustomerDetailsResponse? ApplicationUser { get; init; }
     }
 }

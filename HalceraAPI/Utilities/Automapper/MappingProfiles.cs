@@ -89,6 +89,7 @@ namespace HalceraAPI.Utilities.Automapper
             // Application User
             CreateMap<RegisterRequest, ApplicationUser>().ReverseMap();
             CreateMap<ApplicationUser, UserResponse>().ReverseMap();
+            CreateMap<ApplicationUser, CustomerDetailsResponse>().ReverseMap();
 
             // Refresh Token
             CreateMap<RefreshToken, RefreshTokenResponse>().ReverseMap();
