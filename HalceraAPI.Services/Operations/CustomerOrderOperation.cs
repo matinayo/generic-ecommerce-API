@@ -85,11 +85,6 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public void UpdateOrderAsync(string orderId)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<ShippingDetailsResponse> UpdateOrderShippingAddressAsync(string orderId, UpdateShippingAddressRequest shippingAddressRequest)
         {
             try
@@ -101,9 +96,11 @@ namespace HalceraAPI.Services.Operations
                     includeProperties: "ShippingDetails.ShippingAddress") ?? throw new Exception("Order cannot be found");
 
                 orderHeader.ShippingDetails ??= new();
-
-                _mapper.Map(shippingAddressRequest, orderHeader.ShippingDetails.ShippingAddress);
-                await _unitOfWork.SaveAsync();
+                if (orderHeader.ShippingDetails.CanUpdateShippingAddress())
+                {
+                    _mapper.Map(shippingAddressRequest, orderHeader.ShippingDetails.ShippingAddress);
+                    await _unitOfWork.SaveAsync();
+                }
 
                 return _mapper.Map<ShippingDetailsResponse>(orderHeader.ShippingDetails);
             }

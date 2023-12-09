@@ -20,5 +20,15 @@ namespace HalceraAPI.Models
         public int? AddressId { get; set; }
         [ForeignKey(nameof(AddressId))]
         public BaseAddress? ShippingAddress { get; set; }
+
+        public bool CanUpdateShippingAddress()
+        {
+            if(ShippingStatus == Enums.ShippingStatus.Shipped || ShippingStatus == Enums.ShippingStatus.Completed)
+            {
+                throw new Exception($"Cannot update shipping address because order has already been {ShippingStatus?.ToString().ToLower()}");
+            }
+
+            return true;
+        }
     }
 }

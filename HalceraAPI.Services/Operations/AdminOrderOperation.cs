@@ -74,10 +74,5 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-
-        public void UpdateOrderDetails(string orderId)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

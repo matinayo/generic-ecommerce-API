@@ -11,7 +11,7 @@ namespace HalceraAPI.Models.Requests.OrderHeader
         public OrderStatus? OrderStatus { get; init; }
 
         public DateTime? OrderDate { get; init; }
-        public DateTime? CancelledDate { get; set; }
+        public DateTime? CancelledDate { get; init; }
 
         public PaymentDetailsResponse? PaymentDetails { get; init; }
         public ShippingDetailsResponse? ShippingDetails { get; init; }
