@@ -9,6 +9,7 @@
         Approved = 2,
         Shipped = 3,
         Completed = 4,
-        Redelivery = 5
+        Redelivery = 5,
+        Cancelled = 6
     }
 }
