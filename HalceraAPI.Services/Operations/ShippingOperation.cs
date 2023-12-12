@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
+using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
 using System;
@@ -24,7 +25,12 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
-        public Task UpdateShippingDetailsAsync()
+        public Task GetAllShippingRequests(ShippingStatus? shippingStatus)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateShippingDetailsAsync(int shippingId, UpdateShippingDetailsRequest shippingDetailsRequest)
         {
             throw new NotImplementedException();
         }
