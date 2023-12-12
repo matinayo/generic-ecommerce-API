@@ -11,26 +11,21 @@ namespace HalceraAPI.Services.Contract
         /// Customer is only able to view personal orders
         /// </summary>
         /// <param name="orderId">Order Id</param>
-        public Task<OrderResponse> GetOrderByIdAsync(string orderId);
+        Task<OrderResponse> GetOrderByIdAsync(string orderId);
 
         /// <summary>
         /// Get list of Orders
         /// Customer is only able to view personal orders
         /// </summary>
         /// <param name="orderStatus">Status of Orders to be retrieved</param>
-        public Task<IEnumerable<OrderResponse>?> GetOrdersAsync(OrderStatus? orderStatus);
+        Task<IEnumerable<OrderResponse>?> GetOrdersAsync(OrderStatus? orderStatus);
 
         /// <summary>
         /// Cancel order before Order is in Delivery process
         /// </summary>
         /// <param name="orderId">Id of Order</param>
-        public Task<UpdateOrderStatusResponse> CancelOrderAsync(string orderId);
+        Task<UpdateOrderStatusResponse> CancelOrderAsync(string orderId);
 
-        /// <summary>
-        /// Update Order details
-        /// Customer Update / Admin Update
-        /// </summary>
-        /// <param name="orderId">Order Id</param>
-        public Task<ShippingDetailsResponse> UpdateOrderShippingAddressAsync(string orderId, UpdateShippingAddressRequest shippingAddressRequest);
+        Task<ShippingDetailsResponse> UpdateOrderShippingAddressAsync(string orderId, UpdateShippingAddressRequest shippingAddressRequest);
     }
 }

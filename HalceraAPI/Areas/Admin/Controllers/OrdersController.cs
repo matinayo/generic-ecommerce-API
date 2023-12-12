@@ -1,6 +1,8 @@
 ﻿using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.OrderHeader;
+using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
+using HalceraAPI.Services.Operations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -76,6 +78,40 @@ namespace HalceraAPI.Areas.Admin.Controllers
                     Problem(
                         statusCode: StatusCodes.Status400BadRequest,
                         detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
+
+        [HttpPut("{orderId}/shipping")]
+        [ProducesResponseType(typeof(ShippingDetailsResponse), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<ShippingDetailsResponse>> UpdateShippingDetailsAsync(string orderId, UpdateShippingDetailsRequest shippingDetailsRequest)
+        {
+            try
+            {
+                ShippingDetailsResponse shippingDetailsResponse = await _orderOperation.UpdateOrderShippingDetailsAsync(orderId, shippingDetailsRequest);
+
+                return Ok(shippingDetailsResponse);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+            }
+        }
+
+        [HttpGet("{orderId}/shipping")]
+        [ProducesResponseType(typeof(ShippingDetailsResponse), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<ShippingDetailsResponse>> GetOrderShippingDetailsAsync(string orderId)
+        {
+            try
+            {
+                ShippingDetailsResponse shippingDetailsResponse = await _orderOperation.GetOrderShippingDetailsAsync(orderId);
+
+                return Ok(shippingDetailsResponse);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
     }

@@ -108,6 +108,8 @@ namespace HalceraAPI.Utilities.Automapper
             CreateMap<BaseAddress, ShippingAddressResponse>().ReverseMap();
             CreateMap<UpdateShippingAddressRequest, BaseAddress>()
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
+            CreateMap<UpdateShippingDetailsRequest, ShippingDetails>()
+                .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
 
             // Order Header
             CreateMap<OrderHeader, CheckoutResponse>().ReverseMap();
