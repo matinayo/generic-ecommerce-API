@@ -5,8 +5,8 @@ namespace HalceraAPI.Services.Contract
 {
     public interface IShippingOperation
     {
-        Task UpdateShippingDetailsAsync(int shippingId, UpdateShippingDetailsRequest shippingDetailsRequest);
+        Task<ShippingDetailsResponse> UpdateShippingDetailsAsync(int shippingId, UpdateShippingDetailsRequest shippingDetailsRequest);
 
-        Task GetAllShippingRequests(ShippingStatus? shippingStatus);
+        Task<IEnumerable<ShippingDetailsResponse>> GetAllShippingRequestsAsync(ShippingStatus? shippingStatus);
     }
 }

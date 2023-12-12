@@ -4,35 +4,51 @@ using HalceraAPI.Models;
 using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HalceraAPI.Services.Operations
 {
     public class ShippingOperation : IShippingOperation
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IIdentityOperation _identityOperation;
         private readonly IMapper _mapper;
 
-        public ShippingOperation(IUnitOfWork unitOfWork, IIdentityOperation identityOperation, IMapper mapper)
+        public ShippingOperation(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _identityOperation = identityOperation;
             _mapper = mapper;
         }
 
-        public Task GetAllShippingRequests(ShippingStatus? shippingStatus)
+        public async Task<IEnumerable<ShippingDetailsResponse>> GetAllShippingRequestsAsync(ShippingStatus? shippingStatus)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _unitOfWork.ShippingDetails.GetAll<ShippingDetailsResponse>(
+                    filter: shippingStatus != null ? shipping => shipping.ShippingStatus == shippingStatus : null,
+                    orderBy: shipping => shipping.OrderBy(entity => entity.ShippingDate));
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public Task UpdateShippingDetailsAsync(int shippingId, UpdateShippingDetailsRequest shippingDetailsRequest)
+        public async Task<ShippingDetailsResponse> UpdateShippingDetailsAsync(int shippingId, UpdateShippingDetailsRequest shippingDetailsRequest)
         {
-            throw new NotImplementedException();
+            try
+            {
+                ShippingDetails shippingDetails = await _unitOfWork.ShippingDetails.GetFirstOrDefault(shipping => shipping.Id == shippingId)
+                    ?? throw new Exception("Shipping details cannot be found");
+
+                _mapper.Map(shippingDetailsRequest, shippingDetails);
+                await _unitOfWork.SaveAsync();
+
+                return _mapper.Map<ShippingDetailsResponse>(shippingDetails);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

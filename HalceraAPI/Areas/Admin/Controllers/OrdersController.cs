@@ -1,4 +1,5 @@
-﻿using HalceraAPI.Models.Enums;
+﻿using HalceraAPI.Common.Utilities;
+using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.OrderHeader;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HalceraAPI.Areas.Admin.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
     [Area("Admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]
