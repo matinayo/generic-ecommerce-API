@@ -39,6 +39,7 @@ namespace HalceraAPI.Utilities.Extensions
             services.AddScoped<IIdentityOperation, IdentityOperation>();
             services.AddScoped<ICustomerOrderOperation, CustomerOrderOperation>();
             services.AddScoped<IAdminOrderOperation, AdminOrderOperation>();
+            services.AddScoped<IShippingOperation, ShippingOperation>();
         }
     }
 }

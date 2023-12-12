@@ -70,7 +70,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut("{orderId}/shipping")]
         [ProducesResponseType(typeof(ShippingDetailsResponse), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<ShippingDetailsResponse>> UpdateShippingAddress(string orderId, UpdateShippingAddressRequest shippingAddressRequest)
