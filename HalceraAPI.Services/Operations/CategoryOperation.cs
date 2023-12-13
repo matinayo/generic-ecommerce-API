@@ -104,7 +104,9 @@ namespace HalceraAPI.Services.Operations
             {
                 if (categoryRequests != null && categoryRequests.Any())
                 {
-                    var categories = await _unitOfWork.Category.GetAll(category => categoryRequests.Select(opt => opt.CategoryId).Contains(category.Id));
+                    var categories = await _unitOfWork.Category.GetAll(
+                        category => categoryRequests.Select(opt => opt.CategoryId).Contains(category.Id));
+
                     return categories;
                 }
                 return null;
@@ -115,18 +117,18 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<CategoryResponse?> GetCategoryAsync(int categoryId)
+        public async Task<APIResponse<CategoryResponse>> GetCategoryAsync(int categoryId)
         {
             try
             {
-                Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(category => category.Id == categoryId, includeProperties: nameof(Category.MediaCollection));
-                if (categoryDetailsFromDb == null)
-                    throw new Exception("Category not found");
+                Category categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(
+                    category => category.Id == categoryId, 
+                    includeProperties: nameof(Category.MediaCollection)) 
+                    ?? throw new Exception("Category not found");
 
-                CategoryResponse response = new();
-                _mapper.Map(categoryDetailsFromDb, response);
+                CategoryResponse response = _mapper.Map<CategoryResponse>(categoryDetailsFromDb);
 
-                return response;
+                return new APIResponse<CategoryResponse>(response);
             }
             catch (Exception)
             {
@@ -134,13 +136,14 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<CategoryResponse> UpdateCategoryAsync(int categoryId, UpdateCategoryRequest category)
+        public async Task<APIResponse<CategoryResponse>> UpdateCategoryAsync(int categoryId, UpdateCategoryRequest category)
         {
             try
             {
-                Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(categoryDb => categoryDb.Id == categoryId, includeProperties: $"{nameof(Category.MediaCollection)}");
-                if (categoryDetailsFromDb == null)
-                    throw new Exception("Category not found");
+                Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(
+                    categoryDb => categoryDb.Id == categoryId,
+                    includeProperties: $"{nameof(Category.MediaCollection)}") 
+                    ?? throw new Exception("Category not found");
 
                 _mediaOperation.UpdateMediaCollection(category.MediaCollection, categoryDetailsFromDb.MediaCollection);
 
@@ -148,10 +151,9 @@ namespace HalceraAPI.Services.Operations
                 categoryDetailsFromDb.DateLastModified = DateTime.UtcNow;
                 await _unitOfWork.SaveAsync();
 
-                CategoryResponse response = new();
-                _mapper.Map(categoryDetailsFromDb, response);
+                CategoryResponse response = _mapper.Map<CategoryResponse>(categoryDetailsFromDb);
 
-                return response;
+                return new APIResponse<CategoryResponse>(response);
             }
             catch (Exception)
             {

@@ -40,14 +40,14 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [HttpGet("{categoryId}")]
-        [ProducesResponseType(typeof(CategoryResponse), 200)]
+        [ProducesResponseType(typeof(APIResponse<CategoryResponse>), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<CategoryResponse>?>> GetCategoryByIdAsync(int categoryId)
+        public async Task<ActionResult> GetCategoryByIdAsync(int categoryId)
         {
             try
             {
-                CategoryResponse? categoryDetails = await _categoryOperation.GetCategoryAsync(categoryId);
+                APIResponse<CategoryResponse>? categoryDetails = await _categoryOperation.GetCategoryAsync(categoryId);
 
                 return Ok(categoryDetails);
             }
@@ -76,14 +76,15 @@ namespace HalceraAPI.Areas.Admin.Controllers
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpPut("{categoryId}")]
-        [ProducesResponseType(typeof(CategoryResponse), 200)]
+        [ProducesResponseType(typeof(APIResponse<CategoryResponse>), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<CategoryResponse?>> UpdateCategory(int categoryId, [FromBody] UpdateCategoryRequest category)
+        public async Task<ActionResult> UpdateCategory(int categoryId, [FromBody] UpdateCategoryRequest category)
         {
             try
             {
-                CategoryResponse categoryDetails = await _categoryOperation.UpdateCategoryAsync(categoryId, category);
+                APIResponse<CategoryResponse> categoryDetails = await _categoryOperation.UpdateCategoryAsync(categoryId, category);
+
                 return Ok(categoryDetails);
             }
             catch (Exception exception)
