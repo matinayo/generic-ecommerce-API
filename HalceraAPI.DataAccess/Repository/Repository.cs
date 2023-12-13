@@ -34,6 +34,15 @@ namespace HalceraAPI.DataAccess.Repository
             await dbSet.AddRangeAsync(entities);
         }
 
+        public async Task<int> CountAsync(Expression<Func<T, bool>>? filter = null)
+        {
+            if(filter == null)
+            {
+                return await dbSet.CountAsync();
+            }
+            return await dbSet.CountAsync(filter);
+        }
+
         public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null)
         {
             IQueryable<T> query = GetAllQuery(filter, orderBy, skip, take, includeProperties);

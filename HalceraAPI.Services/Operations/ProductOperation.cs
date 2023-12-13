@@ -155,7 +155,7 @@ namespace HalceraAPI.Services.Operations
                 _priceOperation.UpdatePrice(productRequest.Prices, productFromDb.Prices);
                 _mediaOperation.UpdateMediaCollection(productRequest.MediaCollection, productFromDb.MediaCollection);
                 _compositionOperation.UpdateComposition(productRequest.ProductCompositions, productFromDb.ProductCompositions);
-                var categories = await _categoryOperation.GetCategoriesFromListOfCategoryId(productRequest.Categories);
+                var categories = await _categoryOperation.GetCategoriesFromListOfCategoryIdAsync(productRequest.Categories);
                 if (categories != null && categories.Any())
                 {
                     productFromDb.Categories = categories.ToList();
