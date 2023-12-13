@@ -1,4 +1,5 @@
 ﻿using HalceraAPI.Common.Utilities;
+using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
@@ -21,13 +22,13 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<ProductResponse>), 200)]
+        [ProducesResponseType(typeof(APIResponse<IEnumerable<ProductResponse>>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProducts(bool? active, bool? featured, int? categoryId)
+        public async Task<ActionResult> GetProductsAsync(bool? active, bool? featured, int? categoryId, int? page)
         {
             try
             {
-                IEnumerable<ProductResponse>? listOfProducts = await _productOperation.GetAllProducts(active, featured, categoryId);
+                APIResponse<IEnumerable<ProductResponse>> listOfProducts = await _productOperation.GetAllProductsAsync(active, featured, categoryId, page);
                 
                 return Ok(listOfProducts);
             }
@@ -41,13 +42,13 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [HttpGet("{productId}")]
-        [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
+        [ProducesResponseType(typeof(APIResponse<ProductDetailsResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<ProductDetailsResponse>?>> GetProductById(int productId)
+        public async Task<ActionResult> GetProductByIdAsync(int productId)
         {
             try
             {
-                ProductDetailsResponse? productDetails = await _productOperation.GetProductById(productId);
+                APIResponse<ProductDetailsResponse>? productDetails = await _productOperation.GetProductByIdAsync(productId);
 
                 return Ok(productDetails);
             }
@@ -59,13 +60,13 @@ namespace HalceraAPI.Areas.Admin.Controllers
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpPost]
-        [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
+        [ProducesResponseType(typeof(APIResponse<ProductDetailsResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ProductDetailsResponse?>> CreateProduct([FromBody] CreateProductRequest productRequest)
+        public async Task<ActionResult> CreateProductAsync([FromBody] CreateProductRequest productRequest)
         {
             try
             {
-                ProductDetailsResponse productDetails = await _productOperation.CreateProduct(productRequest);
+                APIResponse<ProductDetailsResponse> productDetails = await _productOperation.CreateProductAsync(productRequest);
 
                 return Ok(productDetails);
             }
@@ -77,14 +78,14 @@ namespace HalceraAPI.Areas.Admin.Controllers
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpPut("{productId}")]
-        [ProducesResponseType(typeof(ProductDetailsResponse), 200)]
+        [ProducesResponseType(typeof(APIResponse<ProductDetailsResponse>), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ProductDetailsResponse?>> UpdateProduct(int productId, [FromBody] UpdateProductRequest productRequest)
+        public async Task<ActionResult> UpdateProductAsync(int productId, [FromBody] UpdateProductRequest productRequest)
         {
             try
             {
-                ProductDetailsResponse productDetails = await _productOperation.UpdateProduct(productId, productRequest);
+                APIResponse<ProductDetailsResponse> productDetails = await _productOperation.UpdateProductAsync(productId, productRequest);
 
                 return Ok(productDetails);
             }
@@ -99,11 +100,11 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<bool?>> DeleteProduct(int productId)
+        public async Task<ActionResult> DeleteProductAsync(int productId)
         {
             try
             {
-                bool result = await _productOperation.DeleteProduct(productId);
+                bool result = await _productOperation.DeleteProductAsync(productId);
 
                 return Ok(result);
             }

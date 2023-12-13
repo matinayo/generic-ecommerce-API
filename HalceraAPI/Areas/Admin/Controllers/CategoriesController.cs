@@ -65,7 +65,8 @@ namespace HalceraAPI.Areas.Admin.Controllers
         {
             try
             {
-                var categoryDetails = await _categoryOperation.CreateCategoryAsync(category);
+                APIResponse<CategoryResponse> categoryDetails = await _categoryOperation.CreateCategoryAsync(category);
+
                 return Ok(categoryDetails);
             }
             catch (Exception exception)
@@ -98,7 +99,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<bool?>> DeleteCategory(int categoryId)
+        public async Task<ActionResult> DeleteCategory(int categoryId)
         {
             try
             {
