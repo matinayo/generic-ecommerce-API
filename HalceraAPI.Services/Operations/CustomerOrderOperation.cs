@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Enums;
+using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.OrderHeader;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
@@ -22,7 +24,7 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
-        public async Task<UpdateOrderStatusResponse> CancelOrderAsync(string orderId)
+        public async Task<APIResponse<UpdateOrderStatusResponse>> CancelOrderAsync(string orderId)
         {
             try
             {
@@ -33,11 +35,13 @@ namespace HalceraAPI.Services.Operations
                 orderHeaderFromDb.CancelOrder();
                 await _unitOfWork.SaveAsync();
 
-                return new UpdateOrderStatusResponse()
+                var result = new UpdateOrderStatusResponse()
                 {
                     OrderId = orderHeaderFromDb.Id,
                     OrderStatus = orderHeaderFromDb.OrderStatus
                 };
+
+                return new APIResponse<UpdateOrderStatusResponse>(result);
             }
             catch (Exception)
             {
@@ -45,7 +49,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<IEnumerable<OrderResponse>?> GetOrdersAsync(OrderStatus? orderStatus)
+        public async Task<APIResponse<IEnumerable<OrderResponse>>> GetOrdersAsync(OrderStatus? orderStatus, int? page)
         {
             try
             {
@@ -56,9 +60,16 @@ namespace HalceraAPI.Services.Operations
                     filterExpression = order => order.ApplicationUserId == applicationUser.Id && order.OrderStatus == orderStatus;
                 }
 
-                return await _unitOfWork.OrderHeader.GetAll<OrderResponse>(
+                int totalItems = await _unitOfWork.OrderHeader.CountAsync(filterExpression);
+                var result = await _unitOfWork.OrderHeader.GetAll<OrderResponse>(
                     filter: filterExpression,
-                    orderBy: order => order.OrderBy(entity => entity.OrderDate));
+                    orderBy: order => order.OrderBy(entity => entity.OrderDate),
+                    skip: ((page ?? 1) - 1) * Pagination.DefaultItemsPerPage,
+                    take: Pagination.DefaultItemsPerPage);
+
+                var meta = new Meta(totalItems, Pagination.DefaultItemsPerPage, page ?? 1);
+
+                return new APIResponse<IEnumerable<OrderResponse>>(result, meta);
             }
             catch (Exception)
             {
@@ -66,18 +77,18 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<OrderResponse> GetOrderByIdAsync(string orderId)
+        public async Task<APIResponse<OrderResponse>> GetOrderByIdAsync(string orderId)
         {
             try
             {
                 ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
-                OrderResponse? orderHeaderFromDb =
+                OrderResponse orderHeaderFromDb =
                     await _unitOfWork.OrderHeader.GetFirstOrDefault<OrderResponse>(
                         filter: order =>
                         applicationUser.Id == order.ApplicationUserId
-                        && order.Id.ToLower().Equals(orderId.ToLower()));
+                        && order.Id.ToLower().Equals(orderId.ToLower())) ?? throw new Exception("Order cannot be found");
 
-                return orderHeaderFromDb ?? throw new Exception("Order cannot be found");
+                return new APIResponse<OrderResponse>(orderHeaderFromDb);
             }
             catch (Exception)
             {
@@ -85,7 +96,9 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<ShippingDetailsResponse> UpdateOrderShippingAddressAsync(string orderId, UpdateShippingAddressRequest shippingAddressRequest)
+        public async Task<APIResponse<ShippingDetailsResponse>> UpdateOrderShippingAddressAsync(
+            string orderId,
+            UpdateShippingAddressRequest shippingAddressRequest)
         {
             try
             {
@@ -102,7 +115,9 @@ namespace HalceraAPI.Services.Operations
                     await _unitOfWork.SaveAsync();
                 }
 
-                return _mapper.Map<ShippingDetailsResponse>(orderHeader.ShippingDetails);
+                var shippingDetailsResponse = _mapper.Map<ShippingDetailsResponse>(orderHeader.ShippingDetails);
+
+                return new APIResponse<ShippingDetailsResponse>(shippingDetailsResponse);
             }
             catch (Exception)
             {

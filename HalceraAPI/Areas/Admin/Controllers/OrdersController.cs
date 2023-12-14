@@ -3,7 +3,6 @@ using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.OrderHeader;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
-using HalceraAPI.Services.Operations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -82,7 +81,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
         }
 
-        [HttpPut("{orderId}/shipping")]
+        [HttpPut("{orderId}/Shipping")]
         [ProducesResponseType(typeof(ShippingDetailsResponse), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<ShippingDetailsResponse>> UpdateShippingDetailsAsync(string orderId, UpdateShippingDetailsRequest shippingDetailsRequest)
@@ -99,7 +98,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
         }
 
-        [HttpGet("{orderId}/shipping")]
+        [HttpGet("{orderId}/Shipping")]
         [ProducesResponseType(typeof(ShippingDetailsResponse), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<ShippingDetailsResponse>> GetOrderShippingDetailsAsync(string orderId)

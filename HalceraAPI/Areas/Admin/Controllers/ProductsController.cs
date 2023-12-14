@@ -25,16 +25,17 @@ namespace HalceraAPI.Areas.Admin.Controllers
         {
             try
             {
-                APIResponse<IEnumerable<ProductResponse>> listOfProducts = await _productOperation.GetAllProductsAsync(active, featured, categoryId, page);
+                APIResponse<IEnumerable<ProductResponse>> listOfProducts = 
+                    await _productOperation.GetAllProductsAsync(active, featured, categoryId, page);
                 
                 return Ok(listOfProducts);
             }
             catch (Exception exception)
             {
                 return BadRequest(
-                    Problem(
-                        statusCode: StatusCodes.Status400BadRequest, 
-                        detail: exception?.InnerException?.Message ?? exception?.Message));
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest, 
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
@@ -51,7 +52,10 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest, 
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
