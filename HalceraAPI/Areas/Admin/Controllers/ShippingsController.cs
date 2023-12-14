@@ -1,5 +1,6 @@
 ﻿using HalceraAPI.Common.Utilities;
 using HalceraAPI.Models.Enums;
+using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
@@ -21,13 +22,14 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<ShippingDetailsResponse>), 200)]
+        [ProducesResponseType(typeof(APIResponse<IEnumerable<ShippingDetailsResponse>>), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<ShippingDetailsResponse>>> GetAllShippingRequestsAsync(ShippingStatus? shippingStatus)
+        public async Task<ActionResult> GetAllShippingRequestsAsync(ShippingStatus? shippingStatus, int? page)
         {
             try
             {
-                IEnumerable<ShippingDetailsResponse> shippingDetails = await _shippingOperation.GetAllShippingRequestsAsync(shippingStatus);
+                APIResponse<IEnumerable<ShippingDetailsResponse>> shippingDetails =
+                    await _shippingOperation.GetAllShippingRequestsAsync(shippingStatus, page);
 
                 return Ok(shippingDetails);
             }
@@ -41,14 +43,15 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [HttpPut("{shippingId}")]
-        [ProducesResponseType(typeof(ShippingDetailsResponse), 200)]
+        [ProducesResponseType(typeof(APIResponse<ShippingDetailsResponse>), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<ShippingDetailsResponse>> UpdateShippingDetailsAsync
+        public async Task<ActionResult> UpdateShippingDetailsAsync
             (int shippingId, UpdateShippingDetailsRequest shippingDetailsRequest)
         {
             try
             {
-                ShippingDetailsResponse shippingDetails = await _shippingOperation.UpdateShippingDetailsAsync(shippingId, shippingDetailsRequest);
+                APIResponse<ShippingDetailsResponse> shippingDetails = 
+                    await _shippingOperation.UpdateShippingDetailsAsync(shippingId, shippingDetailsRequest);
 
                 return Ok(shippingDetails);
             }

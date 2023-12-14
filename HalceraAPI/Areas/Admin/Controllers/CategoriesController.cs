@@ -7,9 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HalceraAPI.Areas.Admin.Controllers
 {
-    /// <summary>
-    /// Admin controllers
-    /// </summary>
     [Area("Admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]
