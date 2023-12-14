@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using AutoMapper.Features;
 using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
@@ -67,7 +66,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Product? productDetails = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId) 
+                Product? productDetails = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId)
                     ?? throw new Exception("Product not found");
 
                 // delete product media
@@ -207,7 +206,7 @@ namespace HalceraAPI.Services.Operations
             bool? active, bool? featured) => product => product.Active == active && product.Featured == featured;
 
         private static Expression<Func<Product, bool>> GetFeaturedProductsByCategoryId(
-            bool? featured,int categoryId) =>
+            bool? featured, int categoryId) =>
             product => product.Featured == featured && product.Categories!.Any(category => category.Id == categoryId);
 
         private static Expression<Func<Product, bool>> GetActiveProductsByCategoryId(
@@ -215,8 +214,8 @@ namespace HalceraAPI.Services.Operations
             product => product.Active == active && product.Categories!.Any(category => category.Id == categoryId);
 
         private static Expression<Func<Product, bool>> GetActiveAndFeaturedProductsByCategoryId(
-            bool? active, bool? featured, int categoryId) => 
-            product => product.Active == active && product.Featured == featured 
+            bool? active, bool? featured, int categoryId) =>
+            product => product.Active == active && product.Featured == featured
             && product.Categories!.Any(category => category.Id == categoryId);
 
         private static Expression<Func<Product, bool>> GetProductsByCategoryId(int categoryId) =>

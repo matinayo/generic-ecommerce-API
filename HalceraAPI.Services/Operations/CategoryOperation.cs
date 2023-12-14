@@ -9,9 +9,6 @@ using System.Linq.Expressions;
 
 namespace HalceraAPI.Services.Operations
 {
-    /// <summary>
-    /// Category Operations
-    /// </summary>
     public class CategoryOperation : ICategoryOperation
     {
         private readonly IUnitOfWork _unitOfWork;
