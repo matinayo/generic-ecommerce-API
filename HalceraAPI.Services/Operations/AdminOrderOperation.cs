@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
+using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Enums;
+using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.OrderHeader;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
+using System.Linq.Expressions;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -18,7 +21,7 @@ namespace HalceraAPI.Services.Operations
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public async Task<UpdateOrderStatusResponse> UpdateOrderStatusAsync(string orderId, OrderStatus orderStatus)
+        public async Task<APIResponse<UpdateOrderStatusResponse>> UpdateOrderStatusAsync(string orderId, OrderStatus orderStatus)
         {
             try
             {
@@ -40,12 +43,13 @@ namespace HalceraAPI.Services.Operations
                 }
 
                 await _unitOfWork.SaveAsync();
-
-                return new UpdateOrderStatusResponse()
+                var response = new UpdateOrderStatusResponse()
                 {
                     OrderId = orderId,
                     OrderStatus = orderHeader.OrderStatus
                 };
+
+                return new APIResponse<UpdateOrderStatusResponse>(response);
             }
             catch (Exception)
             {
@@ -53,13 +57,21 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<IEnumerable<OrderResponse>> GetOrdersAsync(OrderStatus? orderStatus)
+        public async Task<APIResponse<IEnumerable<OrderResponse>>> GetOrdersAsync(OrderStatus? orderStatus, int? page)
         {
             try
             {
-                return await _unitOfWork.OrderHeader.GetAll<OrderResponse>(
-                    filter: orderStatus != null ? order => order.OrderStatus == orderStatus : null,
+                Expression<Func<OrderHeader, bool>>? filterExpression =
+                     orderStatus != null ? order => order.OrderStatus == orderStatus : null;
+
+                int totalItems = await _unitOfWork.OrderHeader.CountAsync(filterExpression);
+                var response = await _unitOfWork.OrderHeader.GetAll<OrderResponse>(
+                    filter: filterExpression,
                     orderBy: order => order.OrderBy(entity => entity.OrderDate));
+
+                var meta = new Meta(totalItems, Pagination.DefaultItemsPerPage, page ?? 1);
+
+                return new APIResponse<IEnumerable<OrderResponse>>(response, meta);
             }
             catch (Exception)
             {
@@ -67,15 +79,16 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<OrderResponse> GetOrderByIdAsync(string orderId)
+        public async Task<APIResponse<OrderResponse>> GetOrderByIdAsync(string orderId)
         {
             try
             {
-                OrderResponse? orderHeaderFromDb =
+                OrderResponse orderHeaderFromDb =
                     await _unitOfWork.OrderHeader.GetFirstOrDefault<OrderResponse>(
-                        filter: order => order.Id.ToLower().Equals(orderId.ToLower()));
+                        filter: order => order.Id.ToLower().Equals(orderId.ToLower())) 
+                    ?? throw new Exception("Order cannot be found");
 
-                return orderHeaderFromDb ?? throw new Exception("Order cannot be found");
+                return new APIResponse<OrderResponse>(orderHeaderFromDb);
             }
             catch (Exception)
             {
@@ -83,7 +96,8 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<ShippingDetailsResponse> UpdateOrderShippingDetailsAsync(string orderId, UpdateShippingDetailsRequest shippingDetailsRequest)
+        public async Task<APIResponse<ShippingDetailsResponse>> UpdateOrderShippingDetailsAsync(
+            string orderId, UpdateShippingDetailsRequest shippingDetailsRequest)
         {
             try
             {
@@ -96,7 +110,9 @@ namespace HalceraAPI.Services.Operations
                     _mapper.Map(shippingDetailsRequest, orderHeader.ShippingDetails);
                     await _unitOfWork.SaveAsync();
                 
-                return _mapper.Map<ShippingDetailsResponse>(orderHeader.ShippingDetails);
+                var response = _mapper.Map<ShippingDetailsResponse>(orderHeader.ShippingDetails);
+
+                return new APIResponse<ShippingDetailsResponse>(response);
             }
             catch (Exception)
             {
@@ -104,7 +120,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<ShippingDetailsResponse> GetOrderShippingDetailsAsync(string orderId)
+        public async Task<APIResponse<ShippingDetailsResponse>> GetOrderShippingDetailsAsync(string orderId)
         {
             try
             {
@@ -112,7 +128,9 @@ namespace HalceraAPI.Services.Operations
                     filter: orderHeader => orderHeader.Id.ToLower().Equals(orderId.ToLower()),
                     includeProperties: "ShippingDetails.ShippingAddress") ?? throw new Exception("Order cannot be found");
 
-                return _mapper.Map<ShippingDetailsResponse>(orderHeader.ShippingDetails ??= new());
+                var response = _mapper.Map<ShippingDetailsResponse>(orderHeader.ShippingDetails ??= new());
+
+                return new APIResponse<ShippingDetailsResponse>(response);
             }
             catch (Exception)
             {
