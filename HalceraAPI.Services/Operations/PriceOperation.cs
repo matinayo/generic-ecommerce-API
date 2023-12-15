@@ -52,7 +52,27 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public void UpdatePrice(IEnumerable<UpdatePriceRequest>? priceCollection, ICollection<Price>? existingPriceFromDb)
+        public async Task ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId)
+        {
+            try
+            {
+                Price price = await _unitOfWork.Price.GetFirstOrDefault(
+                    price => price.Id == priceId
+                    && price.ProductId == productId)
+                    ?? throw new Exception("No price available for this product");
+
+                price.DiscountAmount = null;
+                await _unitOfWork.SaveAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public void UpdatePrice(
+            IEnumerable<UpdatePriceRequest>? priceCollection,
+            ICollection<Price>? existingPriceFromDb)
         {
             try
             {

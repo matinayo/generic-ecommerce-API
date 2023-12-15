@@ -168,6 +168,27 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
+        [HttpDelete("{productId}/Price/{priceId}/ResetDiscount")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId)
+        {
+            try
+            {
+                await _productOperation.ResetDiscountOfProductPriceByPriceIdAsync(productId, priceId);
+
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
+
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpDelete("{productId}/Media/{mediaId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]

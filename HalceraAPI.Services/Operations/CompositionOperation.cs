@@ -63,7 +63,9 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public void UpdateComposition(IEnumerable<UpdateCompositionRequest>? compositionCollection, ICollection<Composition>? existingCompositionsFromDb)
+        public void UpdateComposition(
+            IEnumerable<UpdateCompositionRequest>? compositionCollection, 
+            ICollection<Composition>? existingCompositionsFromDb)
         {
             try
             {

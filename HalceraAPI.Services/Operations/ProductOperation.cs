@@ -41,10 +41,10 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Product product = new();
-                _mapper.Map(productRequest, product);
+                Product product = _mapper.Map<Product>(productRequest);
+                product.ValidateProductForCreate();
 
-                if (productRequest.Categories != null && productRequest.Categories.Any())
+                if (productRequest.Categories is not null && productRequest.Categories.Any())
                 {
                     var categories = await _unitOfWork.Category.GetAll(
                         category => productRequest.Categories != null
@@ -175,6 +175,8 @@ namespace HalceraAPI.Services.Operations
                     includeProperties: $"{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.Prices)},{nameof(Product.MediaCollection)}")
                     ?? throw new Exception("Product not found");
 
+                CanUpdateProductRequest(productFromDb, productRequest);
+
                 _priceOperation.UpdatePrice(productRequest.Prices, productFromDb.Prices);
                 _mediaOperation.UpdateMediaCollection(productRequest.MediaCollection, productFromDb.MediaCollection);
                 _compositionOperation.UpdateComposition(productRequest.ProductCompositions, productFromDb.ProductCompositions);
@@ -203,6 +205,23 @@ namespace HalceraAPI.Services.Operations
             {
                 throw;
             }
+        }
+
+        private void CanUpdateProductRequest(Product productFromDb, UpdateProductRequest productRequest)
+        {
+            // prevent duplicate CompositionType
+            List<Price> tempPrices = productFromDb.Prices?.ToList() ?? new();
+            tempPrices.AddRange(_mapper.Map<List<Price>>(productRequest.Prices));
+
+            var tempCompositions = productFromDb.ProductCompositions?.ToList() ?? new();
+            tempCompositions.AddRange(_mapper.Map<List<Composition>>(productRequest.ProductCompositions));
+
+            Product tempValidation = new()
+            {
+                Prices = tempPrices,
+                ProductCompositions = tempCompositions
+            };
+            tempValidation.ValidateProductForCreate();
         }
 
         public async Task DeleteCategoryFromProductByCategoryIdAsync(int productId, int categoryId)
@@ -264,6 +283,18 @@ namespace HalceraAPI.Services.Operations
                     productId,
                     compositionId,
                     compositionDataId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId)
+        {
+            try
+            {
+                await _priceOperation.ResetDiscountOfProductPriceByPriceIdAsync(productId, priceId);
             }
             catch (Exception)
             {

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HalceraAPI.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace HalceraAPI.Models
 {
@@ -57,5 +58,41 @@ namespace HalceraAPI.Models
         public DateTime? DateAdded { get; set; } = DateTime.UtcNow;
 
         public DateTime? DateLastModified { get; set; }
+
+        public void ValidateProductForCreate()
+        {
+            CheckCompositionDuplicateType();
+            CheckPriceDuplicateCurrency();
+        }
+
+        private void CheckCompositionDuplicateType()
+        {
+            if (ProductCompositions is not null && ProductCompositions.Any())
+            {
+                HashSet<CompositionType?> seenTypes = new();
+                foreach (var composition in ProductCompositions)
+                {
+                    if (!seenTypes.Add(composition.CompositionType))
+                    {
+                        throw new Exception($"Duplicate composition type: {composition.CompositionType?.ToString()} specified");
+                    }
+                }
+            }
+        }
+
+        private void CheckPriceDuplicateCurrency()
+        {
+            if (Prices is not null && Prices.Any())
+            {
+                HashSet<Currency?> seenTypes = new();
+                foreach (var price in Prices)
+                {
+                    if (!seenTypes.Add(price.Currency))
+                    {
+                        throw new Exception($"Duplicate currency: {price.Currency?.ToString().ToUpper()} specified");
+                    }
+                }
+            }
+        }
     }
 }
