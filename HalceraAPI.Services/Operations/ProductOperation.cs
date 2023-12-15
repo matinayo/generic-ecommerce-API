@@ -74,7 +74,7 @@ namespace HalceraAPI.Services.Operations
 
                 // delete product composition and prices
                 await _compositionOperation.DeleteProductCompositions(productId);
-                await _priceOperation.DeleteProductPrices(productId);
+                await _priceOperation.DeleteProductPricesAsync(productId);
 
                 _unitOfWork.Product.Remove(productDetails);
                 await _unitOfWork.SaveAsync();
@@ -213,6 +213,32 @@ namespace HalceraAPI.Services.Operations
                     ?? throw new Exception("This category cannot be found");
 
                 product.Categories.Remove(categoryToDelete);
+                await _unitOfWork.SaveAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteProductPriceByPriceIdAsync(int productId, int priceId)
+        {
+            try
+            {
+                Product product = await _unitOfWork.Product.GetFirstOrDefault(
+                    product => product.Id == productId,
+                    includeProperties: nameof(Product.Prices))
+                    ?? throw new Exception("This product cannot be found");
+
+                if (product.Prices == null || !product.Prices.Any())
+                {
+                    throw new Exception("No prices available for this product");
+                }
+
+                Price priceToDelete = product.Prices.FirstOrDefault(price => price.Id == priceId)
+                    ?? throw new Exception("This price cannot be found");
+
+                product.Prices.Remove(priceToDelete);
                 await _unitOfWork.SaveAsync();
             }
             catch (Exception)

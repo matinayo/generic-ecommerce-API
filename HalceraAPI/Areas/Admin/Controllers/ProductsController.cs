@@ -126,7 +126,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpDelete("{productId}/category/{categoryId}")]
+        [HttpDelete("{productId}/Category/{categoryId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteProductCategoryAsync(int productId, int categoryId)
@@ -134,6 +134,27 @@ namespace HalceraAPI.Areas.Admin.Controllers
             try
             {
                 await _productOperation.DeleteProductCategoryByCategoryIdAsync(productId, categoryId);
+
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
+
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
+        [HttpDelete("{productId}/Price/{priceId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> DeleteProductPriceByPriceIdAsync(int productId, int priceId)
+        {
+            try
+            {
+                await _productOperation.DeleteProductPriceByPriceIdAsync(productId, priceId);
 
                 return NoContent();
             }

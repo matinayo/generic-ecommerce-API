@@ -17,7 +17,7 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
-        public async Task<bool> DeleteProductPrices(int productId)
+        public async Task DeleteProductPricesAsync(int productId)
         {
             try
             {
@@ -27,7 +27,6 @@ namespace HalceraAPI.Services.Operations
                     _unitOfWork.Price.RemoveRange(productPrices);
                     await _unitOfWork.SaveAsync();
                 }
-                return true;
             }
             catch (Exception)
             {
