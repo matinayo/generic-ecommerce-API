@@ -3,7 +3,6 @@ using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.Composition;
 using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Services.Contract;
 using System.Linq.Expressions;
@@ -43,7 +42,7 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 Product product = _mapper.Map<Product>(productRequest);
-                product.ValidateProductForCreate();                
+                product.ValidateProductForCreate();
 
                 if (productRequest.Categories is not null && productRequest.Categories.Any())
                 {
@@ -284,6 +283,18 @@ namespace HalceraAPI.Services.Operations
                     productId,
                     compositionId,
                     compositionDataId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId)
+        {
+            try
+            {
+                await _priceOperation.ResetDiscountOfProductPriceByPriceIdAsync(productId, priceId);
             }
             catch (Exception)
             {
