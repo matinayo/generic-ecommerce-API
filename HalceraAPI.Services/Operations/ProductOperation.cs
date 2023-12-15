@@ -62,7 +62,7 @@ namespace HalceraAPI.Services.Operations
             catch (Exception) { throw; }
         }
 
-        public async Task<bool> DeleteProductAsync(int productId)
+        public async Task DeleteProductAsync(int productId)
         {
             try
             {
@@ -78,8 +78,6 @@ namespace HalceraAPI.Services.Operations
 
                 _unitOfWork.Product.Remove(productDetails);
                 await _unitOfWork.SaveAsync();
-
-                return true;
             }
             catch (Exception)
             {
@@ -198,6 +196,31 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
+        public async Task DeleteProductCategoryByCategoryIdAsync(int productId, int categoryId)
+        {
+            try
+            {
+                Product product = await _unitOfWork.Product.GetFirstOrDefault(
+                    filter: product => product.Id == productId, 
+                    includeProperties: nameof(Product.Categories))
+                    ?? throw new Exception("This product cannot be found");
+
+                if(product.Categories == null || !product.Categories.Any()) {
+                    throw new Exception("No categories available for this product");
+                }
+
+                Category categoryToDelete = product.Categories.FirstOrDefault(category => category.Id == categoryId)
+                    ?? throw new Exception("This category cannot be found");
+
+                product.Categories.Remove(categoryToDelete);
+                await _unitOfWork.SaveAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private static Expression<Func<Product, bool>> GetFeaturedProducts(bool? featured) => product => product.Featured == featured;
 
         private static Expression<Func<Product, bool>> GetActiveProducts(bool? active) => product => product.Active == active;
@@ -220,5 +243,6 @@ namespace HalceraAPI.Services.Operations
 
         private static Expression<Func<Product, bool>> GetProductsByCategoryId(int categoryId) =>
             product => product.Categories!.Any(category => category.Id == categoryId);
+
     }
 }
