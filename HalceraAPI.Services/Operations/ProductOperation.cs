@@ -3,6 +3,7 @@ using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.APIResponse;
+using HalceraAPI.Models.Requests.Composition;
 using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Services.Contract;
 using System.Linq.Expressions;
@@ -41,10 +42,10 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Product product = new();
-                _mapper.Map(productRequest, product);
+                Product product = _mapper.Map<Product>(productRequest);
+                product.ValidateProductForCreate();                
 
-                if (productRequest.Categories != null && productRequest.Categories.Any())
+                if (productRequest.Categories is not null && productRequest.Categories.Any())
                 {
                     var categories = await _unitOfWork.Category.GetAll(
                         category => productRequest.Categories != null
@@ -175,6 +176,8 @@ namespace HalceraAPI.Services.Operations
                     includeProperties: $"{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.Prices)},{nameof(Product.MediaCollection)}")
                     ?? throw new Exception("Product not found");
 
+                CanUpdateProductRequest(productFromDb, productRequest);
+
                 _priceOperation.UpdatePrice(productRequest.Prices, productFromDb.Prices);
                 _mediaOperation.UpdateMediaCollection(productRequest.MediaCollection, productFromDb.MediaCollection);
                 _compositionOperation.UpdateComposition(productRequest.ProductCompositions, productFromDb.ProductCompositions);
@@ -203,6 +206,21 @@ namespace HalceraAPI.Services.Operations
             {
                 throw;
             }
+        }
+
+        private void CanUpdateProductRequest(Product productFromDb, UpdateProductRequest productRequest)
+        {
+            // prevent duplicate CompositionType
+            Product tempValidation = new()
+            {
+                ProductCompositions = productFromDb.ProductCompositions
+            };
+
+            List<Composition> destination = tempValidation.ProductCompositions?.ToList() ?? new();
+            destination.AddRange(_mapper.Map<List<Composition>>(productRequest.ProductCompositions));
+
+            tempValidation.ProductCompositions = destination;
+            tempValidation.ValidateProductForCreate();
         }
 
         public async Task DeleteCategoryFromProductByCategoryIdAsync(int productId, int categoryId)
