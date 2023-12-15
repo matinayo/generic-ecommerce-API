@@ -17,7 +17,7 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
-        public async Task<bool> DeleteMediaCollection(int? categoryId, int? productId)
+        public async Task DeleteMediaCollection(int? categoryId, int? productId)
         {
             try
             {
@@ -31,9 +31,45 @@ namespace HalceraAPI.Services.Operations
                 if (relatedMediaCollection != null && relatedMediaCollection.Any())
                 {
                     _unitOfWork.Media.RemoveRange(relatedMediaCollection);
-                    return true;
                 }
-                return false;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteMediaFromCategoryByMediaIdAsync(int categoryId, int mediaId)
+        {
+            try
+            {
+                Media mediaToDelete = await _unitOfWork.Media
+                    .GetFirstOrDefault(
+                    media => media.Id == mediaId
+                    && media.CategoryId == categoryId)
+                    ?? throw new Exception("No media available for this product");
+
+                _unitOfWork.Media.Remove(mediaToDelete);
+                await _unitOfWork.SaveAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteMediaFromProductByMediaIdAsync(int productId, int mediaId)
+        {
+            try
+            {
+                Media mediaToDelete = await _unitOfWork.Media
+                    .GetFirstOrDefault(
+                    media => media.Id == mediaId
+                    && media.ProductId == productId)
+                    ?? throw new Exception("No media available for this product");
+
+                _unitOfWork.Media.Remove(mediaToDelete);
+                await _unitOfWork.SaveAsync();
             }
             catch (Exception)
             {

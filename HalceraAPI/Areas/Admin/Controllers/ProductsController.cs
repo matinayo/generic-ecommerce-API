@@ -25,16 +25,16 @@ namespace HalceraAPI.Areas.Admin.Controllers
         {
             try
             {
-                APIResponse<IEnumerable<ProductResponse>> listOfProducts = 
+                APIResponse<IEnumerable<ProductResponse>> listOfProducts =
                     await _productOperation.GetAllProductsAsync(active, featured, categoryId, page);
-                
+
                 return Ok(listOfProducts);
             }
             catch (Exception exception)
             {
                 return BadRequest(
                         Problem(
-                            statusCode: StatusCodes.Status400BadRequest, 
+                            statusCode: StatusCodes.Status400BadRequest,
                             detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
@@ -46,7 +46,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         {
             try
             {
-                APIResponse<ProductDetailsResponse>? productDetails = 
+                APIResponse<ProductDetailsResponse>? productDetails =
                     await _productOperation.GetProductByIdAsync(productId);
 
                 return Ok(productDetails);
@@ -55,7 +55,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             {
                 return BadRequest(
                         Problem(
-                            statusCode: StatusCodes.Status400BadRequest, 
+                            statusCode: StatusCodes.Status400BadRequest,
                             detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
@@ -68,7 +68,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         {
             try
             {
-                APIResponse<ProductDetailsResponse> productDetails = 
+                APIResponse<ProductDetailsResponse> productDetails =
                     await _productOperation.CreateProductAsync(productRequest);
 
                 return Ok(productDetails);
@@ -99,7 +99,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
             {
                 return BadRequest(
                         Problem(
-                            statusCode: StatusCodes.Status400BadRequest, 
+                            statusCode: StatusCodes.Status400BadRequest,
                             detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
@@ -120,20 +120,110 @@ namespace HalceraAPI.Areas.Admin.Controllers
             {
                 return BadRequest(
                         Problem(
-                            statusCode: StatusCodes.Status400BadRequest, 
+                            statusCode: StatusCodes.Status400BadRequest,
                             detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpDelete("{productId}/category/{categoryId}")]
+        [HttpDelete("{productId}/Category/{categoryId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteProductCategoryAsync(int productId, int categoryId)
         {
             try
             {
-                await _productOperation.DeleteProductCategoryByCategoryIdAsync(productId, categoryId);
+                await _productOperation.DeleteCategoryFromProductByCategoryIdAsync(productId, categoryId);
+
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
+
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
+        [HttpDelete("{productId}/Price/{priceId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> DeleteProductPriceByPriceIdAsync(int productId, int priceId)
+        {
+            try
+            {
+                await _productOperation.DeletePriceFromProductByPriceIdAsync(productId, priceId);
+
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
+
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
+        [HttpDelete("{productId}/Media/{mediaId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> DeleteProductMediaByMediaIdAsync(int productId, int mediaId)
+        {
+            try
+            {
+                await _productOperation.DeleteMediaFromProductByMediaIdAsync(productId, mediaId);
+
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
+
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
+        [HttpDelete("{productId}/Composition/{compositionId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> DeleteProductCompositionByCompositionIdAsync(int productId, int compositionId)
+        {
+            try
+            {
+                await _productOperation.DeleteCompositionFromProductByCompositionIdAsync(productId, compositionId);
+
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
+
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
+        [HttpDelete("{productId}/Composition/{compositionId}/Data/{compositionDataId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> DeleteProductCompositionDataByCompositionDataIdAsync(
+            int productId,
+            int compositionId,
+            int compositionDataId)
+        {
+            try
+            {
+                await _productOperation.DeleteProductCompositionDataByCompositionDataIdAsync(
+                    productId,
+                    compositionId,
+                    compositionDataId);
 
                 return NoContent();
             }

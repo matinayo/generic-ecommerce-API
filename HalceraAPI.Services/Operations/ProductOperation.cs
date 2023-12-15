@@ -15,6 +15,7 @@ namespace HalceraAPI.Services.Operations
         private readonly IMapper _mapper;
         private readonly IMediaOperation _mediaOperation;
         private readonly ICompositionOperation _compositionOperation;
+        private readonly ICompositionDataOperation _compositionDataOperation;
         private readonly IPriceOperation _priceOperation;
         private readonly ICategoryOperation _categoryOperation;
 
@@ -23,6 +24,7 @@ namespace HalceraAPI.Services.Operations
             IMapper mapper,
             IMediaOperation mediaOperation,
             ICompositionOperation compositionOperation,
+            ICompositionDataOperation compositionDataOperation,
             IPriceOperation priceOperation,
             ICategoryOperation categoryOperation)
         {
@@ -30,6 +32,7 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
             _mediaOperation = mediaOperation;
             _compositionOperation = compositionOperation;
+            _compositionDataOperation = compositionDataOperation;
             _priceOperation = priceOperation;
             _categoryOperation = categoryOperation;
         }
@@ -74,7 +77,7 @@ namespace HalceraAPI.Services.Operations
 
                 // delete product composition and prices
                 await _compositionOperation.DeleteProductCompositions(productId);
-                await _priceOperation.DeleteProductPrices(productId);
+                await _priceOperation.DeleteProductPricesAsync(productId);
 
                 _unitOfWork.Product.Remove(productDetails);
                 await _unitOfWork.SaveAsync();
@@ -85,7 +88,11 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<APIResponse<IEnumerable<ProductResponse>>> GetAllProductsAsync(bool? active, bool? featured, int? categoryId, int? page)
+        public async Task<APIResponse<IEnumerable<ProductResponse>>> GetAllProductsAsync(
+            bool? active,
+            bool? featured,
+            int? categoryId,
+            int? page)
         {
             try
             {
@@ -158,13 +165,15 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<APIResponse<ProductDetailsResponse>> UpdateProductAsync(int productId, UpdateProductRequest productRequest)
+        public async Task<APIResponse<ProductDetailsResponse>> UpdateProductAsync(
+            int productId,
+            UpdateProductRequest productRequest)
         {
             try
             {
-                Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId,
-                    includeProperties: $"{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.Prices)},{nameof(Product.MediaCollection)}");
-                if (productFromDb is null) throw new Exception("Product not found");
+                Product productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId,
+                    includeProperties: $"{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.Prices)},{nameof(Product.MediaCollection)}")
+                    ?? throw new Exception("Product not found");
 
                 _priceOperation.UpdatePrice(productRequest.Prices, productFromDb.Prices);
                 _mediaOperation.UpdateMediaCollection(productRequest.MediaCollection, productFromDb.MediaCollection);
@@ -196,24 +205,65 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task DeleteProductCategoryByCategoryIdAsync(int productId, int categoryId)
+        public async Task DeleteCategoryFromProductByCategoryIdAsync(int productId, int categoryId)
         {
             try
             {
-                Product product = await _unitOfWork.Product.GetFirstOrDefault(
-                    filter: product => product.Id == productId, 
-                    includeProperties: nameof(Product.Categories))
-                    ?? throw new Exception("This product cannot be found");
+                await _categoryOperation.DeleteCategoryFromProductByCategoryIdAsync(productId, categoryId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
-                if(product.Categories == null || !product.Categories.Any()) {
-                    throw new Exception("No categories available for this product");
-                }
+        public async Task DeletePriceFromProductByPriceIdAsync(int productId, int priceId)
+        {
+            try
+            {
+                await _priceOperation.DeletePriceFromProductByPriceIdAsync(productId, priceId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
-                Category categoryToDelete = product.Categories.FirstOrDefault(category => category.Id == categoryId)
-                    ?? throw new Exception("This category cannot be found");
+        public async Task DeleteMediaFromProductByMediaIdAsync(int productId, int mediaId)
+        {
+            try
+            {
+                await _mediaOperation.DeleteMediaFromProductByMediaIdAsync(productId, mediaId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
-                product.Categories.Remove(categoryToDelete);
-                await _unitOfWork.SaveAsync();
+        public async Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId)
+        {
+            try
+            {
+                await _compositionOperation.DeleteCompositionFromProductByCompositionIdAsync(productId, compositionId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteProductCompositionDataByCompositionDataIdAsync(
+            int productId,
+            int compositionId,
+            int compositionDataId)
+        {
+            try
+            {
+                await _compositionDataOperation.DeleteCompositionDataFromProductCompositionAsync(
+                    productId,
+                    compositionId,
+                    compositionDataId);
             }
             catch (Exception)
             {
@@ -243,6 +293,5 @@ namespace HalceraAPI.Services.Operations
 
         private static Expression<Func<Product, bool>> GetProductsByCategoryId(int categoryId) =>
             product => product.Categories!.Any(category => category.Id == categoryId);
-
     }
 }

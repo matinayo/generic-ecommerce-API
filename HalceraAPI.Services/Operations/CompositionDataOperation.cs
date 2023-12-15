@@ -17,18 +17,19 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
-        public async Task<bool> DeleteCompositionData(IEnumerable<int> compositionIdCollection)
+        public async Task DeleteCompositionDataCollectionAsync(IEnumerable<int> compositionIdCollection)
         {
             try
             {
-                IEnumerable<CompositionData>? compositionDataCollection = await _unitOfWork.CompositionData.GetAll(compositionData => compositionData.CompositionId != null
-                && compositionIdCollection.Contains(compositionData.CompositionId ?? 0));
+                IEnumerable<CompositionData>? compositionDataCollection = await _unitOfWork.CompositionData.GetAll(
+                    compositionData => compositionData.CompositionId != null
+                    && compositionIdCollection.Contains(compositionData.CompositionId ?? 0));
+
                 if (compositionDataCollection is not null && compositionDataCollection.Any())
                 {
                     _unitOfWork.CompositionData.RemoveRange(compositionDataCollection);
                     await _unitOfWork.SaveAsync();
                 }
-                return true;
             }
             catch (Exception)
             {
@@ -36,7 +37,33 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public void UpdateCompositionData(IEnumerable<UpdateCompositionDataRequest>? compositionDataRequests, ICollection<CompositionData>? existingCompositionDataFromDb)
+        public async Task DeleteCompositionDataFromProductCompositionAsync(int productId, int compositionId, int compositionDataId)
+        {
+            try
+            {
+                CompositionData compositionDataToDelete = await _unitOfWork.CompositionData
+                    .GetFirstOrDefault(
+                    compositionData => compositionData.Id == compositionDataId
+                    && compositionData.CompositionId == compositionId, includeProperties: nameof(CompositionData.Composition))
+                    ?? throw new Exception("No composition data available for this composition");
+
+                if (compositionDataToDelete.Composition is null || compositionDataToDelete.Composition.ProductId != productId)
+                {
+                    throw new Exception("No composition available for this product");
+                }
+
+                _unitOfWork.CompositionData.Remove(compositionDataToDelete);
+                await _unitOfWork.SaveAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public void UpdateCompositionData(
+            IEnumerable<UpdateCompositionDataRequest>? compositionDataRequests,
+            ICollection<CompositionData>? existingCompositionDataFromDb)
         {
             try
             {
