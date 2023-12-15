@@ -15,6 +15,7 @@ namespace HalceraAPI.Services.Operations
         private readonly IMapper _mapper;
         private readonly IMediaOperation _mediaOperation;
         private readonly ICompositionOperation _compositionOperation;
+        private readonly ICompositionDataOperation _compositionDataOperation;
         private readonly IPriceOperation _priceOperation;
         private readonly ICategoryOperation _categoryOperation;
 
@@ -23,6 +24,7 @@ namespace HalceraAPI.Services.Operations
             IMapper mapper,
             IMediaOperation mediaOperation,
             ICompositionOperation compositionOperation,
+            ICompositionDataOperation compositionDataOperation,
             IPriceOperation priceOperation,
             ICategoryOperation categoryOperation)
         {
@@ -30,6 +32,7 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
             _mediaOperation = mediaOperation;
             _compositionOperation = compositionOperation;
+            _compositionDataOperation = compositionDataOperation;
             _priceOperation = priceOperation;
             _categoryOperation = categoryOperation;
         }
@@ -86,7 +89,7 @@ namespace HalceraAPI.Services.Operations
         }
 
         public async Task<APIResponse<IEnumerable<ProductResponse>>> GetAllProductsAsync(
-            bool? active, 
+            bool? active,
             bool? featured,
             int? categoryId,
             int? page)
@@ -202,24 +205,11 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task DeleteProductCategoryByCategoryIdAsync(int productId, int categoryId)
+        public async Task DeleteCategoryFromProductByCategoryIdAsync(int productId, int categoryId)
         {
             try
             {
-                Product product = await _unitOfWork.Product.GetFirstOrDefault(
-                    filter: product => product.Id == productId, 
-                    includeProperties: nameof(Product.Categories))
-                    ?? throw new Exception("This product cannot be found");
-
-                if(product.Categories == null || !product.Categories.Any()) {
-                    throw new Exception("No categories available for this product");
-                }
-
-                Category categoryToDelete = product.Categories.FirstOrDefault(category => category.Id == categoryId)
-                    ?? throw new Exception("This category cannot be found");
-
-                product.Categories.Remove(categoryToDelete);
-                await _unitOfWork.SaveAsync();
+                await _categoryOperation.DeleteCategoryFromProductByCategoryIdAsync(productId, categoryId);
             }
             catch (Exception)
             {
@@ -227,25 +217,11 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task DeleteProductPriceByPriceIdAsync(int productId, int priceId)
+        public async Task DeletePriceFromProductByPriceIdAsync(int productId, int priceId)
         {
             try
             {
-                Product product = await _unitOfWork.Product.GetFirstOrDefault(
-                    product => product.Id == productId,
-                    includeProperties: nameof(Product.Prices))
-                    ?? throw new Exception("This product cannot be found");
-
-                if (product.Prices == null || !product.Prices.Any())
-                {
-                    throw new Exception("No prices available for this product");
-                }
-
-                Price priceToDelete = product.Prices.FirstOrDefault(price => price.Id == priceId)
-                    ?? throw new Exception("This price cannot be found");
-
-                product.Prices.Remove(priceToDelete);
-                await _unitOfWork.SaveAsync();
+                await _priceOperation.DeletePriceFromProductByPriceIdAsync(productId, priceId);
             }
             catch (Exception)
             {
@@ -253,37 +229,11 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task DeleteProductMediaByMediaIdAsync(int productId, int mediaId)
+        public async Task DeleteMediaFromProductByMediaIdAsync(int productId, int mediaId)
         {
             try
             {
-                Product product = await _unitOfWork.Product.GetFirstOrDefault(
-                    filter: product => product.Id == productId,
-                    includeProperties: nameof(Product.MediaCollection)) 
-                    ?? throw new Exception("This product cannot be found");
-
-                if (product.MediaCollection == null || !product.MediaCollection.Any())
-                {
-                    throw new Exception("No media available for this product");
-                }
-
-                Media mediaToDelete = product.MediaCollection.FirstOrDefault(media => media.Id == mediaId)
-                    ?? throw new Exception("This media cannot be found");
-
-                product.MediaCollection.Remove(mediaToDelete);
-                await _unitOfWork.SaveAsync();
-            }
-            catch(Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task DeleteProductCompositionByCompositionIdAsync(int productId, int compositionId)
-        {
-            try
-            {
-                await _compositionOperation.DeleteProductCompositionByCompositionId(productId, compositionId);
+                await _mediaOperation.DeleteMediaFromProductByMediaIdAsync(productId, mediaId);
             }
             catch (Exception)
             {
@@ -291,9 +241,34 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public Task DeleteProductCompositionDataByCompositionDataIdAsync(int productId, int compositionId, int compositionDataId)
+        public async Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _compositionOperation.DeleteCompositionFromProductByCompositionIdAsync(productId, compositionId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteProductCompositionDataByCompositionDataIdAsync(
+            int productId,
+            int compositionId,
+            int compositionDataId)
+        {
+            try
+            {
+                await _compositionDataOperation.DeleteCompositionDataFromProductCompositionAsync(
+                    productId,
+                    compositionId,
+                    compositionDataId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         private static Expression<Func<Product, bool>> GetFeaturedProducts(bool? featured) => product => product.Featured == featured;

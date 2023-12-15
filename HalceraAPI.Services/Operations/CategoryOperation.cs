@@ -41,7 +41,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<bool> DeleteCategoryAsync(int categoryId)
+        public async Task DeleteCategoryAsync(int categoryId)
         {
             try
             {
@@ -52,7 +52,6 @@ namespace HalceraAPI.Services.Operations
                 _unitOfWork.Category.Remove(categoryDetailsFromDb);
 
                 await _unitOfWork.SaveAsync();
-                return true;
             }
             catch (Exception)
             {
@@ -60,7 +59,48 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<APIResponse<IEnumerable<CategoryResponse>>> GetAllCategoriesAsync(bool? active, bool? featured, int? page)
+        public async Task DeleteCategoryFromProductByCategoryIdAsync(int productId, int categoryId)
+        {
+            try
+            {
+                Product product = await _unitOfWork.Product.GetFirstOrDefault(
+                    filter: product => product.Id == productId,
+                    includeProperties: nameof(Product.Categories))
+                    ?? throw new Exception("This product cannot be found");
+
+                if (product.Categories == null || !product.Categories.Any())
+                {
+                    throw new Exception("No categories available for this product");
+                }
+
+                Category categoryToDelete = product.Categories.FirstOrDefault(category => category.Id == categoryId)
+                    ?? throw new Exception("This category cannot be found");
+
+                product.Categories.Remove(categoryToDelete);
+                await _unitOfWork.SaveAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteMediaFromCategoryByMediaIdAsync(int categoryId, int mediaId)
+        {
+            try
+            {
+                await _mediaOperation.DeleteMediaFromCategoryByMediaIdAsync(categoryId, mediaId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<APIResponse<IEnumerable<CategoryResponse>>> GetAllCategoriesAsync(
+            bool? active, 
+            bool? featured,
+            int? page)
         {
             try
             {
@@ -95,7 +135,8 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<IEnumerable<Category>?> GetCategoriesFromListOfCategoryIdAsync(IEnumerable<ProductCategoryRequest>? categoryRequests)
+        public async Task<IEnumerable<Category>?> GetCategoriesFromListOfCategoryIdAsync(
+            IEnumerable<ProductCategoryRequest>? categoryRequests)
         {
             try
             {
@@ -119,8 +160,8 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 Category categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(
-                    category => category.Id == categoryId, 
-                    includeProperties: nameof(Category.MediaCollection)) 
+                    category => category.Id == categoryId,
+                    includeProperties: nameof(Category.MediaCollection))
                     ?? throw new Exception("Category not found");
 
                 CategoryResponse response = _mapper.Map<CategoryResponse>(categoryDetailsFromDb);
@@ -133,13 +174,15 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<APIResponse<CategoryResponse>> UpdateCategoryAsync(int categoryId, UpdateCategoryRequest category)
+        public async Task<APIResponse<CategoryResponse>> UpdateCategoryAsync(
+            int categoryId,
+            UpdateCategoryRequest category)
         {
             try
             {
                 Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(
                     categoryDb => categoryDb.Id == categoryId,
-                    includeProperties: $"{nameof(Category.MediaCollection)}") 
+                    includeProperties: $"{nameof(Category.MediaCollection)}")
                     ?? throw new Exception("Category not found");
 
                 _mediaOperation.UpdateMediaCollection(category.MediaCollection, categoryDetailsFromDb.MediaCollection);

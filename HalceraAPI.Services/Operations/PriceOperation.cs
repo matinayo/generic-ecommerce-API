@@ -17,6 +17,24 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
+        public async Task DeletePriceFromProductByPriceIdAsync(int productId, int priceId)
+        {
+            try
+            {
+                Price priceToDelete = await _unitOfWork.Price.GetFirstOrDefault(
+                    price => price.Id == priceId
+                    && price.ProductId == productId)
+                    ?? throw new Exception("No price available for this product");
+
+                _unitOfWork.Price.Remove(priceToDelete);
+                await _unitOfWork.SaveAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task DeleteProductPricesAsync(int productId)
         {
             try

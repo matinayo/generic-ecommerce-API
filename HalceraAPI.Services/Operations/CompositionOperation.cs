@@ -20,17 +20,17 @@ namespace HalceraAPI.Services.Operations
             _compositionDataOperation = compositionDataOperation;
         }
 
-        public async Task DeleteProductCompositionByCompositionId(int productId, int compositionId)
+        public async Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId)
         {
             try
             {
                 Composition compositionToDelete = await _unitOfWork.Composition
                     .GetFirstOrDefault(
-                    composition => composition.ProductId == productId 
-                    && composition.Id == compositionId)
+                    composition => composition.Id == compositionId 
+                    && composition.ProductId == productId)
                     ?? throw new Exception("No composition available for this product");
 
-                await _compositionDataOperation.DeleteCompositionData(new List<int>() { compositionToDelete.Id });
+                await _compositionDataOperation.DeleteCompositionDataCollectionAsync(new List<int>() { compositionToDelete.Id });
 
                 _unitOfWork.Composition.Remove(compositionToDelete);
                 await _unitOfWork.SaveAsync();
@@ -45,11 +45,12 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                IEnumerable<Composition>? productCompositions = await _unitOfWork.Composition.GetAll(composition => composition.ProductId == productId);
+                IEnumerable<Composition>? productCompositions = await _unitOfWork.Composition.GetAll(
+                    composition => composition.ProductId == productId);
                 if (productCompositions is not null && productCompositions.Any())
                 {
                     // delete product composition data
-                    await _compositionDataOperation.DeleteCompositionData(productCompositions.Select(comp => comp.Id));
+                    await _compositionDataOperation.DeleteCompositionDataCollectionAsync(productCompositions.Select(comp => comp.Id));
 
                     _unitOfWork.Composition.RemoveRange(productCompositions);
                     await _unitOfWork.SaveAsync();

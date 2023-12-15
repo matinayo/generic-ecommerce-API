@@ -39,6 +39,44 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
+        public async Task DeleteMediaFromCategoryByMediaIdAsync(int categoryId, int mediaId)
+        {
+            try
+            {
+                Media mediaToDelete = await _unitOfWork.Media
+                    .GetFirstOrDefault(
+                    media => media.Id == mediaId
+                    && media.CategoryId == categoryId)
+                    ?? throw new Exception("No media available for this product");
+
+                _unitOfWork.Media.Remove(mediaToDelete);
+                await _unitOfWork.SaveAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteMediaFromProductByMediaIdAsync(int productId, int mediaId)
+        {
+            try
+            {
+                Media mediaToDelete = await _unitOfWork.Media
+                    .GetFirstOrDefault(
+                    media => media.Id == mediaId
+                    && media.ProductId == productId)
+                    ?? throw new Exception("No media available for this product");
+
+                _unitOfWork.Media.Remove(mediaToDelete);
+                await _unitOfWork.SaveAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public void UpdateMediaCollection(IEnumerable<UpdateMediaRequest>? mediaCollection, ICollection<Media>? mediaCollectionFromDb)
         {
             try

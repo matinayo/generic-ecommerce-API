@@ -25,14 +25,17 @@ namespace HalceraAPI.Areas.Admin.Controllers
         {
             try
             {
-                APIResponse<IEnumerable<CategoryResponse>> listOfCategories = 
+                APIResponse<IEnumerable<CategoryResponse>> listOfCategories =
                     await _categoryOperation.GetAllCategoriesAsync(active: active, featured: featured, page: page);
 
                 return Ok(listOfCategories);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.Message));
             }
         }
 
@@ -50,7 +53,10 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.Message));
             }
         }
 
@@ -68,7 +74,10 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.Message));
             }
         }
 
@@ -87,25 +96,52 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.Message));
             }
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpDelete("{categoryId}")]
-        [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteCategory(int categoryId)
         {
             try
             {
-                bool result = await _categoryOperation.DeleteCategoryAsync(categoryId);
-                return Ok(result);
+                await _categoryOperation.DeleteCategoryAsync(categoryId);
+
+                return NoContent();
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.Message));
+            }
+        }
+
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
+        [HttpDelete("{categoryId}/Media/{mediaId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> DeleteCategoryMediaByMediaIdAsync(int categoryId, int mediaId)
+        {
+            try
+            {
+                await _categoryOperation.DeleteMediaFromCategoryByMediaIdAsync(categoryId, mediaId);
+
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
     }

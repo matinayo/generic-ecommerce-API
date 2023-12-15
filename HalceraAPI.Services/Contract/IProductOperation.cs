@@ -15,13 +15,13 @@ namespace HalceraAPI.Services.Contract
 
         Task DeleteProductAsync(int productId);
 
-        Task DeleteProductCategoryByCategoryIdAsync(int productId, int categoryId);
+        Task DeleteCategoryFromProductByCategoryIdAsync(int productId, int categoryId);
 
-        Task DeleteProductPriceByPriceIdAsync(int productId, int priceId);
+        Task DeletePriceFromProductByPriceIdAsync(int productId, int priceId);
 
-        Task DeleteProductMediaByMediaIdAsync(int productId, int mediaId);
+        Task DeleteMediaFromProductByMediaIdAsync(int productId, int mediaId);
 
-        Task DeleteProductCompositionByCompositionIdAsync(int productId, int compositionId);
+        Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId);
 
         Task DeleteProductCompositionDataByCompositionDataIdAsync(int productId, int compositionId, int compositionDataId);
     }

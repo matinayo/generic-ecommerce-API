@@ -8,6 +8,6 @@ namespace HalceraAPI.Services.Contract
     {
         void UpdatePrice(IEnumerable<UpdatePriceRequest>? priceCollection, ICollection<Price>? pricesFromDb);
         Task DeleteProductPricesAsync(int productId);
-        
+        Task DeletePriceFromProductByPriceIdAsync(int productId, int priceId);
     }
 }
