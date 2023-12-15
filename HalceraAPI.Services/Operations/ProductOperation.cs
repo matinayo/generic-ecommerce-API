@@ -162,9 +162,9 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Product? productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId,
-                    includeProperties: $"{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.Prices)},{nameof(Product.MediaCollection)}");
-                if (productFromDb is null) throw new Exception("Product not found");
+                Product productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId,
+                    includeProperties: $"{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.Prices)},{nameof(Product.MediaCollection)}")
+                    ?? throw new Exception("Product not found");
 
                 _priceOperation.UpdatePrice(productRequest.Prices, productFromDb.Prices);
                 _mediaOperation.UpdateMediaCollection(productRequest.MediaCollection, productFromDb.MediaCollection);
@@ -242,6 +242,32 @@ namespace HalceraAPI.Services.Operations
                 await _unitOfWork.SaveAsync();
             }
             catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteProductMediaByMediaIdAsync(int productId, int mediaId)
+        {
+            try
+            {
+                Product product = await _unitOfWork.Product.GetFirstOrDefault(
+                    filter: product => product.Id == productId,
+                    includeProperties: nameof(Product.MediaCollection)) 
+                    ?? throw new Exception("This product cannot be found");
+
+                if (product.MediaCollection == null || !product.MediaCollection.Any())
+                {
+                    throw new Exception("No media available for this product");
+                }
+
+                Media mediaToDelete = product.MediaCollection.FirstOrDefault(media => media.Id == mediaId)
+                    ?? throw new Exception("This media cannot be found");
+
+                product.MediaCollection.Remove(mediaToDelete);
+                await _unitOfWork.SaveAsync();
+            }
+            catch(Exception)
             {
                 throw;
             }

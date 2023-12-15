@@ -166,5 +166,26 @@ namespace HalceraAPI.Areas.Admin.Controllers
                             detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
+
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
+        [HttpDelete("{productId}/Media/{mediaId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> DeleteProductMediaByMediaIdAsync(int productId, int mediaId)
+        {
+            try
+            {
+                await _productOperation.DeleteProductMediaByMediaIdAsync(productId, mediaId);
+
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
     }
 }

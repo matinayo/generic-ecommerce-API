@@ -17,7 +17,7 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
-        public async Task<bool> DeleteMediaCollection(int? categoryId, int? productId)
+        public async Task DeleteMediaCollection(int? categoryId, int? productId)
         {
             try
             {
@@ -31,9 +31,7 @@ namespace HalceraAPI.Services.Operations
                 if (relatedMediaCollection != null && relatedMediaCollection.Any())
                 {
                     _unitOfWork.Media.RemoveRange(relatedMediaCollection);
-                    return true;
                 }
-                return false;
             }
             catch (Exception)
             {

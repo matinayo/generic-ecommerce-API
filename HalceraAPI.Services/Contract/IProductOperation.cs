@@ -18,5 +18,7 @@ namespace HalceraAPI.Services.Contract
         Task DeleteProductCategoryByCategoryIdAsync(int productId, int categoryId);
 
         Task DeleteProductPriceByPriceIdAsync(int productId, int priceId);
+
+        Task DeleteProductMediaByMediaIdAsync(int productId, int mediaId);
     }
 }
