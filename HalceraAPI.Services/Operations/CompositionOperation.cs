@@ -20,6 +20,27 @@ namespace HalceraAPI.Services.Operations
             _compositionDataOperation = compositionDataOperation;
         }
 
+        public async Task DeleteProductCompositionByCompositionId(int productId, int compositionId)
+        {
+            try
+            {
+                Composition compositionToDelete = await _unitOfWork.Composition
+                    .GetFirstOrDefault(
+                    composition => composition.ProductId == productId 
+                    && composition.Id == compositionId)
+                    ?? throw new Exception("No composition available for this product");
+
+                await _compositionDataOperation.DeleteCompositionData(new List<int>() { compositionToDelete.Id });
+
+                _unitOfWork.Composition.Remove(compositionToDelete);
+                await _unitOfWork.SaveAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<bool> DeleteProductCompositions(int productId)
         {
             try

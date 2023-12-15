@@ -85,7 +85,11 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<APIResponse<IEnumerable<ProductResponse>>> GetAllProductsAsync(bool? active, bool? featured, int? categoryId, int? page)
+        public async Task<APIResponse<IEnumerable<ProductResponse>>> GetAllProductsAsync(
+            bool? active, 
+            bool? featured,
+            int? categoryId,
+            int? page)
         {
             try
             {
@@ -158,7 +162,9 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<APIResponse<ProductDetailsResponse>> UpdateProductAsync(int productId, UpdateProductRequest productRequest)
+        public async Task<APIResponse<ProductDetailsResponse>> UpdateProductAsync(
+            int productId,
+            UpdateProductRequest productRequest)
         {
             try
             {
@@ -273,6 +279,23 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
+        public async Task DeleteProductCompositionByCompositionIdAsync(int productId, int compositionId)
+        {
+            try
+            {
+                await _compositionOperation.DeleteProductCompositionByCompositionId(productId, compositionId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task DeleteProductCompositionDataByCompositionDataIdAsync(int productId, int compositionId, int compositionDataId)
+        {
+            throw new NotImplementedException();
+        }
+
         private static Expression<Func<Product, bool>> GetFeaturedProducts(bool? featured) => product => product.Featured == featured;
 
         private static Expression<Func<Product, bool>> GetActiveProducts(bool? active) => product => product.Active == active;
@@ -295,6 +318,5 @@ namespace HalceraAPI.Services.Operations
 
         private static Expression<Func<Product, bool>> GetProductsByCategoryId(int categoryId) =>
             product => product.Categories!.Any(category => category.Id == categoryId);
-
     }
 }

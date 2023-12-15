@@ -10,11 +10,9 @@ namespace HalceraAPI.Services.Contract
         /// Update Product Composition
         /// </summary>
         void UpdateComposition(IEnumerable<UpdateCompositionRequest>? compositionCollection, ICollection<Composition>? existingCompositionsfromDb);
-        /// <summary>
-        /// Delete range of Composition collection
-        /// </summary>
-        /// <param name="productId">Product Id Composition to be deleted</param>
-        /// <returns>Returns false if nothing was deleted otherwise true</returns>
+        
         Task<bool> DeleteProductCompositions(int productId);
+
+        Task DeleteProductCompositionByCompositionId(int productId, int compositionId);
     }
 }
