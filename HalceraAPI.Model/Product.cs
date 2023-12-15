@@ -62,6 +62,7 @@ namespace HalceraAPI.Models
         public void ValidateProductForCreate()
         {
             CheckCompositionDuplicateType();
+            CheckPriceDuplicateCurrency();
         }
 
         private void CheckCompositionDuplicateType()
@@ -73,7 +74,22 @@ namespace HalceraAPI.Models
                 {
                     if (!seenTypes.Add(composition.CompositionType))
                     {
-                        throw new Exception($"Duplicate composition type {composition.CompositionType?.ToString().ToLower()}");
+                        throw new Exception($"Duplicate composition type: {composition.CompositionType?.ToString()} specified");
+                    }
+                }
+            }
+        }
+
+        private void CheckPriceDuplicateCurrency()
+        {
+            if (Prices is not null && Prices.Any())
+            {
+                HashSet<Currency?> seenTypes = new();
+                foreach (var price in Prices)
+                {
+                    if (!seenTypes.Add(price.Currency))
+                    {
+                        throw new Exception($"Duplicate currency: {price.Currency?.ToString().ToUpper()} specified");
                     }
                 }
             }

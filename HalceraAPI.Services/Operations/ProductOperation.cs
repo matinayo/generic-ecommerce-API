@@ -211,15 +211,17 @@ namespace HalceraAPI.Services.Operations
         private void CanUpdateProductRequest(Product productFromDb, UpdateProductRequest productRequest)
         {
             // prevent duplicate CompositionType
+            List<Price> tempPrices = productFromDb.Prices?.ToList() ?? new();
+            tempPrices.AddRange(_mapper.Map<List<Price>>(productRequest.Prices));
+
+            var tempCompositions = productFromDb.ProductCompositions?.ToList() ?? new();
+            tempCompositions.AddRange(_mapper.Map<List<Composition>>(productRequest.ProductCompositions));
+
             Product tempValidation = new()
             {
-                ProductCompositions = productFromDb.ProductCompositions
+                Prices = tempPrices,
+                ProductCompositions = tempCompositions
             };
-
-            List<Composition> destination = tempValidation.ProductCompositions?.ToList() ?? new();
-            destination.AddRange(_mapper.Map<List<Composition>>(productRequest.ProductCompositions));
-
-            tempValidation.ProductCompositions = destination;
             tempValidation.ValidateProductForCreate();
         }
 
