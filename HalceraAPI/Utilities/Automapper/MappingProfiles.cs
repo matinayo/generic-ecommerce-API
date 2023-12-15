@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Elfie.Serialization;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Models.Requests.BaseAddress;
@@ -119,6 +118,7 @@ namespace HalceraAPI.Utilities.Automapper
 
             // Order Purchase
             CreateMap<PurchaseDetails, PurchaseDetailsSummaryResponse>().ReverseMap();
+
         }
     }
 }

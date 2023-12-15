@@ -46,7 +46,8 @@ namespace HalceraAPI.Areas.Admin.Controllers
         {
             try
             {
-                APIResponse<ProductDetailsResponse>? productDetails = await _productOperation.GetProductByIdAsync(productId);
+                APIResponse<ProductDetailsResponse>? productDetails = 
+                    await _productOperation.GetProductByIdAsync(productId);
 
                 return Ok(productDetails);
             }
@@ -67,13 +68,17 @@ namespace HalceraAPI.Areas.Admin.Controllers
         {
             try
             {
-                APIResponse<ProductDetailsResponse> productDetails = await _productOperation.CreateProductAsync(productRequest);
+                APIResponse<ProductDetailsResponse> productDetails = 
+                    await _productOperation.CreateProductAsync(productRequest);
 
                 return Ok(productDetails);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
@@ -92,26 +97,52 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest, 
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpDelete("{productId}")]
-        [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteProductAsync(int productId)
         {
             try
             {
-                bool result = await _productOperation.DeleteProductAsync(productId);
+                await _productOperation.DeleteProductAsync(productId);
 
-                return Ok(result);
+                return NoContent();
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception?.InnerException?.Message ?? exception?.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest, 
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
+            }
+        }
+
+        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
+        [HttpDelete("{productId}/category/{categoryId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> DeleteProductCategoryAsync(int productId, int categoryId)
+        {
+            try
+            {
+                await _productOperation.DeleteProductCategoryByCategoryIdAsync(productId, categoryId);
+
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
     }
