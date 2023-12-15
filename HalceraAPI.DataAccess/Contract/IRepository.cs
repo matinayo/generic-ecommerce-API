@@ -37,5 +37,7 @@ namespace HalceraAPI.DataAccess.Contract
         void Remove(T entity);
 
         void RemoveRange(IEnumerable<T> entities);
+
+        Task<int> CountAsync(Expression<Func<T, bool>>? filter = null);
     }
 }

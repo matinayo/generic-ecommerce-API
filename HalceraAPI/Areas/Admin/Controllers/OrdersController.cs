@@ -1,14 +1,15 @@
-﻿using HalceraAPI.Models.Enums;
+﻿using HalceraAPI.Common.Utilities;
+using HalceraAPI.Models.Enums;
+using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.OrderHeader;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
-using HalceraAPI.Services.Operations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HalceraAPI.Areas.Admin.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
     [Area("Admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]
@@ -22,96 +23,107 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<OrderResponse>), 200)]
+        [ProducesResponseType(typeof(APIResponse<IEnumerable<OrderResponse>>), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<OrderResponse>>> GetOrdersAsync(OrderStatus? orderStatus)
+        public async Task<ActionResult> GetOrdersAsync(OrderStatus? orderStatus, int? page)
         {
             try
             {
-                IEnumerable<OrderResponse>? listOfOrders = await _orderOperation.GetOrdersAsync(orderStatus);
+                APIResponse<IEnumerable<OrderResponse>> listOfOrders =
+                    await _orderOperation.GetOrdersAsync(orderStatus, page);
 
                 return Ok(listOfOrders);
             }
             catch (Exception exception)
             {
                 return BadRequest(
-                    Problem(
-                        statusCode: StatusCodes.Status400BadRequest,
-                        detail: exception?.InnerException?.Message ?? exception?.Message));
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
         [HttpGet("{orderId}")]
-        [ProducesResponseType(typeof(OrderResponse), 200)]
+        [ProducesResponseType(typeof(APIResponse<OrderResponse>), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<OrderResponse>> GetOrderByIdAsync(string orderId)
+        public async Task<ActionResult> GetOrderByIdAsync(string orderId)
         {
             try
             {
-                OrderResponse orderDetails = await _orderOperation.GetOrderByIdAsync(orderId);
+                APIResponse<OrderResponse> orderDetails = await _orderOperation.GetOrderByIdAsync(orderId);
 
                 return Ok(orderDetails);
             }
             catch (Exception exception)
             {
                 return BadRequest(
-                    Problem(
-                        statusCode: StatusCodes.Status400BadRequest,
-                        detail: exception?.InnerException?.Message ?? exception?.Message));
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
         [HttpPut("{orderId}/{orderStatus}")]
-        [ProducesResponseType(typeof(UpdateOrderStatusResponse), 200)]
+        [ProducesResponseType(typeof(APIResponse<UpdateOrderStatusResponse>), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<UpdateOrderStatusResponse>> UpdateOrderStatusAsync(string orderId, OrderStatus orderStatus)
+        public async Task<ActionResult> UpdateOrderStatusAsync(string orderId, OrderStatus orderStatus)
         {
             try
             {
-                UpdateOrderStatusResponse updateOrderDetails = await _orderOperation.UpdateOrderStatusAsync(orderId, orderStatus);
+                APIResponse<UpdateOrderStatusResponse> updateOrderDetails =
+                    await _orderOperation.UpdateOrderStatusAsync(orderId, orderStatus);
 
                 return Ok(updateOrderDetails);
             }
             catch (Exception exception)
             {
                 return BadRequest(
-                    Problem(
-                        statusCode: StatusCodes.Status400BadRequest,
-                        detail: exception?.InnerException?.Message ?? exception?.Message));
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
-        [HttpPut("{orderId}/shipping")]
-        [ProducesResponseType(typeof(ShippingDetailsResponse), 200)]
+        [HttpPut("{orderId}/Shipping")]
+        [ProducesResponseType(typeof(APIResponse<ShippingDetailsResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ShippingDetailsResponse>> UpdateShippingDetailsAsync(string orderId, UpdateShippingDetailsRequest shippingDetailsRequest)
+        public async Task<ActionResult> UpdateShippingDetailsAsync(
+            string orderId, UpdateShippingDetailsRequest shippingDetailsRequest)
         {
             try
             {
-                ShippingDetailsResponse shippingDetailsResponse = await _orderOperation.UpdateOrderShippingDetailsAsync(orderId, shippingDetailsRequest);
+                APIResponse<ShippingDetailsResponse> shippingDetailsResponse =
+                    await _orderOperation.UpdateOrderShippingDetailsAsync(orderId, shippingDetailsRequest);
 
                 return Ok(shippingDetailsResponse);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
 
-        [HttpGet("{orderId}/shipping")]
-        [ProducesResponseType(typeof(ShippingDetailsResponse), 200)]
+        [HttpGet("{orderId}/Shipping")]
+        [ProducesResponseType(typeof(APIResponse<ShippingDetailsResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ShippingDetailsResponse>> GetOrderShippingDetailsAsync(string orderId)
+        public async Task<ActionResult> GetOrderShippingDetailsAsync(string orderId)
         {
             try
             {
-                ShippingDetailsResponse shippingDetailsResponse = await _orderOperation.GetOrderShippingDetailsAsync(orderId);
+                APIResponse<ShippingDetailsResponse> shippingDetailsResponse =
+                    await _orderOperation.GetOrderShippingDetailsAsync(orderId);
 
                 return Ok(shippingDetailsResponse);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception?.InnerException?.Message ?? exception?.Message));
             }
         }
     }

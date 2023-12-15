@@ -34,13 +34,32 @@ namespace HalceraAPI.DataAccess.Repository
             await dbSet.AddRangeAsync(entities);
         }
 
-        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null)
+        public async Task<int> CountAsync(Expression<Func<T, bool>>? filter = null)
+        {
+            if(filter == null)
+            {
+                return await dbSet.CountAsync();
+            }
+            return await dbSet.CountAsync(filter);
+        }
+
+        public async Task<IEnumerable<T>> GetAll(
+            Expression<Func<T, bool>>? filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            int? skip = null,
+            int? take = null, 
+            string? includeProperties = null)
         {
             IQueryable<T> query = GetAllQuery(filter, orderBy, skip, take, includeProperties);
             return await query.ToListAsync();
         }
 
-        public async Task<IEnumerable<TResult>> GetAll<TResult>(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null)
+        public async Task<IEnumerable<TResult>> GetAll<TResult>(
+            Expression<Func<T, bool>>? filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            int? skip = null, 
+            int? take = null, 
+            string? includeProperties = null)
         {
             IQueryable<T> query = GetAllQuery(filter, orderBy, skip, take, includeProperties);
             return await _mapper.ProjectTo<TResult>(query).ToListAsync();
@@ -73,7 +92,12 @@ namespace HalceraAPI.DataAccess.Repository
             dbSet.Update(entity);
         }
 
-        private IQueryable<T> GetAllQuery(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null)
+        private IQueryable<T> GetAllQuery(
+            Expression<Func<T, bool>>? filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, 
+            int? skip = null, 
+            int? take = null,
+            string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
 

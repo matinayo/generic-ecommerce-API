@@ -5,16 +5,16 @@ namespace HalceraAPI.Models.Requests.Category
     /// <summary>
     /// Category Response object
     /// </summary>
-    public class CategoryResponse
+    public record CategoryResponse
     {
-        public int Id { get; set; }
-        public string? Title { get; set; }
+        public int Id { get; init; }
+        public string? Title { get; init; }
         /// <summary>
         /// Category Medias
         /// </summary>
-        public ICollection<MediaResponse>? MediaCollection { get; set; }
+        public ICollection<MediaResponse>? MediaCollection { get; init; }
 
-        public bool? Active { get; set; }
-        public bool? Featured { get; set; }
+        public bool? Active { get; init; }
+        public bool? Featured { get; init; }
     }
 }

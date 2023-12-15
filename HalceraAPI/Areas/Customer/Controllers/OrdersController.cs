@@ -1,4 +1,5 @@
 ﻿using HalceraAPI.Models.Enums;
+using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.OrderHeader;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Services.Contract;
@@ -20,70 +21,83 @@ namespace HalceraAPI.Areas.Customer.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<OrderResponse>), 200)]
+        [ProducesResponseType(typeof(APIResponse<IEnumerable<OrderResponse>>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<OrderResponse>>> GetAll(OrderStatus? orderStatus)
+        public async Task<ActionResult> GetAll(OrderStatus? orderStatus, int? page)
         {
             try
             {
-                IEnumerable<OrderResponse>? listOfOrders = await _customerOrderOperation.GetOrdersAsync(orderStatus);
+                APIResponse<IEnumerable<OrderResponse>> listOfOrders = await _customerOrderOperation.GetOrdersAsync(orderStatus, page);
 
                 return Ok(listOfOrders);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
 
         [HttpGet("{orderId}")]
-        [ProducesResponseType(typeof(IEnumerable<OrderResponse>), 200)]
+        [ProducesResponseType(typeof(APIResponse<IEnumerable<OrderResponse>>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<OrderResponse>>> GetOrderById(string orderId)
+        public async Task<ActionResult> GetOrderById(string orderId)
         {
             try
             {
-                OrderResponse orderDetails = await _customerOrderOperation.GetOrderByIdAsync(orderId);
+                APIResponse<OrderResponse> orderDetails = await _customerOrderOperation.GetOrderByIdAsync(orderId);
 
                 return Ok(orderDetails);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest, 
+                            detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
 
         [HttpGet("Cancel/{orderId}")]
-        [ProducesResponseType(typeof(UpdateOrderStatusResponse), 200)]
+        [ProducesResponseType(typeof(APIResponse<UpdateOrderStatusResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<UpdateOrderStatusResponse>> CancelOrder(string orderId)
+        public async Task<ActionResult> CancelOrder(string orderId)
         {
             try
             {
-                UpdateOrderStatusResponse orderStatusUpdateResponse = await _customerOrderOperation.CancelOrderAsync(orderId);
+                APIResponse<UpdateOrderStatusResponse> orderStatusUpdateResponse = await _customerOrderOperation.CancelOrderAsync(orderId);
 
                 return Ok(orderStatusUpdateResponse);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest, 
+                            detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
 
-        [HttpPut("{orderId}/shipping")]
-        [ProducesResponseType(typeof(ShippingDetailsResponse), 200)]
+        [HttpPut("{orderId}/Shipping")]
+        [ProducesResponseType(typeof(APIResponse<ShippingDetailsResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ShippingDetailsResponse>> UpdateShippingAddress(string orderId, UpdateShippingAddressRequest shippingAddressRequest)
+        public async Task<ActionResult> UpdateShippingAddress(string orderId, UpdateShippingAddressRequest shippingAddressRequest)
         {
             try
             {
-                ShippingDetailsResponse shippingDetailsResponse = await _customerOrderOperation.UpdateOrderShippingAddressAsync(orderId, shippingAddressRequest);
+                APIResponse<ShippingDetailsResponse> shippingDetailsResponse = 
+                    await _customerOrderOperation.UpdateOrderShippingAddressAsync(orderId, shippingAddressRequest);
 
                 return Ok(shippingDetailsResponse);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest, 
+                            detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
     }
