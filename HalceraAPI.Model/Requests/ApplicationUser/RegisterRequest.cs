@@ -20,11 +20,6 @@ namespace HalceraAPI.Models.Requests.ApplicationUser
         [DataType(DataType.Password)]
         public string? Password { get; set; }
 
-        [Required]
-        [StringLength(255, ErrorMessage = "Must be between 5 and 255 characters", MinimumLength = 5)]
-        [DataType(DataType.Password)]
-        [Compare(nameof(Password))]
-        public string? ConfirmPassword { get; set; }
         public ICollection<RoleRequest>? RolesId { get; set; }
     }
 }

@@ -1,19 +1,21 @@
-﻿using HalceraAPI.Models.Requests.ApplicationUser;
+﻿using HalceraAPI.Common.Utilities;
+using HalceraAPI.Models.Enums;
+using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Models.Requests.RefreshToken;
 using HalceraAPI.Models.Requests.Role;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HalceraAPI.Areas.Customer.Controllers
+namespace HalceraAPI.Areas.Identity
 {
-    [Area("Customer")]
+    [Area("Identity")]
     [Route("api/[area]/[controller]")]
     [ApiController]
-    public class IdentityController : ControllerBase
+    public class AccountController : ControllerBase
     {
         private readonly IIdentityOperation _applicationUserOperation;
-        public IdentityController(IIdentityOperation applicationUserOperation)
+        public AccountController(IIdentityOperation applicationUserOperation)
         {
             _applicationUserOperation = applicationUserOperation;
         }
@@ -27,11 +29,15 @@ namespace HalceraAPI.Areas.Customer.Controllers
             try
             {
                 UserResponse applicationUser = await _applicationUserOperation.Register(registerRequest);
+
                 return Ok(applicationUser);
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
 
@@ -48,7 +54,10 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
 
@@ -66,7 +75,10 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
 
@@ -84,7 +96,32 @@ namespace HalceraAPI.Areas.Customer.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(Problem(statusCode: StatusCodes.Status400BadRequest, detail: exception.InnerException?.Message ?? exception.Message));
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.InnerException?.Message ?? exception.Message));
+            }
+        }
+
+        [Authorize(Roles = RoleDefinition.Admin + "," + RoleDefinition.Employee)]
+        [HttpPut]
+        [Route("{userId}/{accountAction}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> LockUnlockAccountAsync(string userId, AccountAction accountAction)
+        {
+            try
+            {
+                await _applicationUserOperation.LockUnlockUserAsync(userId, accountAction);
+
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
     }

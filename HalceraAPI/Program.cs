@@ -43,7 +43,6 @@ builder.Services.AddAuthentication().AddJwtBearer(
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
                 builder.Configuration.GetSection("JWTOptions:Token").Value!))
         };
-
     });
 builder.Services.AddSwaggerGenNewtonsoftSupport();
 
