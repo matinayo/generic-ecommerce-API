@@ -102,27 +102,5 @@ namespace HalceraAPI.Areas.Identity
                             detail: exception.InnerException?.Message ?? exception.Message));
             }
         }
-
-        [Authorize(Roles = RoleDefinition.Admin + "," + RoleDefinition.Employee)]
-        [HttpPut]
-        [Route("{userId}/{accountAction}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult> LockUnlockAccountAsync(string userId, AccountAction accountAction)
-        {
-            try
-            {
-                await _applicationUserOperation.LockUnlockUserAsync(userId, accountAction);
-
-                return NoContent();
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception.InnerException?.Message ?? exception.Message));
-            }
-        }
     }
 }

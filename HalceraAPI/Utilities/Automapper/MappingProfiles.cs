@@ -88,7 +88,10 @@ namespace HalceraAPI.Utilities.Automapper
             // Application User
             CreateMap<RegisterRequest, ApplicationUser>().ReverseMap();
             CreateMap<ApplicationUser, UserAuthResponse>().ReverseMap();
+            CreateMap<ApplicationUser, UserResponse>().ReverseMap();
             CreateMap<ApplicationUser, CustomerDetailsResponse>().ReverseMap();
+            CreateMap<UpdateUserRequest, ApplicationUser>()
+                .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember != null));
 
             // Refresh Token
             CreateMap<RefreshToken, RefreshTokenResponse>().ReverseMap();
@@ -101,10 +104,12 @@ namespace HalceraAPI.Utilities.Automapper
             CreateMap<PaymentDetailsRequest, PaymentDetails>().ReverseMap();
             CreateMap<PaymentDetails, PaymentDetailsResponse>().ReverseMap();
 
-            // Shipping Address
-            CreateMap<AddressRequest, BaseAddress>().ReverseMap();
+            // Address
+            CreateMap<AddressRequest, BaseAddress>()
+                .ForAllMembers(opts => opts.Condition((source, destination, srcMmber) => srcMmber is not null));
             CreateMap<ShippingDetails, ShippingDetailsResponse>().ReverseMap();
             CreateMap<BaseAddress, ShippingAddressResponse>().ReverseMap();
+            CreateMap<BaseAddress, AddressResponse>().ReverseMap();
             CreateMap<UpdateShippingAddressRequest, BaseAddress>()
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
             CreateMap<UpdateShippingDetailsRequest, ShippingDetails>()

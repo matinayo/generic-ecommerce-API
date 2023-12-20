@@ -4,10 +4,9 @@ namespace HalceraAPI.Models.Requests.BaseAddress
 {
     public class AddressRequest
     {
-        [Required]
         [StringLength(80, ErrorMessage = "Field has a maximum length of '80'")]
         public string? StreetAddress { get; set; }
-        [Required]
+
         [StringLength(40, ErrorMessage = "Field has a maximum length of '40'")]
         public string? City { get; set; }
         [StringLength(80, ErrorMessage = "Field has a maximum length of '80'")]

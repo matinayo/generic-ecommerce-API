@@ -42,7 +42,7 @@ namespace HalceraAPI.Services.Operations
                 ApplicationUser? applicationUser = await GetUserWithEmail(registerRequest.Email);
                 if (applicationUser != null)
                 {
-                    throw new Exception("The email address entered is already being used. Please select another.");
+                    throw new Exception("The email address entered is already being used.");
                 }
 
                 string passwordHash = CreatePasswordHash(registerRequest.Password);
@@ -52,6 +52,7 @@ namespace HalceraAPI.Services.Operations
                 };
                 _mapper.Map(registerRequest, applicationUser);
 
+                applicationUser.FormatUserEmail();
                 await SetUserRole(registerRequest.RolesId, applicationUser);
 
                 applicationUser.LastLoginDate = DateTime.UtcNow;
@@ -153,6 +154,7 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 var roles = await _unitOfWork.Roles.GetAll();
+
                 return _mapper.Map<IEnumerable<RoleResponse>>(roles);
             }catch(Exception)
             {
@@ -160,49 +162,18 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        /// <summary>
-        /// Get user email including roles
-        /// </summary>
-        /// <param name="email">Email</param>
-        /// <returns>ApplicaitonUser associated with email</returns>
-        private async Task<ApplicationUser?> GetUserWithEmail(string? email)
+        public async Task<ApplicationUser?> GetUserWithEmail(string? email)
         {
 
             if (string.IsNullOrWhiteSpace(email))
             {
                 throw new Exception("Email is required.");
             }
-
             ApplicationUser? userFromDb = await _unitOfWork.ApplicationUser
-                .GetFirstOrDefault(user => user.Email.Trim().ToLower().Equals(email.Trim().ToLower()), includeProperties: nameof(ApplicationUser.Roles));
+                .GetFirstOrDefault(user => user.Email.Trim().ToLower().Equals(email.Trim().ToLower()),
+                includeProperties: nameof(ApplicationUser.Roles));
+
             return userFromDb;
-        }
-
-        public async Task LockUnlockUserAsync(string userId, AccountAction accountAction)
-        {
-            try
-            {
-                ApplicationUser applicationUser = await _unitOfWork.ApplicationUser
-                    .GetFirstOrDefault(user => user.Id.Equals(userId, StringComparison.OrdinalIgnoreCase)) 
-                    ?? throw new Exception("User cannot be found");
-
-                if (applicationUser.LockoutEnd != null && applicationUser.LockoutEnd > DateTime.UtcNow)
-                {
-                    applicationUser.LockoutEnd = DateTime.UtcNow;
-                    applicationUser.Active = true;
-                }
-                else
-                {
-                    applicationUser.LockoutEnd = DateTime.UtcNow.AddYears(1000);
-                    applicationUser.Active = false;
-                }
-
-                await _unitOfWork.SaveAsync();
-            }
-            catch(Exception)
-            {
-                throw;
-            }
         }
 
         public bool ValidateUsingRegex(string emailAddress)

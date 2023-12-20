@@ -17,7 +17,6 @@ namespace HalceraAPI.Services.Contract
         Task<ApplicationUser> GetLoggedInUserAsync();
 
         Task<IEnumerable<RoleResponse>> GetApplicationRoles();
-
-        Task LockUnlockUserAsync(string userId, AccountAction accountAction);
+        Task<ApplicationUser?> GetUserWithEmail(string? email);
     }
 }
