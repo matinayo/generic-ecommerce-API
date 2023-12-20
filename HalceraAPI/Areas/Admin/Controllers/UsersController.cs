@@ -152,7 +152,8 @@ namespace HalceraAPI.Areas.Admin.Controllers
                 return BadRequest(
                         Problem(
                             statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception.InnerException?.Message ?? exception.Message));
+                            detail: exception.InnerException?.Message ?? 
+                            exception.Message));
             }
         }
     }
