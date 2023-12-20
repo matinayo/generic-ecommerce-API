@@ -22,13 +22,13 @@ namespace HalceraAPI.Areas.Identity
 
         [HttpPost]
         [Route("Register")]
-        [ProducesResponseType(typeof(UserResponse), 200)]
+        [ProducesResponseType(typeof(UserAuthResponse), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<UserResponse>> Register([FromBody] RegisterRequest registerRequest)
+        public async Task<ActionResult<UserAuthResponse>> Register([FromBody] RegisterRequest registerRequest)
         {
             try
             {
-                UserResponse applicationUser = await _applicationUserOperation.Register(registerRequest);
+                UserAuthResponse applicationUser = await _applicationUserOperation.Register(registerRequest);
 
                 return Ok(applicationUser);
             }
@@ -43,13 +43,13 @@ namespace HalceraAPI.Areas.Identity
 
         [HttpPost]
         [Route("Login")]
-        [ProducesResponseType(typeof(UserResponse), 200)]
+        [ProducesResponseType(typeof(UserAuthResponse), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<UserResponse>> Login([FromBody] LoginRequest loginRequest)
+        public async Task<ActionResult<UserAuthResponse>> Login([FromBody] LoginRequest loginRequest)
         {
             try
             {
-                UserResponse applicationUser = await _applicationUserOperation.Login(loginRequest);
+                UserAuthResponse applicationUser = await _applicationUserOperation.Login(loginRequest);
                 return Ok(applicationUser);
             }
             catch (Exception exception)
@@ -64,13 +64,13 @@ namespace HalceraAPI.Areas.Identity
         [Authorize]
         [HttpPost]
         [Route("RefreshToken")]
-        [ProducesResponseType(typeof(UserResponse), 200)]
+        [ProducesResponseType(typeof(UserAuthResponse), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<UserResponse>> RefreshToken([FromBody] RefreshTokenRequest refreshTokenRequest)
+        public async Task<ActionResult<UserAuthResponse>> RefreshToken([FromBody] RefreshTokenRequest refreshTokenRequest)
         {
             try
             {
-                UserResponse applicationUser = await _applicationUserOperation.RefreshToken(refreshTokenRequest);
+                UserAuthResponse applicationUser = await _applicationUserOperation.RefreshToken(refreshTokenRequest);
                 return Ok(applicationUser);
             }
             catch (Exception exception)

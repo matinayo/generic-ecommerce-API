@@ -34,7 +34,7 @@ namespace HalceraAPI.Services.Operations
             jwtOptions = options.Value;
         }
 
-        public async Task<UserResponse> Register(RegisterRequest registerRequest)
+        public async Task<UserAuthResponse> Register(RegisterRequest registerRequest)
         {
             try
             {
@@ -60,7 +60,7 @@ namespace HalceraAPI.Services.Operations
                 await _unitOfWork.ApplicationUser.Add(applicationUser);
                 await _unitOfWork.SaveAsync();
 
-                UserResponse userResponse = _mapper.Map<UserResponse>(applicationUser);
+                UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUser);
                 string token = CreateToken(applicationUser);
                 userResponse.Token = token;
 
@@ -72,7 +72,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<UserResponse> Login(LoginRequest loginRequest)
+        public async Task<UserAuthResponse> Login(LoginRequest loginRequest)
         {
             try
             {
@@ -89,7 +89,7 @@ namespace HalceraAPI.Services.Operations
 
                 await _unitOfWork.SaveAsync();
 
-                UserResponse userResponse = _mapper.Map<UserResponse>(applicationUserFromDb);
+                UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUserFromDb);
                 string token = CreateToken(applicationUserFromDb);
                 userResponse.Token = token;
 
@@ -101,7 +101,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<UserResponse> RefreshToken(RefreshTokenRequest refreshTokenRequest)
+        public async Task<UserAuthResponse> RefreshToken(RefreshTokenRequest refreshTokenRequest)
         {
             ApplicationUser applicationUser = await GetLoggedInUserAsync();
             if (applicationUser.RefreshToken == null || !applicationUser.RefreshToken.Token.Equals(refreshTokenRequest.Token))
@@ -117,7 +117,7 @@ namespace HalceraAPI.Services.Operations
             applicationUser.RefreshToken = GenerateRefreshToken();
 
             await _unitOfWork.SaveAsync();
-            UserResponse userResponse = _mapper.Map<UserResponse>(applicationUser);
+            UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUser);
             userResponse.Token = token;
 
             return userResponse;

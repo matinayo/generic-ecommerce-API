@@ -8,11 +8,11 @@ namespace HalceraAPI.Services.Contract
 {
     public interface IIdentityOperation
     {
-        Task<UserResponse> Register(RegisterRequest registerRequest);
+        Task<UserAuthResponse> Register(RegisterRequest registerRequest);
 
-        Task<UserResponse> Login(LoginRequest loginRequest);
+        Task<UserAuthResponse> Login(LoginRequest loginRequest);
 
-        Task<UserResponse> RefreshToken(RefreshTokenRequest refreshTokenRequest);
+        Task<UserAuthResponse> RefreshToken(RefreshTokenRequest refreshTokenRequest);
 
         Task<ApplicationUser> GetLoggedInUserAsync();
 
