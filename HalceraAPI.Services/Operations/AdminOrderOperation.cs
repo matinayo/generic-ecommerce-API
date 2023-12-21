@@ -57,7 +57,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<APIResponse<IEnumerable<OrderResponse>>> GetOrdersAsync(OrderStatus? orderStatus, int? page)
+        public async Task<APIResponse<IEnumerable<OrderOverviewResponse>>> GetOrdersAsync(OrderStatus? orderStatus, int? page)
         {
             try
             {
@@ -65,7 +65,7 @@ namespace HalceraAPI.Services.Operations
                      orderStatus != null ? order => order.OrderStatus == orderStatus : null;
 
                 int totalItems = await _unitOfWork.OrderHeader.CountAsync(filterExpression);
-                var response = await _unitOfWork.OrderHeader.GetAll<OrderResponse>(
+                var response = await _unitOfWork.OrderHeader.GetAll<OrderOverviewResponse>(
                     filter: filterExpression,
                     orderBy: order => order.OrderBy(entity => entity.OrderDate),
                     skip: ((page ?? 1) - 1) * Pagination.DefaultItemsPerPage,
@@ -73,7 +73,7 @@ namespace HalceraAPI.Services.Operations
 
                 var meta = new Meta(totalItems, Pagination.DefaultItemsPerPage, page ?? 1);
 
-                return new APIResponse<IEnumerable<OrderResponse>>(response, meta);
+                return new APIResponse<IEnumerable<OrderOverviewResponse>>(response, meta);
             }
             catch (Exception)
             {

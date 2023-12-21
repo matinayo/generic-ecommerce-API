@@ -88,6 +88,7 @@ namespace HalceraAPI.Utilities.Automapper
             // Application User
             CreateMap<RegisterRequest, ApplicationUser>().ReverseMap();
             CreateMap<ApplicationUser, UserAuthResponse>().ReverseMap();
+            CreateMap<ApplicationUser, UserDetailsResponse>().ReverseMap();
             CreateMap<ApplicationUser, UserResponse>().ReverseMap();
             CreateMap<ApplicationUser, CustomerDetailsResponse>().ReverseMap();
             CreateMap<UpdateUserRequest, ApplicationUser>()
@@ -118,6 +119,7 @@ namespace HalceraAPI.Utilities.Automapper
             // Order Header
             CreateMap<OrderHeader, CheckoutResponse>().ReverseMap();
             CreateMap<OrderHeader, OrderResponse>().ReverseMap();
+            CreateMap<OrderHeader, OrderOverviewResponse>().ReverseMap();
             CreateMap<OrderDetails, OrderDetailsResponse>().ReverseMap();
             CreateMap<Product, ProductSummaryResponse>();
 

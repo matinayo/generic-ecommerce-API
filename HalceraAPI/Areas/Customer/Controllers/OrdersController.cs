@@ -21,13 +21,14 @@ namespace HalceraAPI.Areas.Customer.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(APIResponse<IEnumerable<OrderResponse>>), 200)]
+        [ProducesResponseType(typeof(APIResponse<IEnumerable<OrderOverviewResponse>>), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> GetAll(OrderStatus? orderStatus, int? page)
         {
             try
             {
-                APIResponse<IEnumerable<OrderResponse>> listOfOrders = await _customerOrderOperation.GetOrdersAsync(orderStatus, page);
+                APIResponse<IEnumerable<OrderOverviewResponse>> listOfOrders = 
+                    await _customerOrderOperation.GetOrdersAsync(orderStatus, page);
 
                 return Ok(listOfOrders);
             }
@@ -67,7 +68,8 @@ namespace HalceraAPI.Areas.Customer.Controllers
         {
             try
             {
-                APIResponse<UpdateOrderStatusResponse> orderStatusUpdateResponse = await _customerOrderOperation.CancelOrderAsync(orderId);
+                APIResponse<UpdateOrderStatusResponse> orderStatusUpdateResponse = 
+                    await _customerOrderOperation.CancelOrderAsync(orderId);
 
                 return Ok(orderStatusUpdateResponse);
             }

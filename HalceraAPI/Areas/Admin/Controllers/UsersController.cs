@@ -50,13 +50,13 @@ namespace HalceraAPI.Areas.Admin.Controllers
 
         [HttpGet]
         [Route("{userId}")]
-        [ProducesResponseType(typeof(APIResponse<UserResponse>), 200)]
+        [ProducesResponseType(typeof(APIResponse<UserDetailsResponse>), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> GetUserByIdAsync(string userId)
         {
             try
             {
-                APIResponse<UserResponse> userResponse = await _userOperation.GetUserByIdAsync(userId);
+                APIResponse<UserDetailsResponse> userResponse = await _userOperation.GetUserByIdAsync(userId);
 
                 return Ok(userResponse);
             }
@@ -93,13 +93,13 @@ namespace HalceraAPI.Areas.Admin.Controllers
 
         [HttpPut]
         [Route("{userId}")]
-        [ProducesResponseType(typeof(APIResponse<UserResponse>), 200)]
+        [ProducesResponseType(typeof(APIResponse<UserDetailsResponse>), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> UpdateUserDetailsAsync(string userId, UpdateUserRequest updateUserRequest)
         {
             try
             {
-                APIResponse<UserResponse> userResponse =
+                APIResponse<UserDetailsResponse> userResponse =
                     await _userOperation.UpdateUserDetailsAsync(userId, updateUserRequest);
 
                 return Ok(userResponse);

@@ -9,7 +9,7 @@ namespace HalceraAPI.Services.Contract
     {
         Task<APIResponse<OrderResponse>> GetOrderByIdAsync(string orderId);
 
-        Task<APIResponse<IEnumerable<OrderResponse>>> GetOrdersAsync(OrderStatus? orderStatus, int? page);
+        Task<APIResponse<IEnumerable<OrderOverviewResponse>>> GetOrdersAsync(OrderStatus? orderStatus, int? page);
 
         Task<APIResponse<UpdateOrderStatusResponse>> CancelOrderAsync(string orderId);
 

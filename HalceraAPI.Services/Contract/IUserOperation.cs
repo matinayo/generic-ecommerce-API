@@ -13,8 +13,8 @@ namespace HalceraAPI.Services.Contract
             bool? active, 
             bool? deleted, 
             int? page);
-        Task<APIResponse<UserResponse>> GetUserByIdAsync(string userId);
-        Task<APIResponse<UserResponse>> UpdateUserDetailsAsync(string userId, UpdateUserRequest updateUserRequest);
+        Task<APIResponse<UserDetailsResponse>> GetUserByIdAsync(string userId);
+        Task<APIResponse<UserDetailsResponse>> UpdateUserDetailsAsync(string userId, UpdateUserRequest updateUserRequest);
         Task <APIResponse<AddressResponse>>UpdateAddressAsync(string userId, AddressRequest updateAddressRequest);
         Task DeleteAccountAsync(string userId);
         Task LockUnlockUserAsync(string userId, AccountAction accountAction);

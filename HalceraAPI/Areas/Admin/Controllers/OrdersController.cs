@@ -23,13 +23,13 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(APIResponse<IEnumerable<OrderResponse>>), 200)]
+        [ProducesResponseType(typeof(APIResponse<IEnumerable<OrderOverviewResponse>>), 200)]
         [ProducesResponseType(404)]
         public async Task<ActionResult> GetOrdersAsync(OrderStatus? orderStatus, int? page)
         {
             try
             {
-                APIResponse<IEnumerable<OrderResponse>> listOfOrders =
+                APIResponse<IEnumerable<OrderOverviewResponse>> listOfOrders =
                     await _orderOperation.GetOrdersAsync(orderStatus, page);
 
                 return Ok(listOfOrders);

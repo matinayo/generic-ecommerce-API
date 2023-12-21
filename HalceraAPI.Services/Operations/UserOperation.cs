@@ -55,7 +55,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<APIResponse<UserResponse>> UpdateUserDetailsAsync(string userId, UpdateUserRequest updateUserRequest)
+        public async Task<APIResponse<UserDetailsResponse>> UpdateUserDetailsAsync(string userId, UpdateUserRequest updateUserRequest)
         {
             try
             {
@@ -76,9 +76,9 @@ namespace HalceraAPI.Services.Operations
                 user.FormatUserEmail();
 
                 await _unitOfWork.SaveAsync();
-                UserResponse userResponse = _mapper.Map<UserResponse>(user);
+                UserDetailsResponse userResponse = _mapper.Map<UserDetailsResponse>(user);
 
-                return new APIResponse<UserResponse>(userResponse);
+                return new APIResponse<UserDetailsResponse>(userResponse);
 
             }
             catch (Exception)
@@ -87,15 +87,15 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<APIResponse<UserResponse>> GetUserByIdAsync(string userId)
+        public async Task<APIResponse<UserDetailsResponse>> GetUserByIdAsync(string userId)
         {
             try
             {
-                UserResponse userDetails = await _unitOfWork.ApplicationUser.GetFirstOrDefault<UserResponse>(
+                UserDetailsResponse userDetails = await _unitOfWork.ApplicationUser.GetFirstOrDefault<UserDetailsResponse>(
                     user => user.Id.ToLower().Equals(userId.ToLower()))
                     ?? throw new Exception("This user cannot be found");
 
-                return new APIResponse<UserResponse>(userDetails);
+                return new APIResponse<UserDetailsResponse>(userDetails);
             }
             catch (Exception)
             {
