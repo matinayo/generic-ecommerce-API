@@ -172,21 +172,10 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
+                IdenticalUserCannotModify(userId);
                 ApplicationUser applicationUser = await _unitOfWork.ApplicationUser
                     .GetFirstOrDefault(user => user.Id.ToLower().Equals(userId.ToLower()))
                     ?? throw new Exception("This user cannot be found");
-
-                if (_httpContextAccessor.HttpContext != null)
-                {
-                    var claim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-                    if (claim != null)
-                    {
-                        if (claim.Value.ToLower().Equals(userId.ToLower()))
-                        {
-                            throw new Exception("You cannot lock your own account");
-                        }
-                    }
-                }
 
                 if (applicationUser.LockoutEnd != null && applicationUser.LockoutEnd > DateTime.UtcNow)
                 {
@@ -211,22 +200,11 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
+                IdenticalUserCannotModify(userId);
                 ApplicationUser applicationUser = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
                     user => user.Id.ToLower().Equals(userId.ToLower()),
                     includeProperties: nameof(ApplicationUser.Roles))
                 ?? throw new Exception("This user cannot be found");
-
-                if (_httpContextAccessor.HttpContext != null)
-                {
-                    var claim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-                    if (claim != null)
-                    {
-                        if (claim.Value.ToLower().Equals(userId.ToLower()))
-                        {
-                            throw new Exception("You cannot modify your own role");
-                        }
-                    }
-                }
 
                 if(applicationUser.Roles == null || !applicationUser.Roles.Any())
                 {
@@ -263,22 +241,11 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
+                IdenticalUserCannotModify(userId);
                 ApplicationUser applicationUser = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
                     user => user.Id.ToLower().Equals(userId.ToLower()),
                     includeProperties: nameof(ApplicationUser.Roles))
                     ?? throw new Exception("This user cannot be found");
-
-                if (_httpContextAccessor.HttpContext != null)
-                {
-                    var claim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-                    if (claim != null)
-                    {
-                        if (claim.Value.ToLower().Equals(userId.ToLower()))
-                        {
-                            throw new Exception("You cannot modify your own role");
-                        }
-                    }
-                }
 
                 if (applicationUser.Roles == null || !applicationUser.Roles.Any())
                 {
@@ -298,6 +265,21 @@ namespace HalceraAPI.Services.Operations
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        private void IdenticalUserCannotModify(string userId)
+        {
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                var claim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+                if (claim != null)
+                {
+                    if (claim.Value.ToLower().Equals(userId.ToLower()))
+                    {
+                        throw new Exception("You cannot modify your own role");
+                    }
+                }
             }
         }
     }
