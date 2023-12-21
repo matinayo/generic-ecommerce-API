@@ -135,6 +135,29 @@ namespace HalceraAPI.Areas.Admin.Controllers
             }
         }
 
+        [Authorize(Roles = RoleDefinition.Admin)]
+        [HttpPut]
+        [Route("{userId}/Roles/{roleId}")]
+        [ProducesResponseType(typeof(APIResponse<UserAuthResponse>), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> UpdateUserRoleUserAsync(string userId, int roleId)
+        {
+            try
+            {
+                APIResponse<UserAuthResponse> userResponse =
+                    await _userOperation.UpdateUserRoleUserAsync(userId, roleId);
+
+                return Ok(userResponse);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.InnerException?.Message ?? exception.Message));
+            }
+        }
+
         [HttpDelete]
         [Route("{userId}")]
         [ProducesResponseType(204)]
@@ -152,7 +175,31 @@ namespace HalceraAPI.Areas.Admin.Controllers
                 return BadRequest(
                         Problem(
                             statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception.InnerException?.Message ?? 
+                            detail: exception.InnerException?.Message ??
+                            exception.Message));
+            }
+        }
+
+        [Authorize(Roles = RoleDefinition.Admin)]
+        [HttpDelete]
+        [Route("{userId}/Roles/{roleId}")]
+        [ProducesResponseType(typeof(APIResponse<UserAuthResponse>), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> DeleteRoleFromUserAsync(string userId, int roleId)
+        {
+            try
+            {
+                APIResponse<UserAuthResponse> userResponse =
+                    await _userOperation.DeleteRoleFromUserAsync(userId, roleId);
+
+                return Ok(userResponse);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.InnerException?.Message ??
                             exception.Message));
             }
         }

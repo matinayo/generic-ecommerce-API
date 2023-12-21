@@ -2,6 +2,7 @@
 using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Models.Requests.BaseAddress;
+using HalceraAPI.Models.Requests.Role;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -16,7 +17,8 @@ namespace HalceraAPI.Services.Contract
         Task<APIResponse<UserResponse>> UpdateUserDetailsAsync(string userId, UpdateUserRequest updateUserRequest);
         Task <APIResponse<AddressResponse>>UpdateAddressAsync(string userId, AddressRequest updateAddressRequest);
         Task DeleteAccountAsync(string userId);
-
         Task LockUnlockUserAsync(string userId, AccountAction accountAction);
+        Task <APIResponse<UserAuthResponse>> DeleteRoleFromUserAsync(string userId, int roleId);
+        Task<APIResponse<UserAuthResponse>> UpdateUserRoleUserAsync(string userId, int roleId);
     }
 }

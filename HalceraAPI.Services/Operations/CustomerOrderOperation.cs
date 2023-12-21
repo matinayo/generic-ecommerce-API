@@ -106,7 +106,8 @@ namespace HalceraAPI.Services.Operations
                 OrderHeader orderHeader = await _unitOfWork.OrderHeader.GetFirstOrDefault(
                     filter: orderHeader => applicationUser.Id == orderHeader.ApplicationUserId &&
                             orderHeader.Id.ToLower().Equals(orderId.ToLower()),
-                    includeProperties: "ShippingDetails.ShippingAddress") ?? throw new Exception("Order cannot be found");
+                    includeProperties: "ShippingDetails.ShippingAddress") 
+                    ?? throw new Exception("Order cannot be found");
 
                 orderHeader.ShippingDetails ??= new();
                 if (orderHeader.ShippingDetails.CanUpdateShippingAddress())
