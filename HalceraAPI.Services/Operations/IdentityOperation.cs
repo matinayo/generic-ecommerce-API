@@ -3,6 +3,7 @@ using HalceraAPI.Common.AppsettingsOptions;
 using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
+using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Models.Requests.RefreshToken;
 using HalceraAPI.Models.Requests.Role;
@@ -33,7 +34,7 @@ namespace HalceraAPI.Services.Operations
             jwtOptions = options.Value;
         }
 
-        public async Task<UserResponse> Register(RegisterRequest registerRequest)
+        public async Task<UserAuthResponse> Register(RegisterRequest registerRequest)
         {
             try
             {
@@ -41,16 +42,17 @@ namespace HalceraAPI.Services.Operations
                 ApplicationUser? applicationUser = await GetUserWithEmail(registerRequest.Email);
                 if (applicationUser != null)
                 {
-                    throw new Exception("The email address entered is already being used. Please select another.");
+                    throw new Exception("The email address entered is already being used.");
                 }
 
-                string passwordHash = ValidateAndCreateUserPassword(registerRequest.Password, registerRequest.ConfirmPassword);
+                string passwordHash = CreatePasswordHash(registerRequest.Password);
                 applicationUser = new()
                 {
                     PasswordHash = passwordHash
                 };
                 _mapper.Map(registerRequest, applicationUser);
 
+                applicationUser.FormatUserEmail();
                 await SetUserRole(registerRequest.RolesId, applicationUser);
 
                 applicationUser.LastLoginDate = DateTime.UtcNow;
@@ -59,7 +61,7 @@ namespace HalceraAPI.Services.Operations
                 await _unitOfWork.ApplicationUser.Add(applicationUser);
                 await _unitOfWork.SaveAsync();
 
-                UserResponse userResponse = _mapper.Map<UserResponse>(applicationUser);
+                UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUser);
                 string token = CreateToken(applicationUser);
                 userResponse.Token = token;
 
@@ -71,7 +73,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<UserResponse> Login(LoginRequest loginRequest)
+        public async Task<UserAuthResponse> Login(LoginRequest loginRequest)
         {
             try
             {
@@ -88,7 +90,7 @@ namespace HalceraAPI.Services.Operations
 
                 await _unitOfWork.SaveAsync();
 
-                UserResponse userResponse = _mapper.Map<UserResponse>(applicationUserFromDb);
+                UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUserFromDb);
                 string token = CreateToken(applicationUserFromDb);
                 userResponse.Token = token;
 
@@ -100,9 +102,9 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<UserResponse> RefreshToken(RefreshTokenRequest refreshTokenRequest)
+        public async Task<UserAuthResponse> RefreshToken(RefreshTokenRequest refreshTokenRequest)
         {
-            ApplicationUser applicationUser = await GetLoggedInUser();
+            ApplicationUser applicationUser = await GetLoggedInUserAsync();
             if (applicationUser.RefreshToken == null || !applicationUser.RefreshToken.Token.Equals(refreshTokenRequest.Token))
             {
                 throw new UnauthorizedAccessException("Invalid Refresh Token");
@@ -116,13 +118,13 @@ namespace HalceraAPI.Services.Operations
             applicationUser.RefreshToken = GenerateRefreshToken();
 
             await _unitOfWork.SaveAsync();
-            UserResponse userResponse = _mapper.Map<UserResponse>(applicationUser);
+            UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUser);
             userResponse.Token = token;
 
             return userResponse;
         }
 
-        public async Task<ApplicationUser> GetLoggedInUser()
+        public async Task<ApplicationUser> GetLoggedInUserAsync()
         {
             try
             {
@@ -152,6 +154,7 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 var roles = await _unitOfWork.Roles.GetAll();
+
                 return _mapper.Map<IEnumerable<RoleResponse>>(roles);
             }catch(Exception)
             {
@@ -159,21 +162,17 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        /// <summary>
-        /// Get user email including roles
-        /// </summary>
-        /// <param name="email">Email</param>
-        /// <returns>ApplicaitonUser associated with email</returns>
-        private async Task<ApplicationUser?> GetUserWithEmail(string? email)
+        public async Task<ApplicationUser?> GetUserWithEmail(string? email)
         {
 
             if (string.IsNullOrWhiteSpace(email))
             {
                 throw new Exception("Email is required.");
             }
-
             ApplicationUser? userFromDb = await _unitOfWork.ApplicationUser
-                .GetFirstOrDefault(user => user.Email.Trim().ToLower().Equals(email.Trim().ToLower()), includeProperties: nameof(ApplicationUser.Roles));
+                .GetFirstOrDefault(user => user.Email.Trim().ToLower().Equals(email.Trim().ToLower()),
+                includeProperties: nameof(ApplicationUser.Roles));
+
             return userFromDb;
         }
 
@@ -185,43 +184,19 @@ namespace HalceraAPI.Services.Operations
             return regex.IsMatch(emailAddress);
         }
 
-        /// <summary>
-        /// Validate user password request, and create Password Hash
-        /// </summary>
-        /// <param name="password">Password</param>
-        /// <param name="confirmPassword">Confirm password</param>
-        /// <returns>Password Hash</returns>
-        private static string ValidateAndCreateUserPassword(string? password, string? confirmPassword)
-        {
-            ValidatePassword(password, confirmPassword);
-            string passwordHash = CreatePasswordHash(password!);
-            return passwordHash;
-        }
-
-        /// <summary>
-        /// Validate password and password format
-        /// </summary>
-        /// <param name="password">Password</param>
-        /// <param name="confirmPassword">Confirm Password</param>
-        private static void ValidatePassword(string? password, string? confirmPassword)
-        {
-            if (string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
-            {
-                throw new Exception("Password and Confirm Password are required");
-            }
-            if (!password.Equals(confirmPassword))
-            {
-                throw new Exception("Passwords do not match");
-            }
-        }
+        
 
         /// <summary>
         /// Returns created password hash
         /// </summary>
         /// <param name="password">Password string request</param>
         /// <returns>Password Hash</returns>
-        private static string CreatePasswordHash(string password)
+        private static string CreatePasswordHash(string? password)
         {
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new Exception("Password and Confirm Password are required");
+            }
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
 
@@ -326,5 +301,7 @@ namespace HalceraAPI.Services.Operations
                 }
             }
         }
+
+       
     }
 }

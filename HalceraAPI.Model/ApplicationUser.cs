@@ -33,9 +33,28 @@ namespace HalceraAPI.Models
         public int? RefreshTokenId { get; set; }
         [ForeignKey(nameof(RefreshTokenId))]
         public RefreshToken? RefreshToken { get; set; }
+        public bool AccountDeleted { get; set; }
+        public DateTime? DateAccountDeleted { get; set; }
 
         public int? AddressId { get; set; }
         [ForeignKey(nameof(AddressId))]
         public BaseAddress? Address { get; set; }
+
+        public void DeleteUserAccount()
+        {
+            AccountDeleted = true;
+            DateAccountDeleted = DateTime.UtcNow;
+            DateLastModified = DateTime.UtcNow;
+            Active = false;
+            LockoutEnd = DateTime.UtcNow.AddYears(1000);
+        }
+
+        public void FormatUserEmail()
+        {
+            if(!string.IsNullOrWhiteSpace(Email))
+            {
+                Email = Email.Trim().ToLower();
+            }
+        }
     }
 }

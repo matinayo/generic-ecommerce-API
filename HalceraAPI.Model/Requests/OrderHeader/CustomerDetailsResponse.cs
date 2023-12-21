@@ -7,7 +7,7 @@
 
         public string Email { get; init; } = string.Empty;
 
-        public bool Active { get; init; } = true;
+        public bool Active { get; init; }
 
         public DateTime? LockoutEnd { get; init; }
         public DateTime? UserCreatedDate { get; init; }

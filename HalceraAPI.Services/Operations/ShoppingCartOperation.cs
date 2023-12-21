@@ -27,7 +27,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
 
                 ShoppingCart? cart = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
                     cart => cart.ApplicationUserId != null 
@@ -70,7 +70,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
 
                 ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
                     shoppingCart =>
@@ -113,7 +113,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
                 ShoppingCart cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
                     shoppingCart =>
                     shoppingCart.ApplicationUserId != null
@@ -136,7 +136,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
 
                 IEnumerable<ShoppingCart>? shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
                     shoppingCart => 
@@ -158,7 +158,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
                 ShoppingCart shoppingCartFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
                     shoppingCart => shoppingCart.ApplicationUserId != null
                     && shoppingCart.ApplicationUserId.Equals(applicationUser.Id) 
@@ -179,7 +179,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
                 ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
                     shoppingCart => shoppingCart.ApplicationUserId != null 
                     && shoppingCart.ApplicationUserId.Equals(applicationUser.Id) 
@@ -202,7 +202,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
                 
                 IEnumerable<ShoppingCart> cartItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
                     filter: shoppingCart => shoppingCart.ApplicationUserId != null

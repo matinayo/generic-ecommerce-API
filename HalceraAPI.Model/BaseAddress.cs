@@ -12,7 +12,7 @@ namespace HalceraAPI.Models
         [Required]
         [StringLength(80, ErrorMessage = "Field has a maximum length of '80'")]
         public string? StreetAddress { get; set; }
-        [Required]
+        [Required(ErrorMessage = $"The {nameof(City)} field is required")]
         [StringLength(40, ErrorMessage = "Field has a maximum length of '40'")]
         public string? City { get; set; }
         [StringLength(80, ErrorMessage = "Field has a maximum length of '80'")]

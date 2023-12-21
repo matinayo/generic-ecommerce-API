@@ -28,7 +28,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
                 OrderHeader orderHeaderFromDb = await _unitOfWork.OrderHeader.GetFirstOrDefault(
                     filter: order => order.Id.ToLower().Equals(orderId.ToLower())) ?? throw new Exception("Order cannot be found");
 
@@ -53,7 +53,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
                 Expression<Func<OrderHeader, bool>>? filterExpression = order => order.ApplicationUserId == applicationUser.Id;
                 if (orderStatus != null)
                 {
@@ -81,7 +81,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
                 OrderResponse orderHeaderFromDb =
                     await _unitOfWork.OrderHeader.GetFirstOrDefault<OrderResponse>(
                         filter: order =>
@@ -102,7 +102,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUser();
+                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
                 OrderHeader orderHeader = await _unitOfWork.OrderHeader.GetFirstOrDefault(
                     filter: orderHeader => applicationUser.Id == orderHeader.ApplicationUserId &&
                             orderHeader.Id.ToLower().Equals(orderId.ToLower()),
