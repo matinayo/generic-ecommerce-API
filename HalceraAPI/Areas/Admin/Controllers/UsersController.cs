@@ -114,15 +114,15 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [HttpPut]
-        [Route("{addressId}/Address")]
+        [Route("{userId}/Address")]
         [ProducesResponseType(typeof(APIResponse<AddressResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> UpdateUserAddressAsync(int addressId, AddressRequest updateAddressRequest)
+        public async Task<ActionResult> UpdateUserAddressAsync(string userId, AddressRequest updateAddressRequest)
         {
             try
             {
                 APIResponse<AddressResponse> addressResponse =
-                    await _userOperation.UpdateAddressAsync(addressId, updateAddressRequest);
+                    await _userOperation.UpdateAddressAsync(userId, updateAddressRequest);
 
                 return Ok(addressResponse);
             }

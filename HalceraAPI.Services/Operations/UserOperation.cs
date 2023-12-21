@@ -29,7 +29,7 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 ApplicationUser userDetails = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
-                    user => user.Id.Equals(userId, StringComparison.OrdinalIgnoreCase))
+                    user => user.Id.ToLower().Equals(userId.ToLower()))
                     ?? throw new Exception("This user cannot be found");
 
                 userDetails.DeleteUserAccount();
@@ -55,7 +55,7 @@ namespace HalceraAPI.Services.Operations
                 }
 
                 ApplicationUser user = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
-                    user => user.Id.Equals(userId, StringComparison.OrdinalIgnoreCase))
+                    user => user.Id.ToLower().Equals(userId.ToLower()))
                     ?? throw new Exception("This user cannot be found");
 
                 _mapper.Map(updateUserRequest, user);
@@ -78,8 +78,7 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 UserResponse userDetails = await _unitOfWork.ApplicationUser.GetFirstOrDefault<UserResponse>(
-                    user => userId.Equals(user.Id, StringComparison.OrdinalIgnoreCase),
-                    includeProperties: nameof(ApplicationUser.Address))
+                    user => user.Id.ToLower().Equals(userId.ToLower()))
                     ?? throw new Exception("This user cannot be found");
 
                 return new APIResponse<UserResponse>(userDetails);
@@ -132,22 +131,23 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<APIResponse<AddressResponse>> UpdateAddressAsync(int addressId, AddressRequest updateAddressRequest)
+        public async Task<APIResponse<AddressResponse>> UpdateAddressAsync(string userId, AddressRequest updateAddressRequest)
         {
             try
             {
-                BaseAddress address = await _unitOfWork.BaseAddress.GetFirstOrDefault(
-                    address => address.Id == addressId)
-                    ?? throw new Exception("This address cannot be found");
+                ApplicationUser user = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
+                    user => user.Id.ToLower().Equals(userId.ToLower()), 
+                    includeProperties: nameof(ApplicationUser.Address)) 
+                    ?? throw new Exception("This user cannot be found");
 
-                _mapper.Map(updateAddressRequest, address);
+                _mapper.Map(updateAddressRequest, user.Address ??= new());
                 await _unitOfWork.SaveAsync();
 
-                var addressResponse = _mapper.Map<AddressResponse>(address);
+                var addressResponse = _mapper.Map<AddressResponse>(user.Address);
 
                 return new APIResponse<AddressResponse>(addressResponse);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 throw;
             }
@@ -159,7 +159,7 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 ApplicationUser applicationUser = await _unitOfWork.ApplicationUser
-                    .GetFirstOrDefault(user => user.Id.Equals(userId, StringComparison.OrdinalIgnoreCase))
+                    .GetFirstOrDefault(user => user.Id.ToLower().Equals(userId.ToLower()))
                     ?? throw new Exception("This user cannot be found");
 
                 if (applicationUser.LockoutEnd != null && applicationUser.LockoutEnd > DateTime.UtcNow)

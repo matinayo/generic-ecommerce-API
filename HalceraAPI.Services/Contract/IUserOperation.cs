@@ -14,7 +14,7 @@ namespace HalceraAPI.Services.Contract
             int? page);
         Task<APIResponse<UserResponse>> GetUserByIdAsync(string userId);
         Task<APIResponse<UserResponse>> UpdateUserDetailsAsync(string userId, UpdateUserRequest updateUserRequest);
-        Task <APIResponse<AddressResponse>>UpdateAddressAsync(int addressId, AddressRequest updateAddressRequest);
+        Task <APIResponse<AddressResponse>>UpdateAddressAsync(string userId, AddressRequest updateAddressRequest);
         Task DeleteAccountAsync(string userId);
 
         Task LockUnlockUserAsync(string userId, AccountAction accountAction);
