@@ -25,6 +25,7 @@ namespace HalceraAPI.Utilities.Extensions
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IDbInitializer, DbInitializer>();
             services.Configure<JWTOptions>(configuration.GetSection("JWTOptions"));
+            services.Configure<PaystackOptions>(configuration.GetSection("PaystackOptions"));
         }
 
         public static void ConfigureOperationsInjection(this IServiceCollection services)

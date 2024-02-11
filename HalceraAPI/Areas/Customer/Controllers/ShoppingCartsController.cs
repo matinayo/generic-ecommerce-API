@@ -1,4 +1,5 @@
-﻿using HalceraAPI.Models.Requests.APIResponse;
+﻿using HalceraAPI.Models.Enums;
+using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
@@ -23,7 +24,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
         }
 
         [HttpPost("{productId}")]
-        [ProducesResponseType(typeof(APIResponse<ShoppingCartResponse>), 200)]
+        [ProducesResponseType(typeof(APIResponse<AddToCartResponse>), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> AddProductToCartAsync(int productId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
         {
@@ -45,12 +46,12 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(APIResponse<IEnumerable<ShoppingCartDetailsResponse>>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> GetAllItemsInCartAsync()
+        public async Task<ActionResult> GetAllItemsInCartAsync(Currency currency)
         {
             try
             {
-                APIResponse<IEnumerable<ShoppingCartDetailsResponse>> listOfShoppingCartItems =
-                    await _shoppingCartOperation.GetAllItemsInCartAsync();
+                var listOfShoppingCartItems =
+                    await _shoppingCartOperation.GetAllItemsInCartAsync(currency);
 
                 return Ok(listOfShoppingCartItems);
             }
@@ -108,7 +109,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<int?>> DecreaseItemInCartAsync(
-            int shoppingCartId, 
+            int shoppingCartId,
             [FromBody] ShoppingCartRequest? shoppingCartRequest)
         {
             try

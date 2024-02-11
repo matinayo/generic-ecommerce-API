@@ -1,13 +1,14 @@
-﻿using HalceraAPI.Models.Requests.APIResponse;
+﻿using HalceraAPI.Models.Enums;
+using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.ShoppingCart;
 
 namespace HalceraAPI.Services.Contract
 {
     public interface IShoppingCartOperation
     {
-        Task<APIResponse<ShoppingCartResponse>> AddProductToCartAsync(int productId, ShoppingCartRequest? shoppingCartRequest);
+        Task<APIResponse<AddToCartResponse>> AddProductToCartAsync(int productId, ShoppingCartRequest? shoppingCartRequest);
 
-        Task<APIResponse<IEnumerable<ShoppingCartDetailsResponse>>> GetAllItemsInCartAsync();
+        Task<APIResponse<ShoppingCartListResponse>> GetAllItemsInCartAsync(Currency currency = Currency.NGN);
 
         Task<APIResponse<ShoppingCartDetailsResponse>> GetItemInCartAsync(int shoppingCartId);
 

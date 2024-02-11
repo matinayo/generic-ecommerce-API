@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HalceraAPI.Models;
+using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Models.Requests.BaseAddress;
 using HalceraAPI.Models.Requests.Category;
@@ -10,6 +11,7 @@ using HalceraAPI.Models.Requests.OrderHeader;
 using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse;
 using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse.CustomerOrderDetails;
 using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse.PurchaseDetails;
+using HalceraAPI.Models.Requests.Payment;
 using HalceraAPI.Models.Requests.PaymentDetails;
 using HalceraAPI.Models.Requests.Price;
 using HalceraAPI.Models.Requests.Product;
@@ -17,6 +19,7 @@ using HalceraAPI.Models.Requests.RefreshToken;
 using HalceraAPI.Models.Requests.Role;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Models.Requests.ShoppingCart;
+using PayStack.Net;
 
 namespace HalceraAPI.Utilities.Automapper
 {
@@ -83,7 +86,7 @@ namespace HalceraAPI.Utilities.Automapper
 
             // Shopping Cart
             CreateMap<ShoppingCart, ShoppingCartDetailsResponse>().ReverseMap();
-            CreateMap<ShoppingCart, ShoppingCartResponse>().ReverseMap();
+            CreateMap<ShoppingCart, AddToCartResponse>().ReverseMap();
 
             // Application User
             CreateMap<RegisterRequest, ApplicationUser>().ReverseMap();
@@ -104,6 +107,7 @@ namespace HalceraAPI.Utilities.Automapper
             // Payment Details
             CreateMap<PaymentDetailsRequest, PaymentDetails>().ReverseMap();
             CreateMap<PaymentDetails, PaymentDetailsResponse>().ReverseMap();
+            CreateMap<TransactionInitializeResponse, APIResponse<InitializePaymentResponse>>();
 
             // Address
             CreateMap<AddressRequest, BaseAddress>()
