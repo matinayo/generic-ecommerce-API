@@ -25,20 +25,10 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> GetAll(OrderStatus? orderStatus, int? page)
         {
-            try
-            {
-                APIResponse<IEnumerable<OrderOverviewResponse>> listOfOrders = 
-                    await _customerOrderOperation.GetOrdersAsync(orderStatus, page);
+            APIResponse<IEnumerable<OrderOverviewResponse>> listOfOrders =
+                await _customerOrderOperation.GetOrdersAsync(orderStatus, page);
 
-                return Ok(listOfOrders);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception.InnerException?.Message ?? exception.Message));
-            }
+            return Ok(listOfOrders);
         }
 
         [HttpGet("{orderId}")]
@@ -46,19 +36,9 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> GetOrderById(string orderId)
         {
-            try
-            {
-                APIResponse<OrderResponse> orderDetails = await _customerOrderOperation.GetOrderByIdAsync(orderId);
+            APIResponse<OrderResponse> orderDetails = await _customerOrderOperation.GetOrderByIdAsync(orderId);
 
-                return Ok(orderDetails);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest, 
-                            detail: exception.InnerException?.Message ?? exception.Message));
-            }
+            return Ok(orderDetails);
         }
 
         [HttpGet("Cancel/{orderId}")]
@@ -66,20 +46,10 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> CancelOrder(string orderId)
         {
-            try
-            {
-                APIResponse<UpdateOrderStatusResponse> orderStatusUpdateResponse = 
-                    await _customerOrderOperation.CancelOrderAsync(orderId);
+            APIResponse<UpdateOrderStatusResponse> orderStatusUpdateResponse =
+                await _customerOrderOperation.CancelOrderAsync(orderId);
 
-                return Ok(orderStatusUpdateResponse);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest, 
-                            detail: exception.InnerException?.Message ?? exception.Message));
-            }
+            return Ok(orderStatusUpdateResponse);
         }
 
         [HttpPut("{orderId}/Shipping")]
@@ -87,20 +57,11 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> UpdateShippingAddress(string orderId, UpdateShippingAddressRequest shippingAddressRequest)
         {
-            try
-            {
-                APIResponse<ShippingDetailsResponse> shippingDetailsResponse = 
-                    await _customerOrderOperation.UpdateOrderShippingAddressAsync(orderId, shippingAddressRequest);
 
-                return Ok(shippingDetailsResponse);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest, 
-                            detail: exception.InnerException?.Message ?? exception.Message));
-            }
+            APIResponse<ShippingDetailsResponse> shippingDetailsResponse =
+                await _customerOrderOperation.UpdateOrderShippingAddressAsync(orderId, shippingAddressRequest);
+
+            return Ok(shippingDetailsResponse);
         }
     }
 }

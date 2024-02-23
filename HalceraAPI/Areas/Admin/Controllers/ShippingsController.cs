@@ -26,20 +26,10 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult> GetAllShippingRequestsAsync(ShippingStatus? shippingStatus, int? page)
         {
-            try
-            {
                 APIResponse<IEnumerable<ShippingDetailsResponse>> shippingDetails =
                     await _shippingOperation.GetAllShippingRequestsAsync(shippingStatus, page);
 
                 return Ok(shippingDetails);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                    Problem(
-                        statusCode: StatusCodes.Status400BadRequest,
-                        detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
         }
 
         [HttpPut("{shippingId}")]
@@ -48,20 +38,10 @@ namespace HalceraAPI.Areas.Admin.Controllers
         public async Task<ActionResult> UpdateShippingDetailsAsync
             (int shippingId, UpdateShippingDetailsRequest shippingDetailsRequest)
         {
-            try
-            {
                 APIResponse<ShippingDetailsResponse> shippingDetails = 
                     await _shippingOperation.UpdateShippingDetailsAsync(shippingId, shippingDetailsRequest);
 
                 return Ok(shippingDetails);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                    Problem(
-                        statusCode: StatusCodes.Status400BadRequest,
-                        detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
         }
     }
 }

@@ -23,20 +23,10 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> GetProductsAsync(bool? active, bool? featured, int? categoryId, int? page)
         {
-            try
-            {
-                APIResponse<IEnumerable<ProductResponse>> listOfProducts =
-                    await _productOperation.GetAllProductsAsync(active, featured, categoryId, page);
+            APIResponse<IEnumerable<ProductResponse>> listOfProducts =
+                await _productOperation.GetAllProductsAsync(active, featured, categoryId, page);
 
-                return Ok(listOfProducts);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
+            return Ok(listOfProducts);
         }
 
         [HttpGet("{productId}")]
@@ -44,20 +34,10 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> GetProductByIdAsync(int productId)
         {
-            try
-            {
-                APIResponse<ProductDetailsResponse>? productDetails =
-                    await _productOperation.GetProductByIdAsync(productId);
+            APIResponse<ProductDetailsResponse>? productDetails =
+                await _productOperation.GetProductByIdAsync(productId);
 
-                return Ok(productDetails);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
+            return Ok(productDetails);
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
@@ -66,20 +46,10 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> CreateProductAsync([FromBody] CreateProductRequest productRequest)
         {
-            try
-            {
-                APIResponse<ProductDetailsResponse> productDetails =
-                    await _productOperation.CreateProductAsync(productRequest);
+            APIResponse<ProductDetailsResponse> productDetails =
+                await _productOperation.CreateProductAsync(productRequest);
 
-                return Ok(productDetails);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
+            return Ok(productDetails);
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
@@ -89,19 +59,9 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> UpdateProductAsync(int productId, [FromBody] UpdateProductRequest productRequest)
         {
-            try
-            {
-                APIResponse<ProductDetailsResponse> productDetails = await _productOperation.UpdateProductAsync(productId, productRequest);
+            APIResponse<ProductDetailsResponse> productDetails = await _productOperation.UpdateProductAsync(productId, productRequest);
 
-                return Ok(productDetails);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
+            return Ok(productDetails);
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
@@ -110,19 +70,9 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteProductAsync(int productId)
         {
-            try
-            {
-                await _productOperation.DeleteProductAsync(productId);
+            await _productOperation.DeleteProductAsync(productId);
 
-                return NoContent();
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
+            return NoContent();
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
@@ -131,19 +81,9 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteProductCategoryAsync(int productId, int categoryId)
         {
-            try
-            {
-                await _productOperation.DeleteCategoryFromProductByCategoryIdAsync(productId, categoryId);
+            await _productOperation.DeleteCategoryFromProductByCategoryIdAsync(productId, categoryId);
 
-                return NoContent();
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
+            return NoContent();
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
@@ -152,19 +92,9 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteProductPriceByPriceIdAsync(int productId, int priceId)
         {
-            try
-            {
-                await _productOperation.DeletePriceFromProductByPriceIdAsync(productId, priceId);
+            await _productOperation.DeletePriceFromProductByPriceIdAsync(productId, priceId);
 
-                return NoContent();
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
+            return NoContent();
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
@@ -173,19 +103,9 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId)
         {
-            try
-            {
-                await _productOperation.ResetDiscountOfProductPriceByPriceIdAsync(productId, priceId);
+            await _productOperation.ResetDiscountOfProductPriceByPriceIdAsync(productId, priceId);
 
-                return NoContent();
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
+            return NoContent();
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
@@ -194,19 +114,9 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteProductMediaByMediaIdAsync(int productId, int mediaId)
         {
-            try
-            {
-                await _productOperation.DeleteMediaFromProductByMediaIdAsync(productId, mediaId);
+            await _productOperation.DeleteMediaFromProductByMediaIdAsync(productId, mediaId);
 
-                return NoContent();
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
+            return NoContent();
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
@@ -215,19 +125,9 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteProductCompositionByCompositionIdAsync(int productId, int compositionId)
         {
-            try
-            {
-                await _productOperation.DeleteCompositionFromProductByCompositionIdAsync(productId, compositionId);
+            await _productOperation.DeleteCompositionFromProductByCompositionIdAsync(productId, compositionId);
 
-                return NoContent();
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
+            return NoContent();
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
@@ -239,22 +139,12 @@ namespace HalceraAPI.Areas.Admin.Controllers
             int compositionId,
             int compositionDataId)
         {
-            try
-            {
-                await _productOperation.DeleteProductCompositionDataByCompositionDataIdAsync(
-                    productId,
-                    compositionId,
-                    compositionDataId);
+            await _productOperation.DeleteProductCompositionDataByCompositionDataIdAsync(
+                productId,
+                compositionId,
+                compositionDataId);
 
-                return NoContent();
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception?.InnerException?.Message ?? exception?.Message));
-            }
+            return NoContent();
         }
     }
 }
