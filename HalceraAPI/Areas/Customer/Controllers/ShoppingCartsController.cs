@@ -1,5 +1,6 @@
 ﻿using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.APIResponse;
+using HalceraAPI.Models.Requests.Payment;
 using HalceraAPI.Models.Requests.ShoppingCart;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +27,9 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [HttpPost("{productId}")]
         [ProducesResponseType(typeof(APIResponse<AddToCartResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> AddProductToCartAsync(int productId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
+        public async Task<ActionResult> AddProductToCartAsync(
+            int productId,
+            [FromBody] ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {
@@ -72,7 +75,8 @@ namespace HalceraAPI.Areas.Customer.Controllers
         {
             try
             {
-                APIResponse<ShoppingCartDetailsResponse>? itemFromDb = await _shoppingCartOperation.GetItemInCartAsync(shoppingCartId);
+                APIResponse<ShoppingCartDetailsResponse>? itemFromDb =
+                    await _shoppingCartOperation.GetItemInCartAsync(shoppingCartId);
 
                 return Ok(itemFromDb);
             }
@@ -86,15 +90,18 @@ namespace HalceraAPI.Areas.Customer.Controllers
         }
 
         [HttpPost("IncreaseItem/{shoppingCartId}")]
-        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(APIResponse<ShoppingCartUpdateResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<int?>> IncreaseItemInCartAsync(int shoppingCartId, [FromBody] ShoppingCartRequest? shoppingCartRequest)
+        public async Task<ActionResult> IncreaseItemInCartAsync(
+            int shoppingCartId,
+            [FromBody] ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {
-                int totalNumberOfItemsInCart = await _shoppingCartOperation.IncreaseItemInCartAsync(shoppingCartId, shoppingCartRequest);
+                var shoppingCartUpdateResponse = await _shoppingCartOperation
+                    .IncreaseItemInCartAsync(shoppingCartId, shoppingCartRequest);
 
-                return Ok(totalNumberOfItemsInCart);
+                return Ok(shoppingCartUpdateResponse);
             }
             catch (Exception exception)
             {
@@ -106,17 +113,18 @@ namespace HalceraAPI.Areas.Customer.Controllers
         }
 
         [HttpPost("DecreaseItem/{shoppingCartId}")]
-        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(APIResponse<ShoppingCartUpdateResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<int?>> DecreaseItemInCartAsync(
+        public async Task<ActionResult> DecreaseItemInCartAsync(
             int shoppingCartId,
             [FromBody] ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {
-                int totalNumberOfItemsInCart = await _shoppingCartOperation.DecreaseItemInCartAsync(shoppingCartId, shoppingCartRequest);
+                var shoppingCartUpdateResponse = await _shoppingCartOperation
+                    .DecreaseItemInCartAsync(shoppingCartId, shoppingCartRequest);
 
-                return Ok(totalNumberOfItemsInCart);
+                return Ok(shoppingCartUpdateResponse);
             }
             catch (Exception exception)
             {
@@ -128,15 +136,36 @@ namespace HalceraAPI.Areas.Customer.Controllers
         }
 
         [HttpDelete("{shoppingCartId}")]
-        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType(typeof(APIResponse<ShoppingCartUpdateResponse>), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<int?>> DeleteAsync(int shoppingCartId)
+        public async Task<ActionResult> DeleteAsync(int shoppingCartId, Currency currency)
         {
             try
             {
-                bool result = await _shoppingCartOperation.DeleteItemInCartAsync(shoppingCartId);
+                var shoppingCartUpdateResponse = await _shoppingCartOperation.DeleteItemInCartAsync(shoppingCartId, currency);
 
-                return Ok(result);
+                return Ok(shoppingCartUpdateResponse);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(
+                        Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            detail: exception.InnerException?.Message ?? exception.Message));
+            }
+        }
+
+        [HttpPost("InitializePayment")]
+        [ProducesResponseType(typeof(APIResponse<InitializePaymentResponse>), 200)]
+        [ProducesResponseType(400)]
+        public ActionResult InitializeTransactionForCheckout(
+             InitializePaymentRequest initializePaymentRequest)
+        {
+            try
+            {
+                var response = _shoppingCartOperation.InitializeTransactionForCheckout(initializePaymentRequest);
+
+                return Ok(response);
             }
             catch (Exception exception)
             {

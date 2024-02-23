@@ -6,9 +6,10 @@ namespace HalceraAPI.Models.Requests.Payment
     public record InitializePaymentRequest
     {
         [Required]
+        [EmailAddress]
         public string Email { get; init; } = string.Empty;
-        public decimal Amount { get; set; }
-        public Currency Currency { get; set; }
-        public PaymentProvider PaymentProvider { get; set; }
+        public required decimal Amount { get; init; }
+        public Currency Currency { get; init; }
+        public PaymentProvider PaymentProvider { get; init; }
     }
 }

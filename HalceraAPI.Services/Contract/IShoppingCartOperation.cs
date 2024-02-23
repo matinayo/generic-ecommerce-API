@@ -1,5 +1,7 @@
-﻿using HalceraAPI.Models.Enums;
+﻿using HalceraAPI.Common.Utilities;
+using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.APIResponse;
+using HalceraAPI.Models.Requests.Payment;
 using HalceraAPI.Models.Requests.ShoppingCart;
 
 namespace HalceraAPI.Services.Contract
@@ -8,15 +10,18 @@ namespace HalceraAPI.Services.Contract
     {
         Task<APIResponse<AddToCartResponse>> AddProductToCartAsync(int productId, ShoppingCartRequest? shoppingCartRequest);
 
-        Task<APIResponse<ShoppingCartListResponse>> GetAllItemsInCartAsync(Currency currency = Currency.NGN);
+        Task<APIResponse<ShoppingCartListResponse>> GetAllItemsInCartAsync(Currency currency = Defaults.DefaultCurrency);
 
         Task<APIResponse<ShoppingCartDetailsResponse>> GetItemInCartAsync(int shoppingCartId);
 
-        Task<int> IncreaseItemInCartAsync(int shoppingCartId, ShoppingCartRequest? shoppingCartRequest);
+        Task<APIResponse<ShoppingCartUpdateResponse>> IncreaseItemInCartAsync(int shoppingCartId, ShoppingCartRequest? shoppingCartRequest);
 
-        Task<int> DecreaseItemInCartAsync(int shoppingCartId, ShoppingCartRequest? shoppingCartRequest);
+        Task<APIResponse<ShoppingCartUpdateResponse>> DecreaseItemInCartAsync(int shoppingCartId, ShoppingCartRequest? shoppingCartRequest);
 
-        Task<bool> DeleteItemInCartAsync(int shoppingCartId);
+        Task<APIResponse<ShoppingCartUpdateResponse>> DeleteItemInCartAsync(int shoppingCartId, Currency currency = Defaults.DefaultCurrency);
+
+        APIResponse<InitializePaymentResponse> InitializeTransactionForCheckout(
+            InitializePaymentRequest initializePaymentRequest);
 
         Task<APIResponse<CheckoutResponse>> CheckoutAsync(CheckoutRequest checkoutRequest);
     }

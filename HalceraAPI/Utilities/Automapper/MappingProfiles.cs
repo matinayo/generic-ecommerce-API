@@ -108,6 +108,7 @@ namespace HalceraAPI.Utilities.Automapper
             CreateMap<PaymentDetailsRequest, PaymentDetails>().ReverseMap();
             CreateMap<PaymentDetails, PaymentDetailsResponse>().ReverseMap();
             CreateMap<TransactionInitializeResponse, APIResponse<InitializePaymentResponse>>();
+            CreateMap<TransactionInitialize.Data, InitializePaymentResponse>();
 
             // Address
             CreateMap<AddressRequest, BaseAddress>()

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HalceraAPI.Common.AppsettingsOptions;
+using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Models.Enums;
@@ -39,7 +40,6 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
-
                 ShoppingCart? cart = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
                     cart => cart.ApplicationUserId != null
                     && cart.ApplicationUserId.Equals(applicationUser.Id)
@@ -50,6 +50,7 @@ namespace HalceraAPI.Services.Operations
 
                 if (cart == null)
                 {   // adds new item in cart
+                    // TODO:selected product compositions
                     Product? productItem = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId);
                     ValidateAddingItemToCart(productItem);
                     if (requestedQuantity > productItem?.Quantity)
@@ -77,42 +78,59 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<int> DecreaseItemInCartAsync(int shoppingCartId, ShoppingCartRequest? shoppingCartRequest)
+        public async Task<APIResponse<ShoppingCartUpdateResponse>> DecreaseItemInCartAsync(
+            int shoppingCartId,
+            ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {
                 ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
-
-                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
+                IEnumerable<ShoppingCart> shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
                     shoppingCart =>
                     shoppingCart.ApplicationUserId != null
-                    && shoppingCart.ApplicationUserId.Equals(applicationUser.Id)
-                    && shoppingCart.Id == shoppingCartId,
-                    includeProperties: $"{nameof(ShoppingCart.Product)}");
+                    && shoppingCart.ApplicationUserId.Equals(applicationUser.Id),
+                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Prices")
+                    ?? throw new Exception("There is no item in your cart.");
+
+                ShoppingCart? cartItemFromDb = shoppingItemsFromDb
+                    .FirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
 
                 if (cartItemFromDb == null || cartItemFromDb.Product == null)
                     throw new Exception("Item not found");
 
-                if (!cartItemFromDb.Product.Active || cartItemFromDb.Quantity <= 0)
+                if (!ProductInCartIsValid(cartItemFromDb))
                 {
-                    // remove from invalid Item from Shopping Cart
+                    // remove invalid Item from Shopping Cart
                     _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
                     await _unitOfWork.SaveAsync();
                     throw new Exception("This item is not available");
                 }
 
-                // decrease number of items in cart
                 int totalQuantityToRemove = cartItemFromDb.Quantity - (shoppingCartRequest?.Quantity ?? 1);
+                List<ShoppingCart> updatedShoppingCarts = shoppingItemsFromDb.ToList();
+
                 if (totalQuantityToRemove <= 0)
                 {
-                    // remove item from cart
                     _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
+                    updatedShoppingCarts.Remove(cartItemFromDb);
+
                     totalQuantityToRemove = 0;
                 }
                 cartItemFromDb.Quantity = totalQuantityToRemove;
 
                 await _unitOfWork.SaveAsync();
-                return cartItemFromDb.Quantity;
+                Currency currency = shoppingCartRequest?.Currency ?? Defaults.DefaultCurrency;
+                ShoppingCartUpdateResponse response = new()
+                {
+                    Quantity = cartItemFromDb.Quantity,
+                    CartTotal = new()
+                    {
+                        CurrencyToBePaidIn = currency,
+                        TotalAmount = GetTotalAmountToBePaidDuringCheckout(updatedShoppingCarts, currency)
+                    }
+                };
+
+                return new APIResponse<ShoppingCartUpdateResponse>(response);
             }
             catch (Exception)
             {
@@ -120,22 +138,37 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<bool> DeleteItemInCartAsync(int shoppingCartId)
+        public async Task<APIResponse<ShoppingCartUpdateResponse>> DeleteItemInCartAsync(int shoppingCartId, Currency currency)
         {
             try
             {
                 ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
-                ShoppingCart cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
+                IEnumerable<ShoppingCart> shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
                     shoppingCart =>
                     shoppingCart.ApplicationUserId != null
-                    && shoppingCart.ApplicationUserId.Equals(applicationUser.Id)
-                    && shoppingCart.Id == shoppingCartId)
-                    ?? throw new Exception("Item not found");
+                    && shoppingCart.ApplicationUserId.Equals(applicationUser.Id),
+                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Prices")
+                    ?? throw new Exception("There is no item in your cart.");
+
+                ShoppingCart cartItemFromDb = shoppingItemsFromDb.FirstOrDefault(
+                    shoppingCart => shoppingCart.Id == shoppingCartId)
+                    ?? throw new Exception("Item not found.");
 
                 _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
                 await _unitOfWork.SaveAsync();
 
-                return true;
+                var shoppingItemsAfterDelete = shoppingItemsFromDb.Where(cartItem => cartItem != cartItemFromDb).ToList();
+                ShoppingCartUpdateResponse response = new()
+                {
+                    Quantity = 0,
+                    CartTotal = new()
+                    {
+                        CurrencyToBePaidIn = currency,
+                        TotalAmount = GetTotalAmountToBePaidDuringCheckout(shoppingItemsAfterDelete, currency)
+                    }
+                };
+
+                return new APIResponse<ShoppingCartUpdateResponse>(response);
             }
             catch (Exception)
             {
@@ -197,22 +230,40 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<int> IncreaseItemInCartAsync(int shoppingCartId, ShoppingCartRequest? shoppingCartRequest)
+        public async Task<APIResponse<ShoppingCartUpdateResponse>> IncreaseItemInCartAsync(
+            int shoppingCartId,
+            ShoppingCartRequest? shoppingCartRequest)
         {
             try
             {
                 ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
-                ShoppingCart? cartItemFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
-                    shoppingCart => shoppingCart.ApplicationUserId != null
-                    && shoppingCart.ApplicationUserId.Equals(applicationUser.Id)
-                    && shoppingCart.Id == shoppingCartId,
-                    includeProperties: $"{nameof(ShoppingCart.Product)}") ?? throw new Exception("Item not found");
+                IEnumerable<ShoppingCart> shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
+                    shoppingCart =>
+                    shoppingCart.ApplicationUserId != null
+                    && shoppingCart.ApplicationUserId.Equals(applicationUser.Id),
+                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Prices")
+                    ?? throw new Exception("There is no item in your cart.");
+
+                ShoppingCart cartItemFromDb = shoppingItemsFromDb
+                    .FirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId)
+                    ?? throw new Exception("Item not found.");
 
                 int requestedQuantity = shoppingCartRequest?.Quantity ?? 1;
                 ValidateAndUpdateShoppingCartQuantity(cartItemFromDb, requestedQuantity);
                 await _unitOfWork.SaveAsync();
 
-                return cartItemFromDb.Quantity;
+                Currency currency = shoppingCartRequest?.Currency ?? Defaults.DefaultCurrency;
+                ShoppingCartUpdateResponse response = new()
+                {
+                    Quantity = cartItemFromDb.Quantity,
+                    CartTotal = new()
+                    {
+                        CurrencyToBePaidIn = currency,
+                        TotalAmount = GetTotalAmountToBePaidDuringCheckout(shoppingItemsFromDb, currency)
+                    }
+                };
+
+                return new APIResponse<ShoppingCartUpdateResponse>(response);
             }
             catch (Exception)
             {
@@ -225,6 +276,9 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
+                if (InvalidAmountForTransaction(initializePaymentRequest.Amount))
+                    throw new Exception("Amount should be greater than 0.");
+
                 APIResponse<InitializePaymentResponse>? response = initializePaymentRequest.PaymentProvider switch
                 {
                     PaymentProvider.Paystack => InitializePaystackTransaction(
@@ -278,22 +332,34 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
+        private static bool InvalidAmountForTransaction(decimal amount)
+        {
+            return amount <= 0;
+        }
+
         private APIResponse<InitializePaymentResponse> InitializePaystackTransaction(string email, decimal amount, Currency currency)
         {
-            if (currency != Currency.NGN)
-                throw new Exception("The selected provider only supports Naira transactions.");
-
-            int amountInKobo = ConvertAmountToKobo(amount);
-            var paystackApi = new PayStackApi(_paystackOptions.SecretKey);
-            TransactionInitializeResponse? response = paystackApi.Transactions.Initialize(email, amountInKobo);
-
-            if (response != null && response.Status)
+            try
             {
-                return _mapper.Map<APIResponse<InitializePaymentResponse>>(response);
+                if (currency != Currency.NGN)
+                    throw new Exception("The selected provider only supports Naira transactions.");
+
+                int amountInKobo = ConvertAmountToKobo(amount);
+                var paystackApi = new PayStackApi(_paystackOptions.SecretKey);
+                TransactionInitializeResponse? response = paystackApi.Transactions.Initialize(email, amountInKobo);
+
+                if (response != null && response.Status)
+                {
+                    return _mapper.Map<APIResponse<InitializePaymentResponse>>(response);
+                }
+                else
+                {
+                    throw new Exception(response?.Message ?? "Invalid request. Please try again");
+                }
             }
-            else
+            catch(Exception)
             {
-                throw new Exception(response?.Message ?? "Invalid request. Please try again");
+                throw;
             }
         }
 
@@ -367,23 +433,35 @@ namespace HalceraAPI.Services.Operations
         /// <returns>Product total amount</returns>
         private static decimal GetTotalAmountToBePaidDuringCheckout(IEnumerable<ShoppingCart> cartItemsFromDb, Currency currencyToBePaidIn)
         {
+            // TODO: only product that are active
             decimal totalAmount = 0.0M;
             List<OrderDetails> orderDetails = new();
 
             foreach (var cartItem in cartItemsFromDb)
             {
-                if (cartItem.Product != null && cartItem.Product.Prices != null)
+                if (ProductInCartIsValid(cartItem))
                 {
-                    Price? productSelectedPrice = cartItem.Product.Prices.FirstOrDefault(price => price.Currency != null && price.Currency == currencyToBePaidIn);
+                    Price? productSelectedPrice = cartItem?.Product?.Prices?.FirstOrDefault(price => price.Currency != null && price.Currency == currencyToBePaidIn);
                     if (productSelectedPrice != null)
                     {
                         // Total amount
                         decimal productAmount = productSelectedPrice.DiscountAmount ?? productSelectedPrice.Amount ?? 0M;
-                        totalAmount += (productAmount * cartItem.Quantity);
+                        totalAmount += (productAmount * (cartItem?.Quantity ?? 1));
                     }
                 }
             }
             return totalAmount;
+        }
+
+        private static bool ProductInCartIsValid(ShoppingCart cartItem)
+        {
+            return (
+                cartItem != null
+                && cartItem.Product != null
+                && cartItem.Product.Prices != null
+                && cartItem.Product.Active 
+                && cartItem.Product.Quantity > 0 
+                && cartItem.Quantity > 0);
         }
 
         /// <summary>
