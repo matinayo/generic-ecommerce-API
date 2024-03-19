@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HalceraAPI.Models;
+using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Models.Requests.BaseAddress;
@@ -109,6 +110,11 @@ namespace HalceraAPI.Utilities.Automapper
             CreateMap<PaymentDetails, PaymentDetailsResponse>().ReverseMap();
             CreateMap<TransactionInitializeResponse, APIResponse<InitializePaymentResponse>>();
             CreateMap<TransactionInitialize.Data, InitializePaymentResponse>();
+            CreateMap<TransactionVerifyResponse, APIResponse<TransactionVerifyResponse>>();
+            CreateMap<TransactionVerify.Data, VerifyPaymentResponse>()
+                .ForMember(destination => destination.PaymentProvider, opts => opts.MapFrom(src => PaymentProvider.Paystack))
+                .ForMember(destination => destination.TransactionId, opts => opts.MapFrom(src => src.Reference))
+                .ForMember(destination => destination.AmountPaid, opts => opts.MapFrom(src => src.Amount));
 
             // Address
             CreateMap<AddressRequest, BaseAddress>()

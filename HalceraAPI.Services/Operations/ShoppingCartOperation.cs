@@ -294,6 +294,18 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
+        public APIResponse<VerifyPaymentResponse> VerifyTransaction(VerifyPaymentRequest verifyPaymentRequest)
+        {
+            APIResponse<VerifyPaymentResponse>? response = verifyPaymentRequest.PaymentProvider switch
+            {
+                PaymentProvider.Paystack => VerifyPaystackTransaction(
+                        verifyPaymentRequest.Reference, verifyPaymentRequest.Currency),
+                _ => throw new Exception("Unsupported payment provider.")
+            };
+
+            return response ?? throw new Exception("Failed to verify transaction.");
+        }
+
         public async Task<APIResponse<CheckoutResponse>> CheckoutAsync(CheckoutRequest checkoutRequest)
         {
             try
@@ -307,18 +319,25 @@ namespace HalceraAPI.Services.Operations
 
                 if (cartItemsFromDb == null || cartItemsFromDb.IsNullOrEmpty()) throw new Exception("No items found in cart");
 
-                // TODO: Verify Payment, Verify Delivery, Estimated delivery date
+                // TODO: Verify Delivery, Estimated delivery date
+                _ = VerifyTransaction(new VerifyPaymentRequest()
+                {
+                    Currency = checkoutRequest.PaymentDetailsRequest.Currency,
+                    Reference = checkoutRequest.PaymentDetailsRequest.Reference,
+                    PaymentProvider = checkoutRequest.PaymentDetailsRequest.PaymentProvider
+                });
+
                 OrderHeader orderHeader = new()
                 {
                     OrderStatus = OrderStatus.Pending,
                     PaymentDetails = ProcessPaymentOrderDetails(checkoutRequest.PaymentDetailsRequest, cartItemsFromDb),
                     OrderDetails = ProcessOrderDetails(cartItemsFromDb, checkoutRequest.PaymentDetailsRequest.Currency),
                     ShippingDetails = ProcessShippingOrderDetails(checkoutRequest.ShippingAddress),
-                    ApplicationUserId = applicationUser.Id,
+                    ApplicationUserId = applicationUser.Id,                    
                 };
 
                 await _unitOfWork.OrderHeader.Add(orderHeader);
-                // Reset User Shopping Cart
+
                 _unitOfWork.ShoppingCart.RemoveRange(cartItemsFromDb);
                 await _unitOfWork.SaveAsync();
 
@@ -339,27 +358,20 @@ namespace HalceraAPI.Services.Operations
 
         private APIResponse<InitializePaymentResponse> InitializePaystackTransaction(string email, decimal amount, Currency currency)
         {
-            try
+            if (currency != Currency.NGN)
+                throw new Exception("The selected provider only supports Naira transactions.");
+
+            int amountInKobo = ConvertAmountToKobo(amount);
+            var paystackApi = new PayStackApi(_paystackOptions.SecretKey);
+            TransactionInitializeResponse? response = paystackApi.Transactions.Initialize(email, amountInKobo);
+
+            if (response != null && response.Status)
             {
-                if (currency != Currency.NGN)
-                    throw new Exception("The selected provider only supports Naira transactions.");
-
-                int amountInKobo = ConvertAmountToKobo(amount);
-                var paystackApi = new PayStackApi(_paystackOptions.SecretKey);
-                TransactionInitializeResponse? response = paystackApi.Transactions.Initialize(email, amountInKobo);
-
-                if (response != null && response.Status)
-                {
-                    return _mapper.Map<APIResponse<InitializePaymentResponse>>(response);
-                }
-                else
-                {
-                    throw new Exception(response?.Message ?? "Invalid request. Please try again");
-                }
+                return _mapper.Map<APIResponse<InitializePaymentResponse>>(response);
             }
-            catch(Exception)
+            else
             {
-                throw;
+                throw new Exception(response?.Message ?? "Invalid request. Please try again");
             }
         }
 
@@ -415,9 +427,7 @@ namespace HalceraAPI.Services.Operations
         /// <returns>Order Payment Details</returns>
         private PaymentDetails ProcessPaymentOrderDetails(PaymentDetailsRequest paymentDetailsRequest, IEnumerable<ShoppingCart> cartItemsFromDb)
         {
-            // Payment order details
             PaymentDetails paymentDetails = _mapper.Map<PaymentDetails>(paymentDetailsRequest);
-            // Total Amount to be paid and Order Header
             paymentDetails.TotalAmount = GetTotalAmountToBePaidDuringCheckout(cartItemsFromDb, paymentDetailsRequest.Currency);
             // Payment status
             paymentDetails.PaymentStatus =
@@ -459,8 +469,8 @@ namespace HalceraAPI.Services.Operations
                 cartItem != null
                 && cartItem.Product != null
                 && cartItem.Product.Prices != null
-                && cartItem.Product.Active 
-                && cartItem.Product.Quantity > 0 
+                && cartItem.Product.Active
+                && cartItem.Product.Quantity > 0
                 && cartItem.Quantity > 0);
         }
 
@@ -517,6 +527,24 @@ namespace HalceraAPI.Services.Operations
                 }
             }
             return orderDetails;
+        }
+
+        private APIResponse<VerifyPaymentResponse> VerifyPaystackTransaction(string reference, Currency currency)
+        {
+            if (currency != Currency.NGN)
+                throw new Exception("The selected provider only supports Naira transactions.");
+
+            var paystackApi = new PayStackApi(_paystackOptions.SecretKey);
+            TransactionVerifyResponse? response = paystackApi.Transactions.Verify(reference);
+
+            if (response != null && response.Status)
+            {
+                return _mapper.Map<APIResponse<VerifyPaymentResponse>>(response);
+            }
+            else
+            {
+                throw new Exception(response?.Message ?? "Invalid request. Please try again");
+            }
         }
     }
 }

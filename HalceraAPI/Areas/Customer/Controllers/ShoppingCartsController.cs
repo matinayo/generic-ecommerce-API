@@ -8,9 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HalceraAPI.Areas.Customer.Controllers
 {
-    /// <summary>
-    /// Shopping controller defining customers endpoint
-    /// </summary>
     [Authorize]
     [Area("Customer")]
     [Route("api/[area]/[controller]")]
@@ -59,7 +56,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             return Ok(itemFromDb);
         }
 
-        [HttpPost("IncreaseItem/{shoppingCartId}")]
+        [HttpPatch("increase/{shoppingCartId}")]
         [ProducesResponseType(typeof(APIResponse<ShoppingCartUpdateResponse>), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> IncreaseItemInCartAsync(
@@ -72,7 +69,7 @@ namespace HalceraAPI.Areas.Customer.Controllers
             return Ok(shoppingCartUpdateResponse);
         }
 
-        [HttpPost("DecreaseItem/{shoppingCartId}")]
+        [HttpPatch("decrease/{shoppingCartId}")]
         [ProducesResponseType(typeof(APIResponse<ShoppingCartUpdateResponse>), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> DecreaseItemInCartAsync(
@@ -90,33 +87,32 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteAsync(int shoppingCartId, Currency currency)
         {
-            try
-            {
-                var shoppingCartUpdateResponse = await _shoppingCartOperation.DeleteItemInCartAsync(shoppingCartId, currency);
+            var shoppingCartUpdateResponse = await _shoppingCartOperation
+                .DeleteItemInCartAsync(shoppingCartId, currency);
 
-                return Ok(shoppingCartUpdateResponse);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception.InnerException?.Message ?? exception.Message));
-            }
+            return Ok(shoppingCartUpdateResponse);
         }
 
-        [HttpPost("InitializePayment")]
+        [HttpPost("initialize-payment")]
         [ProducesResponseType(typeof(APIResponse<InitializePaymentResponse>), 200)]
         [ProducesResponseType(400)]
         public ActionResult InitializeTransactionForCheckout(
              InitializePaymentRequest initializePaymentRequest)
         {
-            var response = _shoppingCartOperation.InitializeTransactionForCheckout(initializePaymentRequest);
+            var response = _shoppingCartOperation
+                .InitializeTransactionForCheckout(initializePaymentRequest);
 
             return Ok(response);
         }
 
-        [HttpPost("Checkout")]
+        [HttpPost("verify-payment")]
+        public ActionResult<APIResponse<VerifyPaymentResponse>>
+            VerifyTransaction(VerifyPaymentRequest verifyPaymentRequest)
+        {
+            return _shoppingCartOperation.VerifyTransaction(verifyPaymentRequest);
+        }
+
+        [HttpPost("checkout")]
         [ProducesResponseType(typeof(APIResponse<CheckoutResponse>), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> CheckoutAsync([FromBody] CheckoutRequest checkoutRequest)

@@ -11,5 +11,8 @@ namespace HalceraAPI.Models.Requests.PaymentDetails
         public DateTime? PaymentDate { get; set; }
         public DateTime? PaymentDueDate { get; set; }
         public string? TransactionId { get; set; }
+        public string? Reference { get; set; }
+        public PaymentProvider? PaymentProvider { get; set; }
+        public string? Channel { get; set; }
     }
 }

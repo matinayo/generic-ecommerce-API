@@ -23,6 +23,8 @@ namespace HalceraAPI.Services.Contract
         APIResponse<InitializePaymentResponse> InitializeTransactionForCheckout(
             InitializePaymentRequest initializePaymentRequest);
 
+        APIResponse<VerifyPaymentResponse> VerifyTransaction(VerifyPaymentRequest verifyPaymentRequest);
+
         Task<APIResponse<CheckoutResponse>> CheckoutAsync(CheckoutRequest checkoutRequest);
     }
 }
