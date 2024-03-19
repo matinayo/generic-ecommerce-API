@@ -6,12 +6,13 @@ using HalceraAPI.DataAccess.Repository;
 using HalceraAPI.Services.Contract;
 using HalceraAPI.Services.Operations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
+using System.Text;
 
 namespace HalceraAPI.Utilities.Extensions
 {
-    /// <summary>
-    /// Builder Services for dependencies
-    /// </summary>
     public static class ServiceExtension
     {
         public static void ConfigureDbContextAsync(this IServiceCollection services, IConfiguration configuration)
@@ -22,13 +23,14 @@ namespace HalceraAPI.Utilities.Extensions
                 // configuration.GetSection("AppSettings:Token").Value
             });
 
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IDbInitializer, DbInitializer>();
             services.Configure<JWTOptions>(configuration.GetSection("JWTOptions"));
+            services.Configure<PaystackOptions>(configuration.GetSection("PaystackOptions"));
         }
 
         public static void ConfigureOperationsInjection(this IServiceCollection services)
         {
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IDbInitializer, DbInitializer>();
             services.AddScoped<IProductOperation, ProductOperation>();
             services.AddScoped<IShoppingCartOperation, ShoppingCartOperation>();
             services.AddScoped<ICategoryOperation, CategoryOperation>();
@@ -41,6 +43,51 @@ namespace HalceraAPI.Utilities.Extensions
             services.AddScoped<IAdminOrderOperation, AdminOrderOperation>();
             services.AddScoped<IShippingOperation, ShippingOperation>();
             services.AddScoped<IUserOperation, UserOperation>();
+        }
+
+        public static void ConfigureApplicationServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddRouting(options => options.LowercaseUrls = true);
+
+            services.AddEndpointsApiExplorer();
+            
+            services.AddAuthentication().AddJwtBearer(
+                // Verify and validate issuer signing key
+                options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        ValidateAudience = false,
+                        ValidateIssuer = false,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                            configuration.GetSection("JWTOptions:Token").Value!))
+                    };
+                });
+
+            services.ConfigureSwagger();
+
+            services.AddHttpContextAccessor();
+
+            services.AddAutoMapper(typeof(Program).Assembly);
+        }
+
+        private static void ConfigureSwagger(this IServiceCollection services)
+        {
+            services.AddSwaggerGen(options =>
+            {
+                // Setup token in Header -> Authorization
+                options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey
+                });
+
+                options.OperationFilter<SecurityRequirementsOperationFilter>();
+            });
+
+            services.AddSwaggerGenNewtonsoftSupport();
         }
     }
 }

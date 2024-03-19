@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HalceraAPI.Common.AppsettingsOptions;
 using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
@@ -6,8 +7,12 @@ using HalceraAPI.Models.Enums;
 using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Models.Requests.BaseAddress;
+using HalceraAPI.Models.Requests.Role;
 using HalceraAPI.Services.Contract;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using System.Linq.Expressions;
+using System.Security.Claims;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -16,12 +21,21 @@ namespace HalceraAPI.Services.Operations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IIdentityOperation _identityOperation;
         private readonly IMapper _mapper;
+        private readonly JWTOptions jwtOptions;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserOperation(IUnitOfWork unitOfWork, IIdentityOperation identityOperation, IMapper mapper)
+        public UserOperation(
+            IUnitOfWork unitOfWork,
+            IIdentityOperation identityOperation, 
+            IMapper mapper,
+            IOptions<JWTOptions> options, 
+            IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _identityOperation = identityOperation;
             _mapper = mapper;
+            jwtOptions = options.Value;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task DeleteAccountAsync(string userId)
@@ -41,7 +55,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<APIResponse<UserResponse>> UpdateUserDetailsAsync(string userId, UpdateUserRequest updateUserRequest)
+        public async Task<APIResponse<UserDetailsResponse>> UpdateUserDetailsAsync(string userId, UpdateUserRequest updateUserRequest)
         {
             try
             {
@@ -62,9 +76,9 @@ namespace HalceraAPI.Services.Operations
                 user.FormatUserEmail();
 
                 await _unitOfWork.SaveAsync();
-                UserResponse userResponse = _mapper.Map<UserResponse>(user);
+                UserDetailsResponse userResponse = _mapper.Map<UserDetailsResponse>(user);
 
-                return new APIResponse<UserResponse>(userResponse);
+                return new APIResponse<UserDetailsResponse>(userResponse);
 
             }
             catch (Exception)
@@ -73,15 +87,15 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task<APIResponse<UserResponse>> GetUserByIdAsync(string userId)
+        public async Task<APIResponse<UserDetailsResponse>> GetUserByIdAsync(string userId)
         {
             try
             {
-                UserResponse userDetails = await _unitOfWork.ApplicationUser.GetFirstOrDefault<UserResponse>(
+                UserDetailsResponse userDetails = await _unitOfWork.ApplicationUser.GetFirstOrDefault<UserDetailsResponse>(
                     user => user.Id.ToLower().Equals(userId.ToLower()))
                     ?? throw new Exception("This user cannot be found");
 
-                return new APIResponse<UserResponse>(userDetails);
+                return new APIResponse<UserDetailsResponse>(userDetails);
             }
             catch (Exception)
             {
@@ -147,7 +161,7 @@ namespace HalceraAPI.Services.Operations
 
                 return new APIResponse<AddressResponse>(addressResponse);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw;
             }
@@ -158,6 +172,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
+                IdenticalUserCannotModify(userId);
                 ApplicationUser applicationUser = await _unitOfWork.ApplicationUser
                     .GetFirstOrDefault(user => user.Id.ToLower().Equals(userId.ToLower()))
                     ?? throw new Exception("This user cannot be found");
@@ -178,6 +193,93 @@ namespace HalceraAPI.Services.Operations
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        public async Task<APIResponse<UserAuthResponse>> DeleteRoleFromUserAsync(string userId, int roleId)
+        {
+            try
+            {
+                IdenticalUserCannotModify(userId);
+                ApplicationUser applicationUser = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
+                    user => user.Id.ToLower().Equals(userId.ToLower()),
+                    includeProperties: nameof(ApplicationUser.Roles))
+                ?? throw new Exception("This user cannot be found");
+
+                if(applicationUser.Roles == null || !applicationUser.Roles.Any())
+                {
+                    throw new Exception("No roles available for this user");
+                }
+
+                Roles role = applicationUser.Roles.FirstOrDefault(role => role.Id == roleId) 
+                    ?? throw new Exception("This role is invalid");
+                
+                applicationUser.Roles.Remove(role);
+                if (!applicationUser.Roles.Any())
+                {
+                    Roles? customerRoleFromDb = await _unitOfWork.Roles.GetFirstOrDefault(role =>
+                    role.Title.ToLower().Equals(RoleDefinition.Customer.ToLower()));
+
+                    if (customerRoleFromDb != null)
+                    {
+                        applicationUser.Roles.Add(customerRoleFromDb);
+                    }
+                }
+                await _unitOfWork.SaveAsync();
+
+                UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUser);
+                userResponse.Token = JWTManager.CreateToken(applicationUser, jwtOptions.Token);
+
+                return new APIResponse<UserAuthResponse>(userResponse);
+            }catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<APIResponse<UserAuthResponse>> UpdateUserRoleUserAsync(string userId, int roleId)
+        {
+            try
+            {
+                IdenticalUserCannotModify(userId);
+                ApplicationUser applicationUser = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
+                    user => user.Id.ToLower().Equals(userId.ToLower()),
+                    includeProperties: nameof(ApplicationUser.Roles))
+                    ?? throw new Exception("This user cannot be found");
+
+                if (applicationUser.Roles == null || !applicationUser.Roles.Any())
+                {
+                    throw new Exception("No roles available for this user");
+                }
+
+                Roles role = await _unitOfWork.Roles.GetFirstOrDefault(role => role.Id == roleId)
+                    ?? throw new Exception("This role is invalid");
+
+                applicationUser.Roles.Add(role);
+                await _unitOfWork.SaveAsync();
+                UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUser);
+                userResponse.Token = JWTManager.CreateToken(applicationUser, jwtOptions.Token);
+
+                return new APIResponse<UserAuthResponse>(userResponse);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private void IdenticalUserCannotModify(string userId)
+        {
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                var claim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+                if (claim != null)
+                {
+                    if (claim.Value.ToLower().Equals(userId.ToLower()))
+                    {
+                        throw new Exception("You cannot modify your own role");
+                    }
+                }
             }
         }
     }

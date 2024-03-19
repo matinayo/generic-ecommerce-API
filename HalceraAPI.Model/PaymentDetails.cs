@@ -4,9 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HalceraAPI.Models
 {
-    /// <summary>
-    /// Order Payment Details
-    /// </summary>
     public class PaymentDetails
     {
         [Key]
@@ -25,5 +22,8 @@ namespace HalceraAPI.Models
         public DateTime? PaymentDate { get; set; } = DateTime.UtcNow;
         public DateTime? PaymentDueDate { get; set; }
         public string? TransactionId { get; set; }
+        public string? Reference { get; set; }
+        public PaymentProvider? PaymentProvider { get; set; }
+        public string? Channel { get; set; }
     }
 }

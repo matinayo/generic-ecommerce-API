@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using HalceraAPI.Models;
+using HalceraAPI.Models.Enums;
+using HalceraAPI.Models.Requests.APIResponse;
 using HalceraAPI.Models.Requests.ApplicationUser;
 using HalceraAPI.Models.Requests.BaseAddress;
 using HalceraAPI.Models.Requests.Category;
@@ -10,6 +12,7 @@ using HalceraAPI.Models.Requests.OrderHeader;
 using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse;
 using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse.CustomerOrderDetails;
 using HalceraAPI.Models.Requests.OrderHeader.CustomerResponse.PurchaseDetails;
+using HalceraAPI.Models.Requests.Payment;
 using HalceraAPI.Models.Requests.PaymentDetails;
 using HalceraAPI.Models.Requests.Price;
 using HalceraAPI.Models.Requests.Product;
@@ -17,6 +20,7 @@ using HalceraAPI.Models.Requests.RefreshToken;
 using HalceraAPI.Models.Requests.Role;
 using HalceraAPI.Models.Requests.Shipping;
 using HalceraAPI.Models.Requests.ShoppingCart;
+using PayStack.Net;
 
 namespace HalceraAPI.Utilities.Automapper
 {
@@ -83,11 +87,12 @@ namespace HalceraAPI.Utilities.Automapper
 
             // Shopping Cart
             CreateMap<ShoppingCart, ShoppingCartDetailsResponse>().ReverseMap();
-            CreateMap<ShoppingCart, ShoppingCartResponse>().ReverseMap();
+            CreateMap<ShoppingCart, AddToCartResponse>().ReverseMap();
 
             // Application User
             CreateMap<RegisterRequest, ApplicationUser>().ReverseMap();
             CreateMap<ApplicationUser, UserAuthResponse>().ReverseMap();
+            CreateMap<ApplicationUser, UserDetailsResponse>().ReverseMap();
             CreateMap<ApplicationUser, UserResponse>().ReverseMap();
             CreateMap<ApplicationUser, CustomerDetailsResponse>().ReverseMap();
             CreateMap<UpdateUserRequest, ApplicationUser>()
@@ -103,6 +108,13 @@ namespace HalceraAPI.Utilities.Automapper
             // Payment Details
             CreateMap<PaymentDetailsRequest, PaymentDetails>().ReverseMap();
             CreateMap<PaymentDetails, PaymentDetailsResponse>().ReverseMap();
+            CreateMap<TransactionInitializeResponse, APIResponse<InitializePaymentResponse>>();
+            CreateMap<TransactionInitialize.Data, InitializePaymentResponse>();
+            CreateMap<TransactionVerifyResponse, APIResponse<TransactionVerifyResponse>>();
+            CreateMap<TransactionVerify.Data, VerifyPaymentResponse>()
+                .ForMember(destination => destination.PaymentProvider, opts => opts.MapFrom(src => PaymentProvider.Paystack))
+                .ForMember(destination => destination.TransactionId, opts => opts.MapFrom(src => src.Reference))
+                .ForMember(destination => destination.AmountPaid, opts => opts.MapFrom(src => src.Amount));
 
             // Address
             CreateMap<AddressRequest, BaseAddress>()
@@ -118,6 +130,7 @@ namespace HalceraAPI.Utilities.Automapper
             // Order Header
             CreateMap<OrderHeader, CheckoutResponse>().ReverseMap();
             CreateMap<OrderHeader, OrderResponse>().ReverseMap();
+            CreateMap<OrderHeader, OrderOverviewResponse>().ReverseMap();
             CreateMap<OrderDetails, OrderDetailsResponse>().ReverseMap();
             CreateMap<Product, ProductSummaryResponse>();
 

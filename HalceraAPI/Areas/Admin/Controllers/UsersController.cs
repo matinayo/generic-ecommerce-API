@@ -32,41 +32,21 @@ namespace HalceraAPI.Areas.Admin.Controllers
             bool? deleted,
             int? page)
         {
-            try
-            {
-                APIResponse<IEnumerable<UserResponse>> usersResponse =
-                    await _userOperation.GetUsersAsync(roleId, active, deleted, page);
+            APIResponse<IEnumerable<UserResponse>> usersResponse =
+                await _userOperation.GetUsersAsync(roleId, active, deleted, page);
 
-                return Ok(usersResponse);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception.InnerException?.Message ?? exception.Message));
-            }
+            return Ok(usersResponse);
         }
 
         [HttpGet]
         [Route("{userId}")]
-        [ProducesResponseType(typeof(APIResponse<UserResponse>), 200)]
+        [ProducesResponseType(typeof(APIResponse<UserDetailsResponse>), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> GetUserByIdAsync(string userId)
         {
-            try
-            {
-                APIResponse<UserResponse> userResponse = await _userOperation.GetUserByIdAsync(userId);
+            APIResponse<UserDetailsResponse> userResponse = await _userOperation.GetUserByIdAsync(userId);
 
-                return Ok(userResponse);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception.InnerException?.Message ?? exception.Message));
-            }
+            return Ok(userResponse);
         }
 
         [Authorize(Roles = RoleDefinition.Admin + "," + RoleDefinition.Employee)]
@@ -76,41 +56,21 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> LockUnlockAccountAsync(string userId, AccountAction accountAction)
         {
-            try
-            {
-                await _userOperation.LockUnlockUserAsync(userId, accountAction);
+            await _userOperation.LockUnlockUserAsync(userId, accountAction);
 
-                return NoContent();
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception.InnerException?.Message ?? exception.Message));
-            }
+            return NoContent();
         }
 
         [HttpPut]
         [Route("{userId}")]
-        [ProducesResponseType(typeof(APIResponse<UserResponse>), 200)]
+        [ProducesResponseType(typeof(APIResponse<UserDetailsResponse>), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> UpdateUserDetailsAsync(string userId, UpdateUserRequest updateUserRequest)
         {
-            try
-            {
-                APIResponse<UserResponse> userResponse =
-                    await _userOperation.UpdateUserDetailsAsync(userId, updateUserRequest);
+            APIResponse<UserDetailsResponse> userResponse =
+                await _userOperation.UpdateUserDetailsAsync(userId, updateUserRequest);
 
-                return Ok(userResponse);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception.InnerException?.Message ?? exception.Message));
-            }
+            return Ok(userResponse);
         }
 
         [HttpPut]
@@ -119,20 +79,23 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> UpdateUserAddressAsync(string userId, AddressRequest updateAddressRequest)
         {
-            try
-            {
-                APIResponse<AddressResponse> addressResponse =
-                    await _userOperation.UpdateAddressAsync(userId, updateAddressRequest);
+            APIResponse<AddressResponse> addressResponse =
+                await _userOperation.UpdateAddressAsync(userId, updateAddressRequest);
 
-                return Ok(addressResponse);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception.InnerException?.Message ?? exception.Message));
-            }
+            return Ok(addressResponse);
+        }
+
+        [Authorize(Roles = RoleDefinition.Admin)]
+        [HttpPut]
+        [Route("{userId}/Roles/{roleId}")]
+        [ProducesResponseType(typeof(APIResponse<UserAuthResponse>), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> UpdateUserRoleUserAsync(string userId, int roleId)
+        {
+            APIResponse<UserAuthResponse> userResponse =
+                await _userOperation.UpdateUserRoleUserAsync(userId, roleId);
+
+            return Ok(userResponse);
         }
 
         [HttpDelete]
@@ -141,20 +104,22 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteAccountAsync(string userId)
         {
-            try
-            {
-                await _userOperation.DeleteAccountAsync(userId);
+            await _userOperation.DeleteAccountAsync(userId);
 
-                return NoContent();
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(
-                        Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            detail: exception.InnerException?.Message ?? 
-                            exception.Message));
-            }
+            return NoContent();
+        }
+
+        [Authorize(Roles = RoleDefinition.Admin)]
+        [HttpDelete]
+        [Route("{userId}/Roles/{roleId}")]
+        [ProducesResponseType(typeof(APIResponse<UserAuthResponse>), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> DeleteRoleFromUserAsync(string userId, int roleId)
+        {
+            APIResponse<UserAuthResponse> userResponse =
+                await _userOperation.DeleteRoleFromUserAsync(userId, roleId);
+
+            return Ok(userResponse);
         }
     }
 }
