@@ -1,8 +1,8 @@
-﻿using HalceraAPI.Models.Enums;
-using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.ApplicationUser;
-using HalceraAPI.Models.Requests.BaseAddress;
-using HalceraAPI.Models.Requests.Role;
+﻿using HalceraAPI.Common.Enums;
+using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.ApplicationUser;
+using HalceraAPI.Services.Dtos.BaseAddress;
+using HalceraAPI.Services.Dtos.Role;
 
 namespace HalceraAPI.Services.Contract
 {

@@ -1,5 +1,5 @@
-﻿using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.Product;
+﻿using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.Product;
 
 namespace HalceraAPI.Services.Contract
 {

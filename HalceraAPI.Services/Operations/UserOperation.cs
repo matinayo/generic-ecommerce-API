@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
 using HalceraAPI.Common.AppsettingsOptions;
+using HalceraAPI.Common.Enums;
 using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Models.Enums;
-using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.ApplicationUser;
-using HalceraAPI.Models.Requests.BaseAddress;
-using HalceraAPI.Models.Requests.Role;
 using HalceraAPI.Services.Contract;
+using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.ApplicationUser;
+using HalceraAPI.Services.Dtos.BaseAddress;
+using HalceraAPI.Services.Token;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System.Linq.Expressions;
@@ -26,9 +26,9 @@ namespace HalceraAPI.Services.Operations
 
         public UserOperation(
             IUnitOfWork unitOfWork,
-            IIdentityOperation identityOperation, 
+            IIdentityOperation identityOperation,
             IMapper mapper,
-            IOptions<JWTOptions> options, 
+            IOptions<JWTOptions> options,
             IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
@@ -150,8 +150,8 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 ApplicationUser user = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
-                    user => user.Id.ToLower().Equals(userId.ToLower()), 
-                    includeProperties: nameof(ApplicationUser.Address)) 
+                    user => user.Id.ToLower().Equals(userId.ToLower()),
+                    includeProperties: nameof(ApplicationUser.Address))
                     ?? throw new Exception("This user cannot be found");
 
                 _mapper.Map(updateAddressRequest, user.Address ??= new());
@@ -206,14 +206,14 @@ namespace HalceraAPI.Services.Operations
                     includeProperties: nameof(ApplicationUser.Roles))
                 ?? throw new Exception("This user cannot be found");
 
-                if(applicationUser.Roles == null || !applicationUser.Roles.Any())
+                if (applicationUser.Roles == null || !applicationUser.Roles.Any())
                 {
                     throw new Exception("No roles available for this user");
                 }
 
-                Roles role = applicationUser.Roles.FirstOrDefault(role => role.Id == roleId) 
+                Roles role = applicationUser.Roles.FirstOrDefault(role => role.Id == roleId)
                     ?? throw new Exception("This role is invalid");
-                
+
                 applicationUser.Roles.Remove(role);
                 if (!applicationUser.Roles.Any())
                 {
@@ -231,7 +231,8 @@ namespace HalceraAPI.Services.Operations
                 userResponse.Token = JWTManager.CreateToken(applicationUser, jwtOptions.Token);
 
                 return new APIResponse<UserAuthResponse>(userResponse);
-            }catch (Exception)
+            }
+            catch (Exception)
             {
                 throw;
             }

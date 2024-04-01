@@ -1,6 +1,4 @@
-﻿using BCrypt.Net;
-using HalceraAPI.Models.Requests.ApplicationUser;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;

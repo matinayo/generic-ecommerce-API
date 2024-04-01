@@ -1,5 +1,5 @@
 ﻿using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.Media;
+using HalceraAPI.Services.Dtos.Media;
 
 namespace HalceraAPI.Services.Contract
 {

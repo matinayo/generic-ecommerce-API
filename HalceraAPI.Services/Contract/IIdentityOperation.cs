@@ -1,8 +1,8 @@
 ﻿using HalceraAPI.Models;
-using HalceraAPI.Models.Enums;
-using HalceraAPI.Models.Requests.ApplicationUser;
-using HalceraAPI.Models.Requests.RefreshToken;
-using HalceraAPI.Models.Requests.Role;
+using HalceraAPI.Common.Enums;
+using HalceraAPI.Services.Dtos.ApplicationUser;
+using HalceraAPI.Services.Dtos.RefreshToken;
+using HalceraAPI.Services.Dtos.Role;
 
 namespace HalceraAPI.Services.Contract
 {

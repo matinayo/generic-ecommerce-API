@@ -1,6 +1,6 @@
-﻿using HalceraAPI.Models.Requests.ApplicationUser;
-using HalceraAPI.Models.Requests.RefreshToken;
-using HalceraAPI.Models.Requests.Role;
+﻿using HalceraAPI.Services.Dtos.ApplicationUser;
+using HalceraAPI.Services.Dtos.RefreshToken;
+using HalceraAPI.Services.Dtos.Role;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

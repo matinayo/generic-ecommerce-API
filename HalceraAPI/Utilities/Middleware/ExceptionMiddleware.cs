@@ -1,4 +1,4 @@
-﻿using HalceraAPI.Models.Requests.APIResponse;
+﻿using HalceraAPI.Services.Dtos.APIResponse;
 using HalceraAPI.Utilities.Exceptions;
 using System.Net;
 

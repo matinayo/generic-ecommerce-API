@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.Price;
+using HalceraAPI.Services.Dtos.Price;
 using HalceraAPI.Services.Contract;
 
 namespace HalceraAPI.Services.Operations

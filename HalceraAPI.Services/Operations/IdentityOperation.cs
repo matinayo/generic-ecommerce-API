@@ -3,14 +3,14 @@ using HalceraAPI.Common.AppsettingsOptions;
 using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.ApplicationUser;
-using HalceraAPI.Models.Requests.RefreshToken;
-using HalceraAPI.Models.Requests.Role;
 using HalceraAPI.Services.Contract;
+using HalceraAPI.Services.Dtos.ApplicationUser;
+using HalceraAPI.Services.Dtos.RefreshToken;
+using HalceraAPI.Services.Dtos.Role;
+using HalceraAPI.Services.Token;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
-using System.Text.RegularExpressions;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -22,9 +22,9 @@ namespace HalceraAPI.Services.Operations
         private readonly JWTOptions jwtOptions;
 
         public IdentityOperation(
-            IUnitOfWork unitOfWork, 
-            IMapper mapper, 
-            IHttpContextAccessor httpContextAccessor, 
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor,
             IOptions<JWTOptions> options)
         {
             _unitOfWork = unitOfWork;
@@ -35,53 +35,38 @@ namespace HalceraAPI.Services.Operations
 
         public async Task<UserAuthResponse> Register(RegisterRequest registerRequest)
         {
-            try
+            ApplicationUser? applicationUser = await GetUserWithEmail(registerRequest.Email);
+            if (applicationUser != null)
             {
-                // validate if user email is already existing
-                ApplicationUser? applicationUser = await GetUserWithEmail(registerRequest.Email);
-                if (applicationUser != null)
-                {
-                    throw new Exception("The email address entered is already being used.");
-                }
-
-                applicationUser = _mapper.Map<ApplicationUser>(registerRequest);
-                applicationUser.Register(registerRequest.Password);
-                await SetUserRole(registerRequest.RolesId, applicationUser);
-
-                await _unitOfWork.ApplicationUser.Add(applicationUser);
-                await _unitOfWork.SaveAsync();
-
-                UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUser);
-                userResponse.Token = JWTManager.CreateToken(applicationUser, jwtOptions.Token);
-
-                return userResponse;
+                throw new Exception("The email address entered is already being used.");
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            applicationUser = _mapper.Map<ApplicationUser>(registerRequest);
+            applicationUser.Register(registerRequest.Password);
+            await SetUserRole(registerRequest.RolesId, applicationUser);
+
+            await _unitOfWork.ApplicationUser.Add(applicationUser);
+            await _unitOfWork.SaveAsync();
+
+            UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUser);
+            userResponse.Token = JWTManager.CreateToken(applicationUser, jwtOptions.Token);
+
+            return userResponse;
         }
 
         public async Task<UserAuthResponse> Login(LoginRequest loginRequest)
         {
-            try
-            {
-                ApplicationUser applicationUserFromDb = await GetUserWithEmail(loginRequest.Email)
-                    ?? throw new Exception("Incorrect email or password");
+            ApplicationUser applicationUserFromDb = await GetUserWithEmail(loginRequest.Email)
+                ?? throw new Exception("Incorrect email or password");
 
-                applicationUserFromDb.Login(loginRequest.Password
-                    ?? throw new Exception("Password is required"));
-                await _unitOfWork.SaveAsync();
+            applicationUserFromDb.Login(loginRequest.Password
+                ?? throw new Exception("Password is required"));
+            await _unitOfWork.SaveAsync();
 
-                UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUserFromDb);
-                userResponse.Token = JWTManager.CreateToken(applicationUserFromDb, jwtOptions.Token);
+            UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUserFromDb);
+            userResponse.Token = JWTManager.CreateToken(applicationUserFromDb, jwtOptions.Token);
 
-                return userResponse;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return userResponse;
         }
 
         public async Task<UserAuthResponse> RefreshToken(RefreshTokenRequest refreshTokenRequest)
@@ -108,42 +93,28 @@ namespace HalceraAPI.Services.Operations
 
         public async Task<ApplicationUser> GetLoggedInUserAsync()
         {
-            try
+            if (_httpContextAccessor.HttpContext != null)
             {
-                if (_httpContextAccessor.HttpContext != null)
+                var claim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+                if (claim != null)
                 {
-                    var claim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-                    if (claim != null)
-                    {
-                        ApplicationUser? applicationUser = await _unitOfWork.ApplicationUser
-                            .GetFirstOrDefault(user => user.Id == claim.Value,
-                            includeProperties: nameof(ApplicationUser.RefreshToken));
+                    ApplicationUser? applicationUser = await _unitOfWork.ApplicationUser
+                        .GetFirstOrDefault(user => user.Id == claim.Value,
+                        includeProperties: nameof(ApplicationUser.RefreshToken));
 
-                        if (applicationUser != null)
-                        {
-                            return applicationUser;
-                        }
+                    if (applicationUser != null)
+                    {
+                        return applicationUser;
                     }
                 }
-                // TODO: create Unauthorized exception
-                throw new UnauthorizedAccessException("Login to your account");
             }
-            catch (Exception)
-            {
-                throw;
-            }
+            // TODO: create Unauthorized exception
+            throw new UnauthorizedAccessException("Login to your account");
         }
 
         public async Task<IEnumerable<RoleResponse>> GetApplicationRoles()
         {
-            try
-            {
-                return await _unitOfWork.Roles.GetAll<RoleResponse>();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return await _unitOfWork.Roles.GetAll<RoleResponse>();
         }
 
         public async Task<ApplicationUser?> GetUserWithEmail(string? email)
@@ -172,9 +143,9 @@ namespace HalceraAPI.Services.Operations
                     applicationUser.Roles = selectedRoles.ToList();
                 }
             }
+
             if (applicationUser.Roles == null)
             {
-                // assign new role
                 Roles? roleId = await _unitOfWork.Roles.GetFirstOrDefault(u => u.Title.Equals(RoleDefinition.Customer));
                 if (roleId != null)
                 {

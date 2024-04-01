@@ -1,7 +1,7 @@
-﻿using HalceraAPI.Models.Enums;
-using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.Payment;
-using HalceraAPI.Models.Requests.ShoppingCart;
+﻿using HalceraAPI.Common.Enums;
+using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.Payment;
+using HalceraAPI.Services.Dtos.ShoppingCart;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -2,8 +2,8 @@
 using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.Product;
+using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.Product;
 using HalceraAPI.Services.Contract;
 using System.Linq.Expressions;
 

@@ -1,6 +1,6 @@
 ﻿using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.Category;
+using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.Category;
 
 namespace HalceraAPI.Services.Contract
 {

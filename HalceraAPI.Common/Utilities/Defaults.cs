@@ -1,4 +1,4 @@
-﻿using HalceraAPI.Models.Enums;
+﻿using HalceraAPI.Common.Enums;
 
 namespace HalceraAPI.Common.Utilities
 {

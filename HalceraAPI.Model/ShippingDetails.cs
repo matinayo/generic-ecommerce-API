@@ -1,4 +1,4 @@
-﻿using HalceraAPI.Models.Enums;
+﻿using Enums = HalceraAPI.Common.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,7 +13,7 @@ namespace HalceraAPI.Models
         public int Id { get; set; }
         public string? TrackingNumber { get; set; }
         public string? Carrier { get; set; }
-        public ShippingStatus? ShippingStatus { get; set; } = Enums.ShippingStatus.Pending;
+        public Enums.ShippingStatus? ShippingStatus { get; set; } = Enums.ShippingStatus.Pending;
         public DateTime? ShippingDate { get; set; }
         public DateTime? DateShipped { get; set; }
         public DateTime? CancelledDate { get; set; }

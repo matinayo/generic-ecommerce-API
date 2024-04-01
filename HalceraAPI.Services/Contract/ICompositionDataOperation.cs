@@ -1,5 +1,5 @@
 ﻿using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.Composition.CompositionData;
+using HalceraAPI.Services.Dtos.Composition.CompositionData;
 
 namespace HalceraAPI.Services.Contract
 {
