@@ -6,7 +6,7 @@ using HalceraAPI.Services.Dtos.ApplicationUser;
 using HalceraAPI.Services.Dtos.BaseAddress;
 using HalceraAPI.Services.Dtos.Category;
 using HalceraAPI.Services.Dtos.Composition;
-using HalceraAPI.Services.Dtos.Composition.CompositionData;
+using HalceraAPI.Services.Dtos.Composition.MaterialData;
 using HalceraAPI.Services.Dtos.Media;
 using HalceraAPI.Services.Dtos.OrderHeader;
 using HalceraAPI.Services.Dtos.OrderHeader.CustomerResponse;
@@ -44,9 +44,9 @@ namespace HalceraAPI.Services.Automapper
             CreateMap<Product, ProductResponse>().ReverseMap();
             CreateMap<Product, ProductDetailsResponse>().ReverseMap();
             CreateMap<UpdateProductRequest, Product>()
-                .ForMember(destination => destination.MediaCollection, opt => opt.Ignore())
-                .ForMember(destination => destination.Prices, opt => opt.Ignore())
-                .ForMember(destination => destination.ProductCompositions, opt => opt.Ignore())
+                //.ForMember(destination => destination.MediaCollection, opt => opt.Ignore())
+                //.ForMember(destination => destination.Prices, opt => opt.Ignore())
+                //.ForMember(destination => destination.ProductCompositions, opt => opt.Ignore())
                 .ForMember(destination => destination.Categories, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
 
@@ -60,15 +60,15 @@ namespace HalceraAPI.Services.Automapper
             CreateMap<CreateCompositionRequest, Composition>().ReverseMap();
             CreateMap<UpdateCompositionRequest, Composition>()
                 .ForMember(destination => destination.Id, opt => opt.Ignore())
-                .ForMember(destination => destination.CompositionDataCollection, opt => opt.Ignore())
+               // .ForMember(destination => destination.CompositionDataCollection, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
             CreateMap<Composition, CompositionResponse>().ReverseMap();
 
             // Composition Data Request
-            CreateMap<CreateCompositionDataRequest, CompositionData>().ReverseMap();
-            CreateMap<UpdateCompositionDataRequest, CompositionData>()
+            CreateMap<CreateMaterialDataRequest, MaterialData>().ReverseMap();
+            CreateMap<UpdateMaterialDataRequest, MaterialData>()
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
-            CreateMap<CompositionData, CompositionDataResponse>().ReverseMap();
+            CreateMap<MaterialData, MaterialDataResponse>().ReverseMap();
 
             // Media
             CreateMap<CreateMediaRequest, Media>().ReverseMap();
@@ -136,6 +136,9 @@ namespace HalceraAPI.Services.Automapper
 
             // Order Purchase
             CreateMap<PurchaseDetails, PurchaseDetailsSummaryResponse>().ReverseMap();
+
+            CreateMap<ProductSizeRequest, ProductSize>().ReverseMap();
+            CreateMap<ProductSize, ProductSizeResponse>().ReverseMap();
 
         }
     }

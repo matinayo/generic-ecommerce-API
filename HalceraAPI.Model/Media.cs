@@ -19,9 +19,9 @@ namespace HalceraAPI.Models
         [StringLength(20)]
         public string? Name { get; set; }
 
-        public int? ProductId { get; set; }
-        [ForeignKey(nameof(ProductId))]
-        public Product? Product { get; set; }
+        public int? CompositionId { get; set; }
+        [ForeignKey(nameof(CompositionId))]
+        public Composition? Composition { get; set; }
 
         public int? CategoryId { get; set; }
         [ForeignKey(nameof(CategoryId))]

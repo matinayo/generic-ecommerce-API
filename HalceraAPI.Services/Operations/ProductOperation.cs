@@ -2,9 +2,9 @@
 using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
+using HalceraAPI.Services.Contract;
 using HalceraAPI.Services.Dtos.APIResponse;
 using HalceraAPI.Services.Dtos.Product;
-using HalceraAPI.Services.Contract;
 using System.Linq.Expressions;
 
 namespace HalceraAPI.Services.Operations
@@ -39,30 +39,27 @@ namespace HalceraAPI.Services.Operations
 
         public async Task<APIResponse<ProductDetailsResponse>> CreateProductAsync(CreateProductRequest productRequest)
         {
-            try
+            Product product = _mapper.Map<Product>(productRequest);
+            product.ValidateProductForCreate();
+
+            if (productRequest.Categories is not null && productRequest.Categories.Any())
             {
-                Product product = _mapper.Map<Product>(productRequest);
-                product.ValidateProductForCreate();
+                var categories = await _unitOfWork.Category.GetAll(
+                    category => productRequest.Categories != null
+                    && productRequest.Categories.Select(opt => opt.CategoryId).Contains(category.Id));
 
-                if (productRequest.Categories is not null && productRequest.Categories.Any())
+                if (categories != null && categories.Any())
                 {
-                    var categories = await _unitOfWork.Category.GetAll(
-                        category => productRequest.Categories != null
-                        && productRequest.Categories.Select(opt => opt.CategoryId).Contains(category.Id));
-
-                    if (categories != null && categories.Any())
-                    {
-                        product.Categories = categories.ToList();
-                    }
+                    product.Categories = categories.ToList();
                 }
-                await _unitOfWork.Product.Add(product);
-                await _unitOfWork.SaveAsync();
-
-                ProductDetailsResponse productResponse = _mapper.Map<ProductDetailsResponse>(product);
-
-                return new APIResponse<ProductDetailsResponse>(productResponse);
             }
-            catch (Exception) { throw; }
+
+            await _unitOfWork.Product.Add(product);
+            await _unitOfWork.SaveAsync();
+
+            ProductDetailsResponse productResponse = _mapper.Map<ProductDetailsResponse>(product);
+
+            return new APIResponse<ProductDetailsResponse>(productResponse);
         }
 
         public async Task DeleteProductAsync(int productId)
@@ -130,7 +127,7 @@ namespace HalceraAPI.Services.Operations
                 int totalItems = await _unitOfWork.Product.CountAsync(filterExpression);
                 IEnumerable<ProductResponse>? listOfProductResponse = await _unitOfWork.Product.GetAll<ProductResponse>(
                  filter: filterExpression,
-                 includeProperties: $"{nameof(Product.Categories)},{nameof(Product.MediaCollection)},{nameof(Product.Prices)}",
+                 includeProperties: $"{nameof(Product.Categories)}", // ,{nameof(Product.MediaCollection)},{nameof(Product.Prices)}
                  skip: ((page ?? 1) - 1) * Pagination.DefaultItemsPerPage,
                  take: Pagination.DefaultItemsPerPage);
 
@@ -149,7 +146,7 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 Product? product = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId,
-                    includeProperties: $"{nameof(Product.Categories)},{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.MediaCollection)},{nameof(Product.Prices)}");
+                    includeProperties: $"{nameof(Product.Categories)},ProductCompositions.CompositionDataCollection"); // ,{nameof(Product.ProductCompositions)} {nameof(Product.MediaCollection)},{nameof(Product.Prices)}
 
                 ProductDetailsResponse response = new();
                 if (product is not null)
@@ -172,14 +169,14 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 Product productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId,
-                    includeProperties: $"{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.Prices)},{nameof(Product.MediaCollection)}")
-                    ?? throw new Exception("Product not found");
+                    includeProperties: $",ProductCompositions.CompositionDataCollection,")
+                    ?? throw new Exception("Product not found"); // {nameof(Product.ProductCompositions)} {nameof(Product.Prices)},{nameof(Product.MediaCollection)}
 
                 CanUpdateProductRequest(productFromDb, productRequest);
 
-                _priceOperation.UpdatePrice(productRequest.Prices, productFromDb.Prices);
-                _mediaOperation.UpdateMediaCollection(productRequest.MediaCollection, productFromDb.MediaCollection);
-                _compositionOperation.UpdateComposition(productRequest.ProductCompositions, productFromDb.ProductCompositions);
+                //_priceOperation.UpdatePrice(productRequest.Prices, productFromDb.Prices);
+                //_mediaOperation.UpdateMediaCollection(productRequest.MediaCollection, productFromDb.MediaCollection);
+                //_compositionOperation.UpdateComposition(productRequest.ProductCompositions, productFromDb.ProductCompositions);
 
                 var categories = await _categoryOperation.GetCategoriesFromListOfCategoryIdAsync(productRequest.Categories);
                 if (categories != null && categories.Any())
@@ -209,19 +206,19 @@ namespace HalceraAPI.Services.Operations
 
         private void CanUpdateProductRequest(Product productFromDb, UpdateProductRequest productRequest)
         {
-            // prevent duplicate CompositionType
-            List<Price> tempPrices = productFromDb.Prices?.ToList() ?? new();
-            tempPrices.AddRange(_mapper.Map<List<Price>>(productRequest.Prices));
+            //// prevent duplicate CompositionType
+            //List<Price> tempPrices = productFromDb.Prices?.ToList() ?? new();
+            //tempPrices.AddRange(_mapper.Map<List<Price>>(productRequest.Prices));
 
-            var tempCompositions = productFromDb.ProductCompositions?.ToList() ?? new();
-            tempCompositions.AddRange(_mapper.Map<List<Composition>>(productRequest.ProductCompositions));
+            //var tempCompositions = productFromDb.ProductCompositions?.ToList() ?? new();
+            //tempCompositions.AddRange(_mapper.Map<List<Composition>>(productRequest.ProductCompositions));
 
-            Product tempValidation = new()
-            {
-                Prices = tempPrices,
-                ProductCompositions = tempCompositions
-            };
-            tempValidation.ValidateProductForCreate();
+            //Product tempValidation = new()
+            //{
+            //    Prices = tempPrices,
+            //    ProductCompositions = tempCompositions
+            //};
+            //tempValidation.ValidateProductForCreate();
         }
 
         public async Task DeleteCategoryFromProductByCategoryIdAsync(int productId, int categoryId)

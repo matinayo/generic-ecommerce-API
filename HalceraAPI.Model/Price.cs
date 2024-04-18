@@ -27,10 +27,5 @@ namespace HalceraAPI.Models
         /// </summary>
         [Column(TypeName = "decimal(10,4)")]
         public decimal? DiscountAmount { get; set; }
-
-        public int? ProductId { get; set; }
-        [ForeignKey(nameof(ProductId))]
-        public Product? Product { get; set; }
     }
-
 }

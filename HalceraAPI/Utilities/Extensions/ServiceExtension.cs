@@ -1,8 +1,10 @@
-﻿using HalceraAPI.Common.AppsettingsOptions;
+﻿using AutoMapper;
+using HalceraAPI.Common.AppsettingsOptions;
 using HalceraAPI.DataAccess;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.DataAccess.DbInitializer;
 using HalceraAPI.DataAccess.Repository;
+using HalceraAPI.Services.Automapper;
 using HalceraAPI.Services.Contract;
 using HalceraAPI.Services.Operations;
 using Microsoft.EntityFrameworkCore;
@@ -66,10 +68,8 @@ namespace HalceraAPI.Utilities.Extensions
                 });
 
             services.ConfigureSwagger();
-
             services.AddHttpContextAccessor();
-
-            services.AddAutoMapper(typeof(Program).Assembly);
+            services.RegisterMappingProfiles();
         }
 
         private static void ConfigureSwagger(this IServiceCollection services)
@@ -88,6 +88,22 @@ namespace HalceraAPI.Utilities.Extensions
             });
 
             services.AddSwaggerGenNewtonsoftSupport();
+        }
+
+        private static void RegisterMappingProfiles(this IServiceCollection services)
+        {
+            List<Profile> mapperProfiles = new()
+            {
+                new MappingProfiles()
+            };
+
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfiles(mapperProfiles);
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
         }
     }
 }

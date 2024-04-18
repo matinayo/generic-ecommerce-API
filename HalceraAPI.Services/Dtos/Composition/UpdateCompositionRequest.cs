@@ -1,5 +1,5 @@
 ﻿using HalceraAPI.Common.Enums;
-using HalceraAPI.Services.Dtos.Composition.CompositionData;
+using HalceraAPI.Services.Dtos.Composition.MaterialData;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -22,6 +22,6 @@ namespace HalceraAPI.Services.Dtos.Composition
 
         [StringLength(20, ErrorMessage = "Field has a maximum length of '20'")]
         public string? Name { get; set; }
-        public ICollection<UpdateCompositionDataRequest>? CompositionDataCollection { get; set; }
+        public ICollection<UpdateMaterialDataRequest>? CompositionDataCollection { get; set; }
     }
 }

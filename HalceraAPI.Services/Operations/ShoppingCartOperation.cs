@@ -53,10 +53,10 @@ namespace HalceraAPI.Services.Operations
                     // TODO:selected product compositions
                     Product? productItem = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId);
                     ValidateAddingItemToCart(productItem);
-                    if (requestedQuantity > productItem?.Quantity)
-                    {
-                        throw new Exception($"Only {productItem?.Quantity} item(s) available in stock");
-                    }
+                    //if (requestedQuantity > productItem?.Quantity)
+                    //{
+                    //    throw new Exception($"Only {productItem?.Quantity} item(s) available in stock");
+                    //}
 
                     cart = new ShoppingCart() { ProductId = productId, Quantity = requestedQuantity, ApplicationUserId = applicationUser.Id };
                     // if product item does not exist in cart, add new item
@@ -393,10 +393,10 @@ namespace HalceraAPI.Services.Operations
             {
                 throw new Exception("This item is not available");
             }
-            if (product.Quantity <= 0)
-            {
-                throw new Exception("No item in stock");
-            }
+            //if (product.Quantity <= 0)
+            //{
+            //    throw new Exception("No item in stock");
+            //}
         }
 
         /// <summary>
@@ -411,10 +411,10 @@ namespace HalceraAPI.Services.Operations
 
             // update existing item count in cart
             int totalQuantity = cart.Quantity + requestedQuantity;
-            if (totalQuantity > cart.Product.Quantity)
-            {
-                throw new Exception($"Only {cart.Product.Quantity} item(s) available in stock");
-            }
+            //if (totalQuantity > cart.Product.Quantity)
+            //{
+            //    throw new Exception($"Only {cart.Product.Quantity} item(s) available in stock");
+            //}
             // update quantity
             cart.Quantity = totalQuantity;
         }
@@ -449,16 +449,16 @@ namespace HalceraAPI.Services.Operations
 
             foreach (var cartItem in cartItemsFromDb)
             {
-                if (ProductInCartIsValid(cartItem))
-                {
-                    Price? productSelectedPrice = cartItem?.Product?.Prices?.FirstOrDefault(price => price.Currency != null && price.Currency == currencyToBePaidIn);
-                    if (productSelectedPrice != null)
-                    {
-                        // Total amount
-                        decimal productAmount = productSelectedPrice.DiscountAmount ?? productSelectedPrice.Amount ?? 0M;
-                        totalAmount += (productAmount * (cartItem?.Quantity ?? 1));
-                    }
-                }
+                //if (ProductInCartIsValid(cartItem))
+                //{
+                //    Price? productSelectedPrice = cartItem?.Product?.Prices?.FirstOrDefault(price => price.Currency != null && price.Currency == currencyToBePaidIn);
+                //    if (productSelectedPrice != null)
+                //    {
+                //        // Total amount
+                //        decimal productAmount = productSelectedPrice.DiscountAmount ?? productSelectedPrice.Amount ?? 0M;
+                //        totalAmount += (productAmount * (cartItem?.Quantity ?? 1));
+                //    }
+                //}
             }
             return totalAmount;
         }
@@ -468,9 +468,9 @@ namespace HalceraAPI.Services.Operations
             return (
                 cartItem != null
                 && cartItem.Product != null
-                && cartItem.Product.Prices != null
+                //&& cartItem.Product.Prices != null
                 && cartItem.Product.Active
-                && cartItem.Product.Quantity > 0
+                //&& cartItem.Product.Quantity > 0
                 && cartItem.Quantity > 0);
         }
 
@@ -500,31 +500,31 @@ namespace HalceraAPI.Services.Operations
             List<OrderDetails> orderDetails = new();
             foreach (var cartItem in cartItemsFromDb)
             {
-                if (cartItem.Product != null && cartItem.Product.Prices != null)
-                {
-                    Price? productSelectedPrice = cartItem.Product.Prices.FirstOrDefault(price => price.Currency != null && price.Currency == currencyToBePaidIn);
-                    if (productSelectedPrice != null)
-                    {
-                        // Order details
-                        OrderDetails orderDetail = new()
-                        {
-                            ProductId = cartItem.ProductId,
-                            // Purchase details
-                            PurchaseDetails = new()
-                            {
-                                ApplicationUserId = cartItem.ApplicationUserId,
-                                Currency = productSelectedPrice?.Currency,
-                                DiscountAmount = productSelectedPrice?.DiscountAmount,
-                                ProductAmountAtPurchase = productSelectedPrice?.Amount,
-                                Quantity = cartItem.Quantity,
-                                PurchaseDate = DateTime.UtcNow
-                            }
-                        };
-                        orderDetails.Add(orderDetail);
-                        // Update product quantity in stock
-                        cartItem.Product.Quantity -= cartItem.Quantity;
-                    }
-                }
+                //if (cartItem.Product != null && cartItem.Product.Prices != null)
+                //{
+                //    Price? productSelectedPrice = cartItem.Product.Prices.FirstOrDefault(price => price.Currency != null && price.Currency == currencyToBePaidIn);
+                //    if (productSelectedPrice != null)
+                //    {
+                //        // Order details
+                //        OrderDetails orderDetail = new()
+                //        {
+                //            ProductId = cartItem.ProductId,
+                //            // Purchase details
+                //            PurchaseDetails = new()
+                //            {
+                //                ApplicationUserId = cartItem.ApplicationUserId,
+                //                Currency = productSelectedPrice?.Currency,
+                //                DiscountAmount = productSelectedPrice?.DiscountAmount,
+                //                ProductAmountAtPurchase = productSelectedPrice?.Amount,
+                //                Quantity = cartItem.Quantity,
+                //                PurchaseDate = DateTime.UtcNow
+                //            }
+                //        };
+                //        orderDetails.Add(orderDetail);
+                //        // Update product quantity in stock
+                //        cartItem.Product.Quantity -= cartItem.Quantity;
+                //    }
+                //}
             }
             return orderDetails;
         }

@@ -21,13 +21,13 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Price priceToDelete = await _unitOfWork.Price.GetFirstOrDefault(
-                    price => price.Id == priceId
-                    && price.ProductId == productId)
-                    ?? throw new Exception("No price available for this product");
+                //Price priceToDelete = await _unitOfWork.Price.GetFirstOrDefault(
+                //    price => price.Id == priceId
+                //    && price.ProductId == productId)
+                //    ?? throw new Exception("No price available for this product");
 
-                _unitOfWork.Price.Remove(priceToDelete);
-                await _unitOfWork.SaveAsync();
+                //_unitOfWork.Price.Remove(priceToDelete);
+                //await _unitOfWork.SaveAsync();
             }
             catch (Exception)
             {
@@ -39,12 +39,12 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                IEnumerable<Price>? productPrices = await _unitOfWork.Price.GetAll(price => price.ProductId == productId);
-                if (productPrices is not null && productPrices.Any())
-                {
-                    _unitOfWork.Price.RemoveRange(productPrices);
-                    await _unitOfWork.SaveAsync();
-                }
+                //IEnumerable<Price>? productPrices = await _unitOfWork.Price.GetAll(price => price.ProductId == productId);
+                //if (productPrices is not null && productPrices.Any())
+                //{
+                //    _unitOfWork.Price.RemoveRange(productPrices);
+                //    await _unitOfWork.SaveAsync();
+                //}
             }
             catch (Exception)
             {
@@ -56,13 +56,13 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Price price = await _unitOfWork.Price.GetFirstOrDefault(
-                    price => price.Id == priceId
-                    && price.ProductId == productId)
-                    ?? throw new Exception("No price available for this product");
+                //Price price = await _unitOfWork.Price.GetFirstOrDefault(
+                //    price => price.Id == priceId
+                //    && price.ProductId == productId)
+                //    ?? throw new Exception("No price available for this product");
 
-                price.DiscountAmount = null;
-                await _unitOfWork.SaveAsync();
+                //price.DiscountAmount = null;
+                //await _unitOfWork.SaveAsync();
             }
             catch (Exception)
             {

@@ -3,9 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HalceraAPI.Models
 {
-    /// <summary>
-    /// Customer order on each product
-    /// </summary>
     public class OrderDetails
     {
         [Key]

@@ -1,5 +1,7 @@
-﻿using HalceraAPI.Services.Dtos.Category;
+﻿using HalceraAPI.Models;
+using HalceraAPI.Services.Dtos.Category;
 using HalceraAPI.Services.Dtos.Composition;
+using HalceraAPI.Services.Dtos.Composition.MaterialData;
 using HalceraAPI.Services.Dtos.Media;
 using HalceraAPI.Services.Dtos.Price;
 using HalceraAPI.Services.Dtos.Rating;
@@ -17,37 +19,14 @@ namespace HalceraAPI.Services.Dtos.Product
         [StringLength(100, ErrorMessage = "Field has a minimum length of 10 and maximum length of '100'", MinimumLength = 10)]
         public string? Description { get; init; }
 
-        public int? Quantity { get; init; }
-
-        /// <summary>
-        /// Indicates if a product is active
-        /// </summary>
         public bool Active { get; init; } = true;
 
-        /// <summary>
-        /// Featured Product
-        /// </summary>
         public bool? Featured { get; init; }
 
-        /// <summary>
-        /// Define Price for Product
-        /// </summary>
-        [Required]
-        public ICollection<CreatePriceRequest>? Prices { get; init; }
+        public ICollection<CreateCompositionRequest>? Compositions { get; init; }
         
-        /// <summary>
-        /// Define Product Medias
-        /// </summary>
-        public ICollection<CreateMediaRequest>? MediaCollection { get; init; }
+        public ICollection<CreateMaterialDataRequest>? MaterialsAndDetails { get; set; }
 
-        /// <summary>
-        /// Define Product Composition
-        /// </summary>
-        public ICollection<CreateCompositionRequest>? ProductCompositions { get; init; }
-
-        /// <summary>
-        /// Product Categories
-        /// </summary>
         public ICollection<ProductCategoryRequest>? Categories { get; init; }
     }
 }

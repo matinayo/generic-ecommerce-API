@@ -1,19 +1,20 @@
-﻿using HalceraAPI.Common.Enums;
-using HalceraAPI.Services.Dtos.Composition.CompositionData;
+﻿using HalceraAPI.Services.Dtos.Media;
+using HalceraAPI.Services.Dtos.Price;
 
 namespace HalceraAPI.Services.Dtos.Composition
 {
-    /// <summary>
-    /// Composition Response
-    /// </summary>
-    public class CompositionResponse
+    public record CompositionResponse
     {
-        public int Id { get; set; }
-        /// <summary>
-        /// Type of product composition
-        /// </summary>
-        public CompositionType? CompositionType { get; set; }
-        public string? Name { get; set; }
-        public ICollection<CompositionDataResponse>? CompositionDataCollection { get; set; }
+        public int Id { get; init; }
+
+        public string? ColorName { get; init; }
+
+        public string? ColorCode { get; init; }
+
+        public ICollection<ProductSizeResponse>? Sizes { get; init; }
+
+        public ICollection<PriceResponse>? Prices { get; init; }
+
+        public ICollection<MediaResponse>? MediaCollection { get; init; }
     }
 }

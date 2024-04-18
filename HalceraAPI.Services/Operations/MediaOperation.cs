@@ -25,8 +25,8 @@ namespace HalceraAPI.Services.Operations
 
                 if (categoryId != null)
                     relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.CategoryId == categoryId);
-                else if (productId != null)
-                    relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.ProductId == productId);
+                //else if (productId != null)
+                //    relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.ProductId == productId);
 
                 if (relatedMediaCollection != null && relatedMediaCollection.Any())
                 {
@@ -64,8 +64,8 @@ namespace HalceraAPI.Services.Operations
             {
                 Media mediaToDelete = await _unitOfWork.Media
                     .GetFirstOrDefault(
-                    media => media.Id == mediaId
-                    && media.ProductId == productId)
+                    media => media.Id == mediaId)
+                    //&& media.ProductId == productId)
                     ?? throw new Exception("No media available for this product");
 
                 _unitOfWork.Media.Remove(mediaToDelete);

@@ -27,7 +27,7 @@ namespace HalceraAPI.Services.Operations
                 Composition compositionToDelete = await _unitOfWork.Composition
                     .GetFirstOrDefault(
                     composition => composition.Id == compositionId 
-                    && composition.ProductId == productId)
+                    && composition.Id == productId)
                     ?? throw new Exception("No composition available for this product");
 
                 await _compositionDataOperation.DeleteCompositionDataCollectionAsync(new List<int>() { compositionToDelete.Id });
@@ -46,7 +46,7 @@ namespace HalceraAPI.Services.Operations
             try
             {
                 IEnumerable<Composition>? productCompositions = await _unitOfWork.Composition.GetAll(
-                    composition => composition.ProductId == productId);
+                    composition => composition.Id == productId);
                 if (productCompositions is not null && productCompositions.Any())
                 {
                     // delete product composition data
@@ -83,17 +83,17 @@ namespace HalceraAPI.Services.Operations
                             _mapper.Map(compositionRequest, existingComposition);
                             if (compositionRequest.CompositionDataCollection != null)
                             {
-                                _compositionDataOperation.UpdateCompositionData(compositionRequest.CompositionDataCollection, existingComposition.CompositionDataCollection);
+                               // _compositionDataOperation.UpdateCompositionData(compositionRequest.CompositionDataCollection, existingComposition.CompositionDataCollection);
                             }
                         }
                         else
                         {
                             // If the composition does not exist, create a new composition object and map the properties
                             Composition newComposition = _mapper.Map<Composition>(compositionRequest);
-                            newComposition.CompositionDataCollection = new List<CompositionData>();
+                           // newComposition.CompositionDataCollection = new List<CompositionData>();
                             if (compositionRequest.CompositionDataCollection != null)
                             {
-                                _compositionDataOperation.UpdateCompositionData(compositionRequest.CompositionDataCollection, newComposition.CompositionDataCollection);
+                             //   _compositionDataOperation.UpdateCompositionData(compositionRequest.CompositionDataCollection, newComposition.CompositionDataCollection);
                             }
                             existingCompositionsFromDb?.Add(newComposition);
                         }
