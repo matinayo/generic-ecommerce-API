@@ -62,7 +62,7 @@ namespace HalceraAPI.DataAccess.Repository
             string? includeProperties = null)
         {
             IQueryable<T> query = GetAllQuery(filter, orderBy, skip, take, includeProperties);
-            return await _mapper.ProjectTo<TResult>(query).ToListAsync();
+            return await _mapper.ProjectTo<TResult>(query.AsNoTracking()).ToListAsync();
         }
 
         public async Task<T?> GetFirstOrDefault(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
@@ -74,7 +74,7 @@ namespace HalceraAPI.DataAccess.Repository
         public async Task<TResult?> GetFirstOrDefault<TResult>(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
         {
             IQueryable<T> query = GetFirstOrDefaultQuery(filter, includeProperties);
-            return await _mapper.ProjectTo<TResult>(query).FirstOrDefaultAsync();
+            return await _mapper.ProjectTo<TResult>(query.AsNoTracking()).FirstOrDefaultAsync();
         }
 
         public void Remove(T entity)

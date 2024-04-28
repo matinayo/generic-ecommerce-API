@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace HalceraAPI.Utilities.Exceptions
+namespace HalceraAPI.Services.Exceptions
 {
     public class OperationException : Exception
     {

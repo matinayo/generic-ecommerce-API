@@ -8,6 +8,8 @@ namespace HalceraAPI.Services.Contract
     {
         Task<APIResponse<IEnumerable<CategoryResponse>>> GetAllCategoriesAsync(bool? active, bool? featured, int? page);
 
+        Task<ICollection<Category>> GetCategoriesByIdAsync(IEnumerable<ProductCategoryRequest>? listOfCategoryId);
+
         Task<APIResponse<CategoryResponse>> GetCategoryAsync(int categoryId);
 
         Task<APIResponse<CategoryResponse>> CreateCategoryAsync(CreateCategoryRequest category);

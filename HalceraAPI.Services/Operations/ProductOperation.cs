@@ -41,18 +41,7 @@ namespace HalceraAPI.Services.Operations
         {
             Product product = _mapper.Map<Product>(productRequest);
             product.ValidateProductForCreate();
-
-            if (productRequest.Categories is not null && productRequest.Categories.Any())
-            {
-                var categories = await _unitOfWork.Category.GetAll(
-                    category => productRequest.Categories != null
-                    && productRequest.Categories.Select(opt => opt.CategoryId).Contains(category.Id));
-
-                if (categories != null && categories.Any())
-                {
-                    product.Categories = categories.ToList();
-                }
-            }
+            product.Categories = await _categoryOperation.GetCategoriesByIdAsync(productRequest.Categories);
 
             await _unitOfWork.Product.Add(product);
             await _unitOfWork.SaveAsync();
@@ -127,7 +116,6 @@ namespace HalceraAPI.Services.Operations
                 int totalItems = await _unitOfWork.Product.CountAsync(filterExpression);
                 IEnumerable<ProductResponse>? listOfProductResponse = await _unitOfWork.Product.GetAll<ProductResponse>(
                  filter: filterExpression,
-                 includeProperties: $"{nameof(Product.Categories)}", // ,{nameof(Product.MediaCollection)},{nameof(Product.Prices)}
                  skip: ((page ?? 1) - 1) * Pagination.DefaultItemsPerPage,
                  take: Pagination.DefaultItemsPerPage);
 
@@ -145,14 +133,8 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                Product? product = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId,
-                    includeProperties: $"{nameof(Product.Categories)},ProductCompositions.CompositionDataCollection"); // ,{nameof(Product.ProductCompositions)} {nameof(Product.MediaCollection)},{nameof(Product.Prices)}
-
-                ProductDetailsResponse response = new();
-                if (product is not null)
-                {
-                    response = _mapper.Map<ProductDetailsResponse>(product);
-                }
+                ProductDetailsResponse? response = await _unitOfWork.Product
+                    .GetFirstOrDefault<ProductDetailsResponse>(product => product.Id == productId);
 
                 return new APIResponse<ProductDetailsResponse>(response);
             }

@@ -102,6 +102,23 @@ namespace HalceraAPI.Services.Operations
 
         }
 
+        public async Task<ICollection<Category>> GetCategoriesByIdAsync(IEnumerable<ProductCategoryRequest>? listOfCategoryId)
+        {
+            List<Category> response = new();
+            if (listOfCategoryId is not null && listOfCategoryId.Any())
+            {
+                var categories = await _unitOfWork.Category.GetAll(
+                    category => listOfCategoryId.Select(opt => opt.CategoryId).Contains(category.Id));
+
+                if (categories != null && categories.Any())
+                {
+                    response = categories.ToList();
+                }
+            }
+
+            return response;
+        }
+
         public async Task<IEnumerable<Category>?> GetCategoriesFromListOfCategoryIdAsync(
             IEnumerable<ProductCategoryRequest>? categoryRequests)
         {
