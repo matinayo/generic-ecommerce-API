@@ -38,17 +38,14 @@ namespace HalceraAPI.Services.Automapper
             CreateMap<Category, CategoryLabelResponse>().ReverseMap();
 
             // Product Request
-            CreateMap<CreateProductRequest, Product>()
-                .ForMember(destination => destination.Categories, opt => opt.Ignore())
-                .ReverseMap();
-            CreateMap<Product, ProductResponse>().ReverseMap();
-            CreateMap<Product, ProductDetailsResponse>().ReverseMap();
-            CreateMap<UpdateProductRequest, Product>()
-                //.ForMember(destination => destination.MediaCollection, opt => opt.Ignore())
-                //.ForMember(destination => destination.Prices, opt => opt.Ignore())
-                //.ForMember(destination => destination.ProductCompositions, opt => opt.Ignore())
-                .ForMember(destination => destination.Categories, opt => opt.Ignore())
-                .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
+            
+            //
+            //CreateMap<UpdateProductRequest, Product>()
+            //    //.ForMember(destination => destination.MediaCollection, opt => opt.Ignore())
+            //    //.ForMember(destination => destination.Prices, opt => opt.Ignore())
+            //    //.ForMember(destination => destination.ProductCompositions, opt => opt.Ignore())
+            //    .ForMember(destination => destination.Categories, opt => opt.Ignore())
+            //    .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
 
             // Price Request
             CreateMap<CreatePriceRequest, Price>().ReverseMap();
@@ -139,6 +136,9 @@ namespace HalceraAPI.Services.Automapper
 
             CreateMap<ProductSizeRequest, ProductSize>().ReverseMap();
             CreateMap<ProductSize, ProductSizeResponse>().ReverseMap();
+
+            CreateMap<UpdateProductSizeRequest, ProductSize>()
+                .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
 
         }
     }

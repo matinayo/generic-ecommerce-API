@@ -81,20 +81,20 @@ namespace HalceraAPI.Services.Operations
                         {
                             // If the composition already exists, update its properties
                             _mapper.Map(compositionRequest, existingComposition);
-                            if (compositionRequest.CompositionDataCollection != null)
-                            {
-                               // _compositionDataOperation.UpdateCompositionData(compositionRequest.CompositionDataCollection, existingComposition.CompositionDataCollection);
-                            }
+                            //if (compositionRequest.CompositionDataCollection != null)
+                            //{
+                            //   // _compositionDataOperation.UpdateCompositionData(compositionRequest.CompositionDataCollection, existingComposition.CompositionDataCollection);
+                            //}
                         }
                         else
                         {
                             // If the composition does not exist, create a new composition object and map the properties
                             Composition newComposition = _mapper.Map<Composition>(compositionRequest);
                            // newComposition.CompositionDataCollection = new List<CompositionData>();
-                            if (compositionRequest.CompositionDataCollection != null)
-                            {
-                             //   _compositionDataOperation.UpdateCompositionData(compositionRequest.CompositionDataCollection, newComposition.CompositionDataCollection);
-                            }
+                            //if (compositionRequest.CompositionDataCollection != null)
+                            //{
+                            // //   _compositionDataOperation.UpdateCompositionData(compositionRequest.CompositionDataCollection, newComposition.CompositionDataCollection);
+                            //}
                             existingCompositionsFromDb?.Add(newComposition);
                         }
                     }

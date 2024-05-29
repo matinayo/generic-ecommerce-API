@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace HalceraAPI.Services.Exceptions.ErrorMessages
 {
-    internal class ProductErrorMessage
+    public static class ProductErrorMessage
     {
+        public const string ProductCannotBeFound = "The product cannot be found.";
     }
 }

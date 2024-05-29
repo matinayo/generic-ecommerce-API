@@ -5,6 +5,8 @@ using HalceraAPI.Models;
 using HalceraAPI.Services.Contract;
 using HalceraAPI.Services.Dtos.APIResponse;
 using HalceraAPI.Services.Dtos.Product;
+using HalceraAPI.Services.Exceptions;
+using HalceraAPI.Services.Exceptions.ErrorMessages;
 using System.Linq.Expressions;
 
 namespace HalceraAPI.Services.Operations
@@ -131,59 +133,33 @@ namespace HalceraAPI.Services.Operations
 
         public async Task<APIResponse<ProductDetailsResponse>> GetProductByIdAsync(int productId)
         {
-            try
-            {
-                ProductDetailsResponse? response = await _unitOfWork.Product
-                    .GetFirstOrDefault<ProductDetailsResponse>(product => product.Id == productId);
+            ProductDetailsResponse response = await _unitOfWork.Product
+                .GetFirstOrDefault<ProductDetailsResponse>(product => product.Id == productId)
+                ?? throw new NotFoundException(message: ProductErrorMessage.ProductCannotBeFound);
 
-                return new APIResponse<ProductDetailsResponse>(response);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new APIResponse<ProductDetailsResponse>(response);
         }
 
         public async Task<APIResponse<ProductDetailsResponse>> UpdateProductAsync(
             int productId,
             UpdateProductRequest productRequest)
         {
-            try
-            {
-                Product productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId,
-                    includeProperties: $",ProductCompositions.CompositionDataCollection,")
-                    ?? throw new Exception("Product not found"); // {nameof(Product.ProductCompositions)} {nameof(Product.Prices)},{nameof(Product.MediaCollection)}
+            Product productFromDb = await _unitOfWork.Product
+                .GetFirstOrDefault(productDetails => productDetails.Id == productId,
+                includeProperties: 
+                    $"{nameof(Product.Compositions)}" +
+                    ",Compositions.Sizes,Compositions.Prices,Compositions.MediaCollection" +
+                    $",{nameof(Product.Categories)}" +
+                    $",{nameof(Product.MaterialsAndDetails)}")
+                ?? throw new NotFoundException(ProductErrorMessage.ProductCannotBeFound);
 
-                CanUpdateProductRequest(productFromDb, productRequest);
+            _mapper.Map(productRequest, productFromDb);
+            productFromDb.DateLastModified = DateTime.UtcNow;
 
-                //_priceOperation.UpdatePrice(productRequest.Prices, productFromDb.Prices);
-                //_mediaOperation.UpdateMediaCollection(productRequest.MediaCollection, productFromDb.MediaCollection);
-                //_compositionOperation.UpdateComposition(productRequest.ProductCompositions, productFromDb.ProductCompositions);
+            await _unitOfWork.SaveAsync();
+            ProductDetailsResponse response = _mapper.Map<ProductDetailsResponse>(productFromDb);
 
-                var categories = await _categoryOperation.GetCategoriesFromListOfCategoryIdAsync(productRequest.Categories);
-                if (categories != null && categories.Any())
-                {
-                    productFromDb.Categories = categories.ToList();
-                }
-                bool tempActiveValue = productFromDb.Active;
-                _mapper.Map(productRequest, productFromDb);
-                // restore Active value
-                if (productRequest.Active == null)
-                {
-                    productFromDb.Active = tempActiveValue;
-                }
-
-                productFromDb.DateLastModified = DateTime.UtcNow;
-                await _unitOfWork.SaveAsync();
-
-                ProductDetailsResponse response = _mapper.Map<ProductDetailsResponse>(productFromDb);
-
-                return new APIResponse<ProductDetailsResponse>(response);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new APIResponse<ProductDetailsResponse>(response);
         }
 
         private void CanUpdateProductRequest(Product productFromDb, UpdateProductRequest productRequest)

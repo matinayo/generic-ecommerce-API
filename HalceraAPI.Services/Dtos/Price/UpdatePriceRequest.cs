@@ -1,25 +1,18 @@
 ﻿using HalceraAPI.Common.Enums;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HalceraAPI.Services.Dtos.Price
 {
-    /// <summary>
-    /// Update Price Request
-    /// </summary>
-    public class UpdatePriceRequest
+    public record UpdatePriceRequest
     {
-        public int? Id { get; set; }
-        public decimal? Amount { get; set; }
-        public Currency? Currency { get; set; }
+        public int? Id { get; init; }
 
-        /// <summary>
-        /// indicate if price is discounted
-        /// </summary>
-        public decimal? DiscountAmount { get; set; }
+        [Column(TypeName = "decimal(10,4)")]
+        public decimal? Amount { get; init; }
+
+        public Currency? Currency { get; init; }
+
+        [Column(TypeName = "decimal(10,4)")]
+        public decimal? DiscountAmount { get; init; }
     }
 }

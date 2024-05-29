@@ -94,7 +94,8 @@ namespace HalceraAPI.Utilities.Extensions
         {
             List<Profile> mapperProfiles = new()
             {
-                new MappingProfiles()
+                new MappingProfiles(),
+                new ProductProfile()
             };
 
             var mappingConfig = new MapperConfiguration(mc =>
