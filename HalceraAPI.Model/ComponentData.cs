@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HalceraAPI.Models
 {
-    public class MaterialData
+    public class ComponentData
     {
         [Key]
         public int Id { get; set; }
 
-        public CompositionType? CompositionType { get; set; }
+        public ComponentType? ItemDetails { get; set; }
 
         [Required]
         [StringLength(20, ErrorMessage = "Data field has a maximum length of '20'")]

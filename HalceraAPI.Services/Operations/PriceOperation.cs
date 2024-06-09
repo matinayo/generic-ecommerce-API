@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Services.Dtos.Price;
 using HalceraAPI.Services.Contract;
+using HalceraAPI.Services.Dtos.Price;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -74,32 +74,22 @@ namespace HalceraAPI.Services.Operations
             IEnumerable<UpdatePriceRequest>? priceCollection,
             ICollection<Price>? existingPriceFromDb)
         {
-            try
+            if (priceCollection is not null && priceCollection.Any())
             {
-                if (priceCollection is not null && priceCollection.Any())
+                existingPriceFromDb ??= new List<Price>();
+                foreach (var priceRequest in priceCollection)
                 {
-                    existingPriceFromDb ??= new List<Price>();
-                    foreach (var priceRequest in priceCollection)
+                    Price? existingPrice = existingPriceFromDb?.FirstOrDefault(em => em.Id == priceRequest.Id);
+                    if (existingPrice != null)
                     {
-                        // Find existing price with the same ID in the database
-                        Price? existingPrice = existingPriceFromDb?.FirstOrDefault(em => em.Id == priceRequest.Id);
-                        if (existingPrice != null)
-                        {
-                            // If the price already exists, update its properties
-                            _mapper.Map(priceRequest, existingPrice);
-                        }
-                        else
-                        {
-                            // If the price does not exist, create a new price object and map the properties
-                            Price newPrice = _mapper.Map<Price>(priceRequest);
-                            existingPriceFromDb?.Add(newPrice);
-                        }
+                        _mapper.Map(priceRequest, existingPrice);
+                    }
+                    else
+                    {
+                        existingPrice = _mapper.Map<Price>(priceRequest);
+                        existingPriceFromDb?.Add(existingPrice);
                     }
                 }
-            }
-            catch (Exception)
-            {
-                throw;
             }
         }
     }

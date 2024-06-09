@@ -1,16 +1,16 @@
 ﻿using HalceraAPI.Models;
-using HalceraAPI.Services.Dtos.Composition.MaterialData;
+using HalceraAPI.Services.Dtos.Composition.ComponentData;
 
 namespace HalceraAPI.Services.Contract
 {
-    public interface ICompositionDataOperation
+    public interface IComponentDataOperation
     {
         /// <summary>
         /// Update Product Composition Data
         /// </summary>
-        void UpdateCompositionData(
-            IEnumerable<UpdateMaterialDataRequest>? compositionDataRequests,
-            ICollection<MaterialData>? existingCompositionDataFromDb);
+        void UpdateComponentData(
+            IEnumerable<UpdateComponentDataRequest>? compositionDataRequests,
+            ICollection<ComponentData>? existingCompositionDataFromDb);
 
         /// <summary>
         /// Delete range of Composition Data

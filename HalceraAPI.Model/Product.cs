@@ -22,7 +22,7 @@ namespace HalceraAPI.Models
 
         public ICollection<Composition>? Compositions { get; set; }
 
-        public ICollection<MaterialData>? MaterialsAndDetails { get; set; }
+        public ICollection<ComponentData>? ComponentDataCollection { get; set; }
 
         public ICollection<Category>? Categories { get; set; }
 

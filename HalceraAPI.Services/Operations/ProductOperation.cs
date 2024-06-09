@@ -4,6 +4,7 @@ using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Services.Contract;
 using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.Composition;
 using HalceraAPI.Services.Dtos.Product;
 using HalceraAPI.Services.Exceptions;
 using HalceraAPI.Services.Exceptions.ErrorMessages;
@@ -17,7 +18,7 @@ namespace HalceraAPI.Services.Operations
         private readonly IMapper _mapper;
         private readonly IMediaOperation _mediaOperation;
         private readonly ICompositionOperation _compositionOperation;
-        private readonly ICompositionDataOperation _compositionDataOperation;
+        private readonly IComponentDataOperation _componentDataOperation;
         private readonly IPriceOperation _priceOperation;
         private readonly ICategoryOperation _categoryOperation;
 
@@ -26,16 +27,14 @@ namespace HalceraAPI.Services.Operations
             IMapper mapper,
             IMediaOperation mediaOperation,
             ICompositionOperation compositionOperation,
-            ICompositionDataOperation compositionDataOperation,
-            IPriceOperation priceOperation,
+            IComponentDataOperation componentDataOperation,
             ICategoryOperation categoryOperation)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _mediaOperation = mediaOperation;
             _compositionOperation = compositionOperation;
-            _compositionDataOperation = compositionDataOperation;
-            _priceOperation = priceOperation;
+            _componentDataOperation = componentDataOperation;
             _categoryOperation = categoryOperation;
         }
 
@@ -150,8 +149,17 @@ namespace HalceraAPI.Services.Operations
                     $"{nameof(Product.Compositions)}" +
                     ",Compositions.Sizes,Compositions.Prices,Compositions.MediaCollection" +
                     $",{nameof(Product.Categories)}" +
-                    $",{nameof(Product.MaterialsAndDetails)}")
+                    $",{nameof(Product.ComponentDataCollection)}")
                 ?? throw new NotFoundException(ProductErrorMessage.ProductCannotBeFound);
+
+            _compositionOperation.UpdateComposition(productRequest.Compositions, productFromDb.Compositions);
+            _componentDataOperation.UpdateComponentData(productRequest.ComponentDataCollection, productFromDb.ComponentDataCollection);
+
+            var categories = await _categoryOperation.GetCategoriesFromListOfCategoryIdAsync(productRequest.Categories); 
+            if (categories != null && categories.Any())
+            {
+                productFromDb.Categories = categories.ToList();
+            }
 
             _mapper.Map(productRequest, productFromDb);
             productFromDb.DateLastModified = DateTime.UtcNow;
@@ -234,10 +242,10 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                await _compositionDataOperation.DeleteCompositionDataFromProductCompositionAsync(
-                    productId,
-                    compositionId,
-                    compositionDataId);
+                //await _compositionDataOperation.DeleteCompositionDataFromProductCompositionAsync(
+                //    productId,
+                //    compositionId,
+                //    compositionDataId);
             }
             catch (Exception)
             {
@@ -255,6 +263,33 @@ namespace HalceraAPI.Services.Operations
             {
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<CompositionResponse>> UpdateProductComposition(int productId, IEnumerable<UpdateCompositionRequest> updateCompositionRequest)
+        {
+            var compositionIdList = updateCompositionRequest.Select(u => u.Id).ToList();
+            var existingCompositionsFromDb = await _unitOfWork.Composition.GetAll(composition => 
+                                                            compositionIdList.Contains(composition.Id) 
+                                                            && composition.ProductId == productId);
+
+            foreach (var compositionRequest in updateCompositionRequest)
+            {
+                Composition? existingComposition = existingCompositionsFromDb?.FirstOrDefault(u => u.Id == compositionRequest.Id);
+                if(existingComposition != null)
+                {
+                    _mapper.Map(compositionRequest, existingComposition);
+                }
+                else
+                {
+                    Composition newComposition = _mapper.Map<Composition>(compositionRequest);
+                    existingCompositionsFromDb?.Add(newComposition);
+                }
+            }
+
+            await _unitOfWork.SaveAsync();
+
+            var compositionResponse = _mapper.Map<IEnumerable<CompositionResponse>>(existingCompositionsFromDb);
+            return compositionResponse;
         }
 
         private static Expression<Func<Product, bool>> GetFeaturedProducts(bool? featured) => product => product.Featured == featured;
@@ -279,5 +314,10 @@ namespace HalceraAPI.Services.Operations
 
         private static Expression<Func<Product, bool>> GetProductsByCategoryId(int categoryId) =>
             product => product.Categories!.Any(category => category.Id == categoryId);
+
+        Task IProductOperation.UpdateProductComposition(int productId, IEnumerable<UpdateCompositionRequest> updateCompositionRequest)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

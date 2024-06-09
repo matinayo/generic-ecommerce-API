@@ -1,7 +1,7 @@
 ﻿using HalceraAPI.Models;
 using HalceraAPI.Services.Dtos.Category;
 using HalceraAPI.Services.Dtos.Composition;
-using HalceraAPI.Services.Dtos.Composition.MaterialData;
+using HalceraAPI.Services.Dtos.Composition.ComponentData;
 using HalceraAPI.Services.Dtos.Media;
 using HalceraAPI.Services.Dtos.Price;
 
@@ -20,7 +20,7 @@ namespace HalceraAPI.Services.Dtos.Product
 
         public ICollection<CompositionResponse>? Compositions { get; set; }
 
-        public ICollection<MaterialDataResponse>? MaterialsAndDetails { get; set; }
+        public ICollection<ComponentDataResponse>? MaterialsAndDetails { get; set; }
 
         public ICollection<CategoryLabelResponse>? Categories { get; set; }
     }

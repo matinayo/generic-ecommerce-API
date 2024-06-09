@@ -25,7 +25,7 @@ namespace HalceraAPI.Services.Automapper
                 .ForMember(destination => destination.Active, opt => 
                     opt.MapFrom((src, dest) => src.Active == null ? dest.Active : src.Active))
                 .ForMember(destination => destination.Compositions, opt => opt.Ignore())
-                .ForMember(destination => destination.MaterialsAndDetails, opt => opt.Ignore())
+                .ForMember(destination => destination.ComponentDataCollection, opt => opt.Ignore())
                 .ForMember(destination => destination.Categories, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
         }

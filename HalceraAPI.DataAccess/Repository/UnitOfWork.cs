@@ -19,7 +19,7 @@ namespace HalceraAPI.DataAccess.Repository
             BaseAddress = new Repository<BaseAddress>(_context, mapper);
             Category = new Repository<Category>(_context, mapper);
             Composition = new Repository<Composition>(_context, mapper);
-            CompositionData = new Repository<MaterialData>(_context, mapper);
+            ComponentData = new Repository<ComponentData>(_context, mapper);
             Media = new Repository<Media>(_context, mapper);
             Price = new Repository<Price>(_context, mapper);
             Product = new Repository<Product>(_context, mapper);
@@ -38,7 +38,7 @@ namespace HalceraAPI.DataAccess.Repository
         public IRepository<BaseAddress> BaseAddress { get; private set; }
         public IRepository<Category> Category { get; private set; }
         public IRepository<Composition> Composition { get; private set; }
-        public IRepository<MaterialData> CompositionData { get; private set; }
+        public IRepository<ComponentData> ComponentData { get; private set; }
         public IRepository<Media> Media { get; private set; }
         public IRepository<Price> Price { get; private set; }
         public IRepository<Product> Product { get; private set; }

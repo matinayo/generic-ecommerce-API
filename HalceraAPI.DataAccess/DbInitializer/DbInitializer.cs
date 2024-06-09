@@ -62,7 +62,7 @@ namespace HalceraAPI.DataAccess.DbInitializer
             ApplicationUser applicationUser = new()
             {
                 Name = "Admin",
-                Email = "admin@halcera.com",
+                Email = "user@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("MASTER123*"),
                 Roles = roleId != null ? new List<Roles>() { roleId } : null
             };

@@ -1,6 +1,6 @@
 ﻿namespace HalceraAPI.Common.Enums
 {
-    public enum CompositionType
+    public enum ComponentType
     {
         materials,
         care,

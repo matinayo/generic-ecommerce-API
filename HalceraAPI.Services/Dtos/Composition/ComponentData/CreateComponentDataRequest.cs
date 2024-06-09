@@ -1,11 +1,11 @@
 ﻿using HalceraAPI.Common.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace HalceraAPI.Services.Dtos.Composition.MaterialData
+namespace HalceraAPI.Services.Dtos.Composition.ComponentData
 {
-    public class CreateMaterialDataRequest
+    public class CreateComponentDataRequest
     {
-        public CompositionType Type { get; set; }
+        public ComponentType Type { get; set; }
 
         [Required]
         [StringLength(20, ErrorMessage = "Data field has a maximum length of '20'")]

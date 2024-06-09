@@ -39,12 +39,13 @@ namespace HalceraAPI.Utilities.Extensions
             services.AddScoped<IMediaOperation, MediaOperation>();
             services.AddScoped<ICompositionOperation, CompositionOperation>();
             services.AddScoped<IPriceOperation, PriceOperation>();
-            services.AddScoped<ICompositionDataOperation, CompositionDataOperation>();
+            services.AddScoped<IComponentDataOperation, ComponentDataOperation>();
             services.AddScoped<IIdentityOperation, IdentityOperation>();
             services.AddScoped<ICustomerOrderOperation, CustomerOrderOperation>();
             services.AddScoped<IAdminOrderOperation, AdminOrderOperation>();
             services.AddScoped<IShippingOperation, ShippingOperation>();
             services.AddScoped<IUserOperation, UserOperation>();
+            services.AddScoped<IProductSizeOperation, ProductSizeOperation>();
         }
 
         public static void ConfigureApplicationServices(this IServiceCollection services, IConfiguration configuration)
@@ -95,7 +96,8 @@ namespace HalceraAPI.Utilities.Extensions
             List<Profile> mapperProfiles = new()
             {
                 new MappingProfiles(),
-                new ProductProfile()
+                new ProductProfile(),
+                new CompositionProfile(),
             };
 
             var mappingConfig = new MapperConfiguration(mc =>

@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Services.Dtos.Media;
 using HalceraAPI.Services.Contract;
+using HalceraAPI.Services.Dtos.Media;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -79,38 +79,27 @@ namespace HalceraAPI.Services.Operations
 
         public void UpdateMediaCollection(IEnumerable<UpdateMediaRequest>? mediaCollection, ICollection<Media>? mediaCollectionFromDb)
         {
-            try
+            if (mediaCollection is not null && mediaCollection.Any())
             {
-                if (mediaCollection is not null && mediaCollection.Any())
+                mediaCollectionFromDb ??= new List<Media>();
+                foreach (var mediaRequest in mediaCollection)
                 {
-                    // Retrieve existing media from the database
-                    mediaCollectionFromDb ??= new List<Media>();
-                    foreach (var mediaRequest in mediaCollection)
+                    Media? existingMediaItem = mediaCollectionFromDb.FirstOrDefault(em => em.Id == mediaRequest.Id);
+                    if (existingMediaItem != null)
                     {
-                        // Find existing media with the same ID in the database
-                        Media? existingMediaItem = mediaCollectionFromDb.FirstOrDefault(em => em.Id == mediaRequest.Id);
-
-                        if (existingMediaItem != null)
+                        _mapper.Map(mediaRequest, existingMediaItem);
+                    }
+                    else
+                    {
+                        if (mediaRequest.Type != null)
                         {
-                            // If the media already exists, update its properties
-                            _mapper.Map(mediaRequest, existingMediaItem);
-                        }
-                        else
-                        {
-                            // If the media does not exist, create a new Media object and map the properties
-                            if (mediaRequest.Type != null)
-                            {
-                                Media newMedia = _mapper.Map<Media>(mediaRequest);
-                                mediaCollectionFromDb.Add(newMedia);
-                            }
+                            existingMediaItem = _mapper.Map<Media>(mediaRequest);
+                            mediaCollectionFromDb.Add(existingMediaItem);
                         }
                     }
                 }
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
         }
     }
 }

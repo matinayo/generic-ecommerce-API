@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HalceraAPI.Services.Dtos.Composition.MaterialData
+namespace HalceraAPI.Services.Dtos.Composition.ComponentData
 {
-    public class UpdateMaterialDataRequest
+    public class UpdateComponentDataRequest
     {
         public int? Id { get; set; }
 

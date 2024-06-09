@@ -1,6 +1,7 @@
-﻿using HalceraAPI.Services.Dtos.Category;
+﻿using HalceraAPI.Models;
+using HalceraAPI.Services.Dtos.Category;
 using HalceraAPI.Services.Dtos.Composition;
-using HalceraAPI.Services.Dtos.Composition.MaterialData;
+using HalceraAPI.Services.Dtos.Composition.ComponentData;
 using HalceraAPI.Services.Dtos.Media;
 using HalceraAPI.Services.Dtos.Price;
 using System.ComponentModel.DataAnnotations;
@@ -19,5 +20,10 @@ namespace HalceraAPI.Services.Dtos.Product
 
         public bool? Featured { get; set; }
 
+        public ICollection<UpdateCompositionRequest>? Compositions { get; set; }
+
+        public ICollection<UpdateComponentDataRequest>? ComponentDataCollection { get; set; }
+
+        public ICollection<ProductCategoryRequest>? Categories { get; set; }
     }
 }

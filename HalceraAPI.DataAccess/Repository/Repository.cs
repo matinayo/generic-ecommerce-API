@@ -29,7 +29,7 @@ namespace HalceraAPI.DataAccess.Repository
             await dbSet.AddAsync(entity);
         }
 
-        public async Task AddRange(IEnumerable<T> entities)
+        public async Task AddRange(IList<T> entities)
         {
             await dbSet.AddRangeAsync(entities);
         }
@@ -43,7 +43,7 @@ namespace HalceraAPI.DataAccess.Repository
             return await dbSet.CountAsync(filter);
         }
 
-        public async Task<IEnumerable<T>> GetAll(
+        public async Task<IList<T>> GetAll(
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             int? skip = null,
@@ -54,7 +54,7 @@ namespace HalceraAPI.DataAccess.Repository
             return await query.ToListAsync();
         }
 
-        public async Task<IEnumerable<TResult>> GetAll<TResult>(
+        public async Task<IList<TResult>> GetAll<TResult>(
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             int? skip = null, 
