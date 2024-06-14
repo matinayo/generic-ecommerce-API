@@ -77,20 +77,36 @@ namespace HalceraAPI.Services.Operations
             if (priceCollection is not null && priceCollection.Any())
             {
                 existingPriceFromDb ??= new List<Price>();
+
+                var tempPrices = priceCollection.Select(u => u.Currency).ToList();
+                tempPrices.AddRange(existingPriceFromDb.Select(u => u.Currency));
                 foreach (var priceRequest in priceCollection)
                 {
                     Price? existingPrice = existingPriceFromDb?.FirstOrDefault(em => em.Id == priceRequest.Id);
                     if (existingPrice != null)
                     {
+                        var samePrice = priceCollection.FirstOrDefault(u => u.Currency == existingPrice.Currency);
+                        if (samePrice != null && samePrice.Id != existingPrice.Id)
+                        {
+                            throw new Exception($"Duplicate currency type: {samePrice.Currency?.ToString()} specified");
+                        }
                         _mapper.Map(priceRequest, existingPrice);
                     }
                     else
                     {
+                        int noOfCurrentCurrency = tempPrices.Where(u => u == priceRequest.Currency).Count();
+                        if (noOfCurrentCurrency > 1)
+                        {
+                            throw new Exception($"Duplicate currency type: {priceRequest.Currency?.ToString()} specified");
+                        }
+
                         existingPrice = _mapper.Map<Price>(priceRequest);
+
                         existingPriceFromDb?.Add(existingPrice);
                     }
                 }
             }
         }
+
     }
 }

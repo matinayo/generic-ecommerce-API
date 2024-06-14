@@ -19,7 +19,6 @@ namespace HalceraAPI.Services.Operations
         private readonly IMediaOperation _mediaOperation;
         private readonly ICompositionOperation _compositionOperation;
         private readonly IComponentDataOperation _componentDataOperation;
-        private readonly IPriceOperation _priceOperation;
         private readonly ICategoryOperation _categoryOperation;
 
         public ProductOperation(
@@ -64,7 +63,7 @@ namespace HalceraAPI.Services.Operations
 
                 // delete product composition and prices
                 await _compositionOperation.DeleteProductCompositions(productId);
-                await _priceOperation.DeleteProductPricesAsync(productId);
+               // await _priceOperation.DeleteProductPricesAsync(productId);
 
                 _unitOfWork.Product.Remove(productDetails);
                 await _unitOfWork.SaveAsync();
@@ -203,7 +202,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                await _priceOperation.DeletePriceFromProductByPriceIdAsync(productId, priceId);
+               // await _priceOperation.DeletePriceFromProductByPriceIdAsync(productId, priceId);
             }
             catch (Exception)
             {
@@ -257,7 +256,7 @@ namespace HalceraAPI.Services.Operations
         {
             try
             {
-                await _priceOperation.ResetDiscountOfProductPriceByPriceIdAsync(productId, priceId);
+                //await _priceOperation.ResetDiscountOfProductPriceByPriceIdAsync(productId, priceId);
             }
             catch (Exception)
             {

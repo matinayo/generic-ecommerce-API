@@ -18,5 +18,10 @@ namespace HalceraAPI.Models
 
         [Column(TypeName = "decimal(10,4)")]
         public decimal? DiscountAmount { get; set; }
+
+        public int? CompositionId { get; set; }
+
+        [ForeignKey(nameof(CompositionId))]
+        public Composition? Composition { get; set; }
     }
 }
