@@ -28,47 +28,37 @@ namespace HalceraAPI.Services.Operations
             _productSizeOperation = productSizeOperation;
         }
 
-        public async Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId)
+        public async Task DeleteProductCompositions(int productId)
         {
-            try
-            {
-                Composition compositionToDelete = await _unitOfWork.Composition
-                    .GetFirstOrDefault(
-                    composition => composition.Id == compositionId
-                    && composition.Id == productId)
-                    ?? throw new Exception("No composition available for this product");
+            IEnumerable<Composition>? productCompositions = await _unitOfWork.Composition.GetAll(
+                composition => composition.ProductId == productId);
 
-                //await _compositionDataOperation.DeleteCompositionDataCollectionAsync(new List<int>() { compositionToDelete.Id });
-
-                _unitOfWork.Composition.Remove(compositionToDelete);
-                await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
+            if (productCompositions is null || !productCompositions.Any())
             {
-                throw;
+                return;
             }
+
+            List<int> compositionIds = productCompositions.Select(u => u.Id).ToList();
+            await _priceOperation.DeletePricesByListOfCompositionIdAsync(compositionIds);
+            await _mediaOperation.DeleteMediaByListOfCompositionIdAsync(compositionIds);
+            await _productSizeOperation.DeleteSizeByListOfCompositionIdAsync(compositionIds);
+
+            _unitOfWork.Composition.RemoveRange(productCompositions);
         }
 
-        public async Task<bool> DeleteProductCompositions(int productId)
+        public async Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId)
         {
-            try
-            {
-                IEnumerable<Composition>? productCompositions = await _unitOfWork.Composition.GetAll(
-                    composition => composition.Id == productId);
-                if (productCompositions is not null && productCompositions.Any())
-                {
-                    // delete product composition data
-                    //await _compositionDataOperation.DeleteCompositionDataCollectionAsync(productCompositions.Select(comp => comp.Id));
+            Composition compositionToDelete = await _unitOfWork.Composition
+                .GetFirstOrDefault(
+                composition => composition.Id == compositionId
+                && composition.Id == productId)
+                ?? throw new Exception("No composition available for this product");
 
-                    _unitOfWork.Composition.RemoveRange(productCompositions);
-                    await _unitOfWork.SaveAsync();
-                }
-                return true;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            //await _compositionDataOperation.DeleteCompositionDataCollectionAsync(new List<int>() { compositionToDelete.Id });
+
+            _unitOfWork.Composition.Remove(compositionToDelete);
+            await _unitOfWork.SaveAsync();
+
         }
 
         public void UpdateComposition(

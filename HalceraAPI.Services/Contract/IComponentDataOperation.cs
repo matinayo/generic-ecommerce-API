@@ -12,13 +12,9 @@ namespace HalceraAPI.Services.Contract
             IEnumerable<UpdateComponentDataRequest>? compositionDataRequests,
             ICollection<ComponentData>? existingCompositionDataFromDb);
 
-        /// <summary>
-        /// Delete range of Composition Data
-        /// </summary>
-        /// <param name="compositionsId">List of Composition Id to be deleted</param>
-        /// <returns>Returns false if nothing was deleted otherwise true</returns>
         Task DeleteCompositionDataCollectionAsync(IEnumerable<int> compositionIdCollection);
 
         Task DeleteCompositionDataFromProductCompositionAsync(int productId, int compositionId, int compositionDataId);
+        Task DeleteProductComponents(int productId);
     }
 }

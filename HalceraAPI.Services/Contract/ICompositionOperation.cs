@@ -7,7 +7,7 @@ namespace HalceraAPI.Services.Contract
     {
         void UpdateComposition(IEnumerable<UpdateCompositionRequest>? compositionCollection, ICollection<Composition>? existingCompositionsfromDb);
 
-        Task<bool> DeleteProductCompositions(int productId);
+        Task DeleteProductCompositions(int productId);
 
         Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId);
     }

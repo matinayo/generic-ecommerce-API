@@ -23,6 +23,7 @@ namespace HalceraAPI.DataAccess.Repository
             Media = new Repository<Media>(_context, mapper);
             Price = new Repository<Price>(_context, mapper);
             Product = new Repository<Product>(_context, mapper);
+            ProductSize = new Repository<ProductSize>(_context, mapper);
             Rating = new Repository<Rating>(_context, mapper);
             ShoppingCart = new Repository<ShoppingCart>(_context, mapper);
             Roles = new Repository<Roles>(_context, mapper);
@@ -42,6 +43,7 @@ namespace HalceraAPI.DataAccess.Repository
         public IRepository<Media> Media { get; private set; }
         public IRepository<Price> Price { get; private set; }
         public IRepository<Product> Product { get; private set; }
+        public IRepository<ProductSize> ProductSize { get; private set; }
         public IRepository<Rating> Rating { get; private set; }
         public IRepository<ShoppingCart> ShoppingCart { get; private set; }
         public IRepository<Roles> Roles { get; private set; }

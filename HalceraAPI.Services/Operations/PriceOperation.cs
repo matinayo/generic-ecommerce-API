@@ -31,24 +31,20 @@ namespace HalceraAPI.Services.Operations
             }
             catch (Exception)
             {
-                throw;
+                throw; 
             }
         }
 
-        public async Task DeleteProductPricesAsync(int productId)
+        public async Task DeletePricesByListOfCompositionIdAsync(List<int> compositionIds)
         {
-            try
+            IEnumerable<Price>? priceCollection = await _unitOfWork.Price.GetAll(
+                                                                    price => price.CompositionId != null 
+                                                                    && compositionIds.Contains(price.CompositionId ?? 0));
+
+            if (priceCollection is not null && priceCollection.Any())
             {
-                //IEnumerable<Price>? productPrices = await _unitOfWork.Price.GetAll(price => price.ProductId == productId);
-                //if (productPrices is not null && productPrices.Any())
-                //{
-                //    _unitOfWork.Price.RemoveRange(productPrices);
-                //    await _unitOfWork.SaveAsync();
-                //}
-            }
-            catch (Exception)
-            {
-                throw;
+                _unitOfWork.Price.RemoveRange(priceCollection);
+                //await _unitOfWork.SaveAsync();
             }
         }
 

@@ -71,6 +71,18 @@ namespace HalceraAPI.Services.Operations
             throw new NotImplementedException();
         }
 
+        public async Task DeleteProductComponents(int productId)
+        {
+            IEnumerable<ComponentData>? componentDataCollection = await _unitOfWork.ComponentData.GetAll(
+                composition => composition.Id == productId);
+
+            if (componentDataCollection is not null && componentDataCollection.Any())
+            {
+                _unitOfWork.ComponentData.RemoveRange(componentDataCollection);
+                //await _unitOfWork.SaveAsync();
+            }
+        }
+
         public void UpdateComponentData(
             IEnumerable<UpdateComponentDataRequest>? componentDataRequests,
             ICollection<ComponentData>? existingcomponentDataFromDb)

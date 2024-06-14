@@ -17,6 +17,19 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
+        public async Task DeleteSizeByListOfCompositionIdAsync(List<int> compositionIds)
+        {
+            IEnumerable<ProductSize>? sizeCollection = await _unitOfWork.ProductSize.GetAll(
+                                                        size => size.CompositionId != null
+                                                        && compositionIds.Contains(size.CompositionId ?? 0));
+
+            if (sizeCollection is not null && sizeCollection.Any())
+            {
+                _unitOfWork.ProductSize.RemoveRange(sizeCollection);
+                //await _unitOfWork.SaveAsync();
+            }
+        }
+
         public void UpdateProductSize(
             IEnumerable<UpdateProductSizeRequest>? productSizeRequests,
             ICollection<ProductSize>? existingProductSizesFromDb)

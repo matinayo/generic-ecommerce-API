@@ -27,19 +27,5 @@ namespace HalceraAPI.Models
         [ForeignKey(nameof(ProductId))]
         public Product? Product { get; set; }
 
-        public void CheckPriceDuplicateCurrency()
-        {
-            if (Prices is not null && Prices.Any())
-            {
-                HashSet<Currency?> seenTypes = new();
-                foreach (var price in Prices)
-                {
-                    if (!seenTypes.Add(price.Currency))
-                    {
-                        throw new Exception($"Duplicate currency: {price.Currency?.ToString().ToUpper()} specified");
-                    }
-                }
-            }
-        }
     }
 }

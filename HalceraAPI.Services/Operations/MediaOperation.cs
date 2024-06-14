@@ -17,6 +17,19 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
+        public async Task DeleteMediaByListOfCompositionIdAsync(List<int> compositionIds)
+        {
+            IEnumerable<Media>? mediaCollection = await _unitOfWork.Media.GetAll(
+                                                        media => media.CompositionId != null 
+                                                        && compositionIds.Contains(media.CompositionId ?? 0));
+
+            if (mediaCollection is not null && mediaCollection.Any())
+            {
+                _unitOfWork.Media.RemoveRange(mediaCollection);
+                //await _unitOfWork.SaveAsync();
+            }
+        }
+
         public async Task DeleteMediaCollection(int? categoryId, int? productId)
         {
             try

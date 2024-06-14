@@ -12,6 +12,7 @@ namespace HalceraAPI.DataAccess.Contract
         IRepository<Media> Media { get; }
         IRepository<Price> Price { get; }
         IRepository<Product> Product { get; }
+        IRepository<ProductSize> ProductSize { get; }
         IRepository<Rating> Rating { get; }
         IRepository<ShoppingCart> ShoppingCart { get; }
         IRepository<Roles> Roles { get; }

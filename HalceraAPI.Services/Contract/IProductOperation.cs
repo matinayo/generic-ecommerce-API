@@ -27,7 +27,5 @@ namespace HalceraAPI.Services.Contract
         Task DeleteProductCompositionDataByCompositionDataIdAsync(int productId, int compositionId, int compositionDataId);
 
         Task ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId);
-
-        Task UpdateProductComposition(int productId, IEnumerable<UpdateCompositionRequest> updateCompositionRequest);
     }
 }
