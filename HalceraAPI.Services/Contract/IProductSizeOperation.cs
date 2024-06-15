@@ -12,6 +12,7 @@ namespace HalceraAPI.Services.Contract
     public interface IProductSizeOperation
     {
         Task DeleteSizeByListOfCompositionIdAsync(List<int> compositionIds);
+        Task DeleteSizeFromCompositionBySizeIdAsync(int compositionId, int sizeId);
         void UpdateProductSize(IEnumerable<UpdateProductSizeRequest>? productSizeRequests,
             ICollection<ProductSize>? existingProductSizesFromDb);
     }

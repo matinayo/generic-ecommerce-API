@@ -26,11 +26,10 @@ namespace HalceraAPI.Services.Operations
             if (mediaCollection is not null && mediaCollection.Any())
             {
                 _unitOfWork.Media.RemoveRange(mediaCollection);
-                //await _unitOfWork.SaveAsync();
             }
         }
 
-        public async Task DeleteMediaCollection(int? categoryId, int? productId)
+        public async Task DeleteMediaCollection(int? categoryId)
         {
             try
             {
@@ -38,8 +37,6 @@ namespace HalceraAPI.Services.Operations
 
                 if (categoryId != null)
                     relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.CategoryId == categoryId);
-                //else if (productId != null)
-                //    relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.ProductId == productId);
 
                 if (relatedMediaCollection != null && relatedMediaCollection.Any())
                 {
@@ -71,15 +68,14 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task DeleteMediaFromProductByMediaIdAsync(int productId, int mediaId)
+        public async Task DeleteMediaFromCompositionByMediaIdAsync(int compositionId, int mediaId)
         {
             try
             {
                 Media mediaToDelete = await _unitOfWork.Media
                     .GetFirstOrDefault(
-                    media => media.Id == mediaId)
-                    //&& media.ProductId == productId)
-                    ?? throw new Exception("No media available for this product");
+                    media => media.Id == mediaId && media.CompositionId == compositionId)
+                    ?? throw new Exception("No media available for this composition");
 
                 _unitOfWork.Media.Remove(mediaToDelete);
                 await _unitOfWork.SaveAsync();

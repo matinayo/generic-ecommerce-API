@@ -17,53 +17,38 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
-        public async Task DeletePriceFromProductByPriceIdAsync(int productId, int priceId)
+        public async Task DeletePriceFromCompositionByPriceIdAsync(int compositionId, int priceId)
         {
-            try
-            {
-                //Price priceToDelete = await _unitOfWork.Price.GetFirstOrDefault(
-                //    price => price.Id == priceId
-                //    && price.ProductId == productId)
-                //    ?? throw new Exception("No price available for this product");
+            Price priceToDelete = await _unitOfWork.Price.GetFirstOrDefault(
+                price => price.Id == priceId
+                && price.CompositionId == compositionId)
+                ?? throw new Exception("No price available for this composition.");
 
-                //_unitOfWork.Price.Remove(priceToDelete);
-                //await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
-            {
-                throw; 
-            }
+            _unitOfWork.Price.Remove(priceToDelete);
+            await _unitOfWork.SaveAsync();
         }
 
         public async Task DeletePricesByListOfCompositionIdAsync(List<int> compositionIds)
         {
             IEnumerable<Price>? priceCollection = await _unitOfWork.Price.GetAll(
-                                                                    price => price.CompositionId != null 
+                                                                    price => price.CompositionId != null
                                                                     && compositionIds.Contains(price.CompositionId ?? 0));
 
             if (priceCollection is not null && priceCollection.Any())
             {
                 _unitOfWork.Price.RemoveRange(priceCollection);
-                //await _unitOfWork.SaveAsync();
             }
         }
 
-        public async Task ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId)
+        public async Task ResetDiscountOfCompositionPriceByPriceIdAsync(int compositionId, int priceId)
         {
-            try
-            {
-                //Price price = await _unitOfWork.Price.GetFirstOrDefault(
-                //    price => price.Id == priceId
-                //    && price.ProductId == productId)
-                //    ?? throw new Exception("No price available for this product");
+            Price price = await _unitOfWork.Price.GetFirstOrDefault(
+                price => price.Id == priceId
+                && price.CompositionId == compositionId)
+                ?? throw new Exception("No price available for this composition.");
 
-                //price.DiscountAmount = null;
-                //await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            price.DiscountAmount = null;
+            await _unitOfWork.SaveAsync();
         }
 
         public void UpdatePrice(

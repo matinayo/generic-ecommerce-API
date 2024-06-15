@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Services.Dtos.Composition.ComponentData;
 using HalceraAPI.Services.Contract;
+using HalceraAPI.Services.Dtos.Composition.ComponentData;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -79,7 +79,6 @@ namespace HalceraAPI.Services.Operations
             if (componentDataCollection is not null && componentDataCollection.Any())
             {
                 _unitOfWork.ComponentData.RemoveRange(componentDataCollection);
-                //await _unitOfWork.SaveAsync();
             }
         }
 
@@ -87,30 +86,22 @@ namespace HalceraAPI.Services.Operations
             IEnumerable<UpdateComponentDataRequest>? componentDataRequests,
             ICollection<ComponentData>? existingcomponentDataFromDb)
         {
-            try
+            if (componentDataRequests is not null && componentDataRequests.Any())
             {
-                if (componentDataRequests is not null && componentDataRequests.Any())
+                existingcomponentDataFromDb ??= new List<ComponentData>();
+                foreach (var componentDataRequest in componentDataRequests)
                 {
-                    existingcomponentDataFromDb ??= new List<ComponentData>();
-                    foreach (var componentDataRequest in componentDataRequests)
+                    ComponentData? existingcomponentData = existingcomponentDataFromDb?.FirstOrDefault(em => em.Id == componentDataRequest.Id);
+                    if (existingcomponentData != null)
                     {
-                        // Find existing price with the same ID in the database
-                        ComponentData? existingcomponentData = existingcomponentDataFromDb?.FirstOrDefault(em => em.Id == componentDataRequest.Id);
-                        if (existingcomponentData != null)
-                        {
-                            _mapper.Map(componentDataRequest, existingcomponentData);
-                        }
-                        else
-                        {
-                            ComponentData newcomponentData = _mapper.Map<ComponentData>(componentDataRequest);
-                            existingcomponentDataFromDb?.Add(newcomponentData);
-                        }
+                        _mapper.Map(componentDataRequest, existingcomponentData);
+                    }
+                    else
+                    {
+                        ComponentData newcomponentData = _mapper.Map<ComponentData>(componentDataRequest);
+                        existingcomponentDataFromDb?.Add(newcomponentData);
                     }
                 }
-            }
-            catch (Exception)
-            {
-                throw;
             }
         }
     }

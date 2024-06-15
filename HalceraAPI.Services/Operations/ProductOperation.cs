@@ -15,7 +15,6 @@ namespace HalceraAPI.Services.Operations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IMediaOperation _mediaOperation;
         private readonly ICompositionOperation _compositionOperation;
         private readonly IComponentDataOperation _componentDataOperation;
         private readonly ICategoryOperation _categoryOperation;
@@ -30,7 +29,6 @@ namespace HalceraAPI.Services.Operations
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _mediaOperation = mediaOperation;
             _compositionOperation = compositionOperation;
             _componentDataOperation = componentDataOperation;
             _categoryOperation = categoryOperation;
@@ -168,30 +166,6 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task DeletePriceFromProductByPriceIdAsync(int productId, int priceId)
-        {
-            try
-            {
-                // await _priceOperation.DeletePriceFromProductByPriceIdAsync(productId, priceId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task DeleteMediaFromProductByMediaIdAsync(int productId, int mediaId)
-        {
-            try
-            {
-                await _mediaOperation.DeleteMediaFromProductByMediaIdAsync(productId, mediaId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public async Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId)
         {
             try
@@ -204,10 +178,9 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task DeleteProductCompositionDataByCompositionDataIdAsync(
+        public async Task DeleteComponentDataFromProductByComponentDataIdAsync(
             int productId,
-            int compositionId,
-            int compositionDataId)
+            int componentId)
         {
             try
             {
@@ -222,17 +195,7 @@ namespace HalceraAPI.Services.Operations
             }
         }
 
-        public async Task ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId)
-        {
-            try
-            {
-                //await _priceOperation.ResetDiscountOfProductPriceByPriceIdAsync(productId, priceId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+       
 
         private static Expression<Func<Product, bool>> GetFeaturedProducts(bool? featured) => product => product.Featured == featured;
 

@@ -26,8 +26,18 @@ namespace HalceraAPI.Services.Operations
             if (sizeCollection is not null && sizeCollection.Any())
             {
                 _unitOfWork.ProductSize.RemoveRange(sizeCollection);
-                //await _unitOfWork.SaveAsync();
             }
+        }
+
+        public async Task DeleteSizeFromCompositionBySizeIdAsync(int compositionId, int sizeId)
+        {
+            ProductSize productSizeToDelete = await _unitOfWork.ProductSize.GetFirstOrDefault(
+                productSize => productSize.Id == sizeId
+                && productSize.CompositionId == compositionId)
+                ?? throw new Exception("No size available for this composition.");
+
+            _unitOfWork.ProductSize.Remove(productSizeToDelete);
+            await _unitOfWork.SaveAsync();
         }
 
         public void UpdateProductSize(

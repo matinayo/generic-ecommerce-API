@@ -87,39 +87,6 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpDelete("{productId}/Price/{priceId}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult> DeleteProductPriceByPriceIdAsync(int productId, int priceId)
-        {
-            await _productOperation.DeletePriceFromProductByPriceIdAsync(productId, priceId);
-
-            return NoContent();
-        }
-
-        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpDelete("{productId}/Price/{priceId}/ResetDiscount")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult> ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId)
-        {
-            await _productOperation.ResetDiscountOfProductPriceByPriceIdAsync(productId, priceId);
-
-            return NoContent();
-        }
-
-        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpDelete("{productId}/Media/{mediaId}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult> DeleteProductMediaByMediaIdAsync(int productId, int mediaId)
-        {
-            await _productOperation.DeleteMediaFromProductByMediaIdAsync(productId, mediaId);
-
-            return NoContent();
-        }
-
-        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
         [HttpDelete("{productId}/Composition/{compositionId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
@@ -131,18 +98,16 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpDelete("{productId}/Composition/{compositionId}/Data/{compositionDataId}")]
+        [HttpDelete("{productId}/ComponentData/{componentDataId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> DeleteProductCompositionDataByCompositionDataIdAsync(
+        public async Task<ActionResult> DeleteCompomemtDataByCompositionDataIdAsync(
             int productId,
-            int compositionId,
-            int compositionDataId)
+            int componentDataId)
         {
-            await _productOperation.DeleteProductCompositionDataByCompositionDataIdAsync(
+            await _productOperation.DeleteComponentDataFromProductByComponentDataIdAsync(
                 productId,
-                compositionId,
-                compositionDataId);
+                componentDataId);
 
             return NoContent();
         }

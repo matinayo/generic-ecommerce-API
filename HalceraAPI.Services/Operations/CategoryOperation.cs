@@ -39,7 +39,7 @@ namespace HalceraAPI.Services.Operations
             Category? categoryDetailsFromDb = await _unitOfWork.Category.GetFirstOrDefault(category => category.Id == categoryId)
                 ?? throw new Exception("Category not found");
 
-            await _mediaOperation.DeleteMediaCollection(categoryId, null);
+            await _mediaOperation.DeleteMediaCollection(categoryId);
             _unitOfWork.Category.Remove(categoryDetailsFromDb);
 
             await _unitOfWork.SaveAsync();
