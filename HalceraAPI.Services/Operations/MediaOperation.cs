@@ -20,7 +20,7 @@ namespace HalceraAPI.Services.Operations
         public async Task DeleteMediaByListOfCompositionIdAsync(List<int> compositionIds)
         {
             IEnumerable<Media>? mediaCollection = await _unitOfWork.Media.GetAll(
-                                                        media => media.CompositionId != null 
+                                                        media => media.CompositionId != null
                                                         && compositionIds.Contains(media.CompositionId ?? 0));
 
             if (mediaCollection is not null && mediaCollection.Any())
@@ -31,59 +31,38 @@ namespace HalceraAPI.Services.Operations
 
         public async Task DeleteMediaCollection(int? categoryId)
         {
-            try
-            {
-                IEnumerable<Media>? relatedMediaCollection = null;
+            IEnumerable<Media>? relatedMediaCollection = null;
 
-                if (categoryId != null)
-                    relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.CategoryId == categoryId);
+            if (categoryId != null)
+                relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.CategoryId == categoryId);
 
-                if (relatedMediaCollection != null && relatedMediaCollection.Any())
-                {
-                    _unitOfWork.Media.RemoveRange(relatedMediaCollection);
-                }
-            }
-            catch (Exception)
+            if (relatedMediaCollection != null && relatedMediaCollection.Any())
             {
-                throw;
+                _unitOfWork.Media.RemoveRange(relatedMediaCollection);
             }
         }
 
         public async Task DeleteMediaFromCategoryByMediaIdAsync(int categoryId, int mediaId)
         {
-            try
-            {
-                Media mediaToDelete = await _unitOfWork.Media
-                    .GetFirstOrDefault(
-                    media => media.Id == mediaId
-                    && media.CategoryId == categoryId)
-                    ?? throw new Exception("No media available for this product");
+            Media mediaToDelete = await _unitOfWork.Media
+                .GetFirstOrDefault(
+                media => media.Id == mediaId
+                && media.CategoryId == categoryId)
+                ?? throw new Exception("No media available for this product");
 
-                _unitOfWork.Media.Remove(mediaToDelete);
-                await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            _unitOfWork.Media.Remove(mediaToDelete);
+            await _unitOfWork.SaveAsync();
         }
 
         public async Task DeleteMediaFromCompositionByMediaIdAsync(int compositionId, int mediaId)
         {
-            try
-            {
-                Media mediaToDelete = await _unitOfWork.Media
-                    .GetFirstOrDefault(
-                    media => media.Id == mediaId && media.CompositionId == compositionId)
-                    ?? throw new Exception("No media available for this composition");
+            Media mediaToDelete = await _unitOfWork.Media
+                .GetFirstOrDefault(
+                media => media.Id == mediaId && media.CompositionId == compositionId)
+                ?? throw new Exception("No media available for this composition");
 
-                _unitOfWork.Media.Remove(mediaToDelete);
-                await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            _unitOfWork.Media.Remove(mediaToDelete);
+            await _unitOfWork.SaveAsync();
         }
 
         public void UpdateMediaCollection(IEnumerable<UpdateMediaRequest>? mediaCollection, ICollection<Media>? mediaCollectionFromDb)

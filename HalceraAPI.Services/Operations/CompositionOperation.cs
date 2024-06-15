@@ -111,5 +111,10 @@ namespace HalceraAPI.Services.Operations
         {
             await _productSizeOperation.DeleteSizeFromCompositionBySizeIdAsync(compositionId, sizeId);
         }
+
+        public async Task ResetDiscountOfCompositionPriceByPriceIdAsync(int compositionId, int priceId)
+        {
+            await _priceOperation.ResetDiscountOfCompositionPriceByPriceIdAsync(compositionId, priceId);
+        }
     }
 }

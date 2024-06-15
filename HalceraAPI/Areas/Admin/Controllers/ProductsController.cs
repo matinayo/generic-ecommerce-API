@@ -79,7 +79,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [HttpDelete("{productId}/Category/{categoryId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> DeleteProductCategoryAsync(int productId, int categoryId)
+        public async Task<ActionResult> DeleteCategoryFromProductByCategoryIdAsync(int productId, int categoryId)
         {
             await _productOperation.DeleteCategoryFromProductByCategoryIdAsync(productId, categoryId);
 
@@ -90,7 +90,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [HttpDelete("{productId}/Composition/{compositionId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> DeleteProductCompositionByCompositionIdAsync(int productId, int compositionId)
+        public async Task<ActionResult> DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId)
         {
             await _productOperation.DeleteCompositionFromProductByCompositionIdAsync(productId, compositionId);
 
