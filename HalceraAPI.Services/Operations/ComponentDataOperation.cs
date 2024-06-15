@@ -17,58 +17,16 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
-        public async Task DeletecomponentDataCollectionAsync(IEnumerable<int> compositionIdCollection)
+        public async Task DeleteComponentDataByComponentIdAsync(int productId, int componentId)
         {
-            try
-            {
-                IEnumerable<ComponentData>? componentDataCollection = await _unitOfWork.ComponentData.GetAll(
-                    componentData => componentData.Id != null
-                    && compositionIdCollection.Contains(componentData.Id));
+            ComponentData componentDataToDelete = await _unitOfWork.ComponentData
+                .GetFirstOrDefault(
+                componentData => componentData.Id == componentId
+                && componentData.ProductId == productId)
+                ?? throw new Exception("No composition data available for this composition");
 
-                if (componentDataCollection is not null && componentDataCollection.Any())
-                {
-                    _unitOfWork.ComponentData.RemoveRange(componentDataCollection);
-                    await _unitOfWork.SaveAsync();
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task DeletecomponentDataFromProductCompositionAsync(int productId, int compositionId, int componentDataId)
-        {
-            try
-            {
-                ComponentData componentDataToDelete = await _unitOfWork.ComponentData
-                    .GetFirstOrDefault(
-                    componentData => componentData.Id == componentDataId
-                    && componentData.Id == compositionId, includeProperties: nameof(ComponentData))
-                    ?? throw new Exception("No composition data available for this composition");
-
-                //if (componentDataToDelete.Composition is null || componentDataToDelete.Composition.ProductId != productId)
-                //{
-                //    throw new Exception("No composition available for this product");
-                //}
-
-                _unitOfWork.ComponentData.Remove(componentDataToDelete);
-                await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public Task DeleteCompositionDataCollectionAsync(IEnumerable<int> compositionIdCollection)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteCompositionDataFromProductCompositionAsync(int productId, int compositionId, int compositionDataId)
-        {
-            throw new NotImplementedException();
+            _unitOfWork.ComponentData.Remove(componentDataToDelete);
+            await _unitOfWork.SaveAsync();
         }
 
         public async Task DeleteProductComponents(int productId)

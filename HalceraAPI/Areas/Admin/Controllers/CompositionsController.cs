@@ -7,7 +7,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
 {
     [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
     [Area("Admin")]
-    [Route("api/[controller]")]
+    [Route("api/[area]/[controller]")]
     [ApiController]
     public class CompositionsController : ControllerBase
     {

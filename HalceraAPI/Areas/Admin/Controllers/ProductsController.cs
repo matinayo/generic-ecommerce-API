@@ -101,11 +101,11 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [HttpDelete("{productId}/ComponentData/{componentDataId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> DeleteCompomemtDataByCompositionDataIdAsync(
+        public async Task<ActionResult> DeleteComponentDataFromProductByComponentIdAsync(
             int productId,
             int componentDataId)
         {
-            await _productOperation.DeleteComponentDataFromProductByComponentDataIdAsync(
+            await _productOperation.DeleteComponentDataFromProductByComponentIdAsync(
                 productId,
                 componentDataId);
 

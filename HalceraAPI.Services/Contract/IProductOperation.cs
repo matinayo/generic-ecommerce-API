@@ -19,6 +19,6 @@ namespace HalceraAPI.Services.Contract
 
         Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId);
 
-        Task DeleteComponentDataFromProductByComponentDataIdAsync(int productId, int componentId);
+        Task DeleteComponentDataFromProductByComponentIdAsync(int productId, int componentId);
     }
 }

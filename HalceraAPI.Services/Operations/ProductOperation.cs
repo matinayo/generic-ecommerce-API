@@ -168,34 +168,15 @@ namespace HalceraAPI.Services.Operations
 
         public async Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId)
         {
-            try
-            {
-                await _compositionOperation.DeleteCompositionFromProductByCompositionIdAsync(productId, compositionId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await _compositionOperation.DeleteCompositionFromProductByCompositionIdAsync(productId, compositionId);
         }
 
-        public async Task DeleteComponentDataFromProductByComponentDataIdAsync(
+        public async Task DeleteComponentDataFromProductByComponentIdAsync(
             int productId,
             int componentId)
         {
-            try
-            {
-                //await _compositionDataOperation.DeleteCompositionDataFromProductCompositionAsync(
-                //    productId,
-                //    compositionId,
-                //    compositionDataId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await _componentDataOperation.DeleteComponentDataByComponentIdAsync(productId, componentId);
         }
-
-       
 
         private static Expression<Func<Product, bool>> GetFeaturedProducts(bool? featured) => product => product.Featured == featured;
 
