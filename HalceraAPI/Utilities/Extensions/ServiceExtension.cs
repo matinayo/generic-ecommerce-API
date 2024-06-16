@@ -98,6 +98,7 @@ namespace HalceraAPI.Utilities.Extensions
                 new MappingProfiles(),
                 new ProductProfile(),
                 new CompositionProfile(),
+                new ShoppingCartProfile(),
             };
 
             var mappingConfig = new MapperConfiguration(mc =>

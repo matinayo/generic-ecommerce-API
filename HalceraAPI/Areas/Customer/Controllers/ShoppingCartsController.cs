@@ -21,14 +21,14 @@ namespace HalceraAPI.Areas.Customer.Controllers
             _shoppingCartOperation = shoppingCartOperation;
         }
 
-        [HttpPost("{productId}")]
+        [HttpPost]
         [ProducesResponseType(typeof(APIResponse<AddToCartResponse>), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> AddProductToCartAsync(
-            int productId,
-            [FromBody] ShoppingCartRequest? shoppingCartRequest)
+            
+            [FromBody] ShoppingCartRequest shoppingCartRequest)
         {
-            var response = await _shoppingCartOperation.AddProductToCartAsync(productId, shoppingCartRequest);
+            var response = await _shoppingCartOperation.AddProductToCartAsync(shoppingCartRequest);
 
             return Ok(response);
         }

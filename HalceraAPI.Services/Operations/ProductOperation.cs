@@ -22,7 +22,6 @@ namespace HalceraAPI.Services.Operations
         public ProductOperation(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            IMediaOperation mediaOperation,
             ICompositionOperation compositionOperation,
             IComponentDataOperation componentDataOperation,
             ICategoryOperation categoryOperation)
@@ -156,14 +155,7 @@ namespace HalceraAPI.Services.Operations
 
         public async Task DeleteCategoryFromProductByCategoryIdAsync(int productId, int categoryId)
         {
-            try
-            {
-                await _categoryOperation.DeleteCategoryFromProductByCategoryIdAsync(productId, categoryId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await _categoryOperation.DeleteCategoryFromProductByCategoryIdAsync(productId, categoryId);
         }
 
         public async Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId)

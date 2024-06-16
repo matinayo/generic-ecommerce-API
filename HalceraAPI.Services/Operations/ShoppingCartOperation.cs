@@ -1,14 +1,15 @@
 ﻿using AutoMapper;
 using HalceraAPI.Common.AppsettingsOptions;
+using HalceraAPI.Common.Enums;
 using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Common.Enums;
+using HalceraAPI.Services.Contract;
 using HalceraAPI.Services.Dtos.APIResponse;
 using HalceraAPI.Services.Dtos.BaseAddress;
 using HalceraAPI.Services.Dtos.Payment;
+using HalceraAPI.Services.Dtos.Product;
 using HalceraAPI.Services.Dtos.ShoppingCart;
-using HalceraAPI.Services.Contract;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using PayStack.Net;
@@ -34,48 +35,38 @@ namespace HalceraAPI.Services.Operations
             _paystackOptions = options.Value;
         }
 
-        public async Task<APIResponse<AddToCartResponse>> AddProductToCartAsync(
-            int productId, ShoppingCartRequest? shoppingCartRequest)
+        public async Task<APIResponse<AddToCartResponse>> AddProductToCartAsync(ShoppingCartRequest shoppingCartRequest)
         {
-            try
+            ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
+            ShoppingCart? cart = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
+                cart => cart.ApplicationUserId != null
+                && cart.ApplicationUserId.Equals(applicationUser.Id)
+                && cart.ProductId == shoppingCartRequest.ProductId,
+                includeProperties: $"{nameof(ShoppingCart.Product)},Product.Compositions,Composition.Sizes");
+
+            if (cart == null)
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
-                ShoppingCart? cart = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
-                    cart => cart.ApplicationUserId != null
-                    && cart.ApplicationUserId.Equals(applicationUser.Id)
-                    && cart.ProductId == productId,
-                    includeProperties: $"{nameof(ShoppingCart.Product)}");
+                var productItem = await _unitOfWork.Product.GetFirstOrDefault(
+                    product => product.Id == shoppingCartRequest!.ProductId, 
+                    includeProperties: 
+                    $"{nameof(Product.Compositions)}" +
+                    ",Compositions.Sizes");
 
-                int requestedQuantity = shoppingCartRequest?.Quantity ?? 1;
+                ValidateAddingItemToCart(productItem, shoppingCartRequest!);
+                cart = _mapper.Map<ShoppingCart>(shoppingCartRequest);
+                cart.ApplicationUserId = applicationUser.Id;
 
-                if (cart == null)
-                {   // adds new item in cart
-                    // TODO:selected product compositions
-                    Product? productItem = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId);
-                    ValidateAddingItemToCart(productItem);
-                    //if (requestedQuantity > productItem?.Quantity)
-                    //{
-                    //    throw new Exception($"Only {productItem?.Quantity} item(s) available in stock");
-                    //}
-
-                    cart = new ShoppingCart() { ProductId = productId, Quantity = requestedQuantity, ApplicationUserId = applicationUser.Id };
-                    // if product item does not exist in cart, add new item
-                    await _unitOfWork.ShoppingCart.Add(cart);
-                }
-                else
-                {
-                    ValidateAndUpdateShoppingCartQuantity(cart, requestedQuantity);
-                }
-                await _unitOfWork.SaveAsync();
-
-                AddToCartResponse response = _mapper.Map<AddToCartResponse>(cart);
-
-                return new APIResponse<AddToCartResponse>(response);
+                await _unitOfWork.ShoppingCart.Add(cart);
             }
-            catch (Exception)
+            else
             {
-                throw;
+                ValidateAndUpdateShoppingCartQuantity(cart, shoppingCartRequest);
             }
+
+            await _unitOfWork.SaveAsync();
+            AddToCartResponse response = _mapper.Map<AddToCartResponse>(cart);
+
+            return new APIResponse<AddToCartResponse>(response);
         }
 
         public async Task<APIResponse<ShoppingCartUpdateResponse>> DecreaseItemInCartAsync(
@@ -249,7 +240,7 @@ namespace HalceraAPI.Services.Operations
                     ?? throw new Exception("Item not found.");
 
                 int requestedQuantity = shoppingCartRequest?.Quantity ?? 1;
-                ValidateAndUpdateShoppingCartQuantity(cartItemFromDb, requestedQuantity);
+                ValidateAndUpdateShoppingCartQuantity(cartItemFromDb, shoppingCartRequest);
                 await _unitOfWork.SaveAsync();
 
                 Currency currency = shoppingCartRequest?.Currency ?? Defaults.DefaultCurrency;
@@ -333,7 +324,7 @@ namespace HalceraAPI.Services.Operations
                     PaymentDetails = ProcessPaymentOrderDetails(checkoutRequest.PaymentDetailsRequest, cartItemsFromDb),
                     OrderDetails = ProcessOrderDetails(cartItemsFromDb, checkoutRequest.PaymentDetailsRequest.Currency),
                     ShippingDetails = ProcessShippingOrderDetails(checkoutRequest.ShippingAddress),
-                    ApplicationUserId = applicationUser.Id,                    
+                    ApplicationUserId = applicationUser.Id,
                 };
 
                 await _unitOfWork.OrderHeader.Add(orderHeader);
@@ -383,7 +374,7 @@ namespace HalceraAPI.Services.Operations
         /// <summary>
         /// Checks if a product is available for purchase, i.e. being added to cart
         /// </summary>
-        private static void ValidateAddingItemToCart(Product? product)
+        private static void ValidateAddingItemToCart(Product? product, ShoppingCartRequest shoppingCartRequest)
         {
             if (product == null)
             {
@@ -393,30 +384,29 @@ namespace HalceraAPI.Services.Operations
             {
                 throw new Exception("This item is not available");
             }
-            //if (product.Quantity <= 0)
-            //{
-            //    throw new Exception("No item in stock");
-            //}
+            if(product.Compositions == null)
+            {
+                throw new Exception("Invalid product compositions.");
+            }
+
+            var selectedComposition = product.Compositions?.FirstOrDefault(u => u.Id == shoppingCartRequest.SelectedCompositionId);
+            var selectedProductSize = selectedComposition?.Sizes?.FirstOrDefault(u => u.Id == shoppingCartRequest.SelectedProductSizeId);
+
+            if (selectedProductSize?.Quantity <= 0)
+            {
+                throw new Exception("No item in stock");
+            }
+            if (shoppingCartRequest.Quantity > selectedProductSize?.Quantity)
+            {
+                throw new Exception($"Only {selectedProductSize?.Quantity} item(s) available in stock");
+            }
         }
 
-        /// <summary>
-        /// Validate and updates quantity of a shopping cart item with product data
-        /// </summary>
-        /// <param name="cart">Existing item in cart from Db</param>
-        /// <param name="requestedQuantity">quantity to be added</param>
-        private static void ValidateAndUpdateShoppingCartQuantity(ShoppingCart cart, int requestedQuantity)
+        private static void ValidateAndUpdateShoppingCartQuantity(ShoppingCart cart, ShoppingCartRequest shoppingCartRequest)
         {
-            ValidateAddingItemToCart(cart.Product);
-            cart.Product ??= new();
-
-            // update existing item count in cart
-            int totalQuantity = cart.Quantity + requestedQuantity;
-            //if (totalQuantity > cart.Product.Quantity)
-            //{
-            //    throw new Exception($"Only {cart.Product.Quantity} item(s) available in stock");
-            //}
-            // update quantity
-            cart.Quantity = totalQuantity;
+            shoppingCartRequest.Quantity = cart.Quantity + (shoppingCartRequest.Quantity ?? 1);
+            ValidateAddingItemToCart(cart.Product, shoppingCartRequest);
+            cart.Quantity = shoppingCartRequest.Quantity ?? 1;
         }
 
         /// <summary>

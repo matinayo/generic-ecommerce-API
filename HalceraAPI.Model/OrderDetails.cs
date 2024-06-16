@@ -18,6 +18,7 @@ namespace HalceraAPI.Models
         [ForeignKey(nameof(OrderHeaderId))]
         public OrderHeader? OrderHeader { get; set; }
 
+        // component if selected producct
         [Required]
         public int ProductId { get; set; }
         [ForeignKey(nameof(ProductId))]
