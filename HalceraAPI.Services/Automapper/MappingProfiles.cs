@@ -76,9 +76,6 @@ namespace HalceraAPI.Services.Automapper
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember != null));
             CreateMap<Media, MediaResponse>().ReverseMap();
 
-            // Shopping Cart
-            CreateMap<ShoppingCart, ShoppingCartDetailsResponse>().ReverseMap();
-            CreateMap<ShoppingCart, AddToCartResponse>().ReverseMap();
 
             // Application User
             CreateMap<RegisterRequest, ApplicationUser>().ReverseMap();

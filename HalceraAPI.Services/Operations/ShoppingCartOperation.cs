@@ -124,72 +124,58 @@ namespace HalceraAPI.Services.Operations
 
         public async Task<APIResponse<ShoppingCartUpdateResponse>> DeleteItemInCartAsync(int shoppingCartId, Currency currency)
         {
-            try
+            ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
+            IEnumerable<ShoppingCart> shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
+                shoppingCart =>
+                shoppingCart.ApplicationUserId != null
+                && shoppingCart.ApplicationUserId.Equals(applicationUser.Id),
+                includeProperties: $"{nameof(ShoppingCart.Product)},Product.Compositions,Composition.Sizes")
+                ?? throw new Exception("There is no item in your cart.");
+
+            ShoppingCart cartItemFromDb = shoppingItemsFromDb.FirstOrDefault(
+                shoppingCart => shoppingCart.Id == shoppingCartId)
+                ?? throw new Exception("Item not found.");
+
+            _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
+            await _unitOfWork.SaveAsync();
+
+            var shoppingItemsAfterDelete = shoppingItemsFromDb.Where(cartItem => cartItem != cartItemFromDb).ToList();
+            ShoppingCartUpdateResponse response = new()
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
-                IEnumerable<ShoppingCart> shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
-                    shoppingCart =>
-                    shoppingCart.ApplicationUserId != null
-                    && shoppingCart.ApplicationUserId.Equals(applicationUser.Id),
-                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Prices")
-                    ?? throw new Exception("There is no item in your cart.");
-
-                ShoppingCart cartItemFromDb = shoppingItemsFromDb.FirstOrDefault(
-                    shoppingCart => shoppingCart.Id == shoppingCartId)
-                    ?? throw new Exception("Item not found.");
-
-                _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
-                await _unitOfWork.SaveAsync();
-
-                var shoppingItemsAfterDelete = shoppingItemsFromDb.Where(cartItem => cartItem != cartItemFromDb).ToList();
-                ShoppingCartUpdateResponse response = new()
+                Quantity = 0,
+                CartTotal = new()
                 {
-                    Quantity = 0,
-                    CartTotal = new()
-                    {
-                        CurrencyToBePaidIn = currency,
-                        TotalAmount = GetTotalAmountToBePaidDuringCheckout(shoppingItemsAfterDelete, currency)
-                    }
-                };
+                    CurrencyToBePaidIn = currency,
+                    TotalAmount = GetTotalAmountToBePaidDuringCheckout(shoppingItemsAfterDelete, currency)
+                }
+            };
 
-                return new APIResponse<ShoppingCartUpdateResponse>(response);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new APIResponse<ShoppingCartUpdateResponse>(response);
         }
 
         public async Task<APIResponse<ShoppingCartListResponse>> GetAllItemsInCartAsync(Currency currency)
         {
-            try
+            ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
+            IEnumerable<ShoppingCart>? shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
+                shoppingCart =>
+                shoppingCart.ApplicationUserId != null
+                && shoppingCart.ApplicationUserId.Equals(applicationUser.Id),
+                includeProperties: $"{nameof(ShoppingCart.Product)},Product.Compositions,Composition.Sizes,Composition.Prices");
+
+            var shoppingDetailsResponse = _mapper.Map<IEnumerable<ShoppingCartDetailsResponse>>(shoppingItemsFromDb);
+            CartTotalResponse cartTotalResponse = new()
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
-                IEnumerable<ShoppingCart>? shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
-                    shoppingCart =>
-                    shoppingCart.ApplicationUserId != null
-                    && shoppingCart.ApplicationUserId.Equals(applicationUser.Id),
-                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Categories,Product.MediaCollection,Product.Prices");
+                TotalAmount = GetTotalAmountToBePaidDuringCheckout(shoppingItemsFromDb, currency),
+                CurrencyToBePaidIn = currency
+            };
 
-                var shoppingDetailsResponse = _mapper.Map<IEnumerable<ShoppingCartDetailsResponse>>(shoppingItemsFromDb);
-                CartTotalResponse cartTotalResponse = new()
-                {
-                    TotalAmount = GetTotalAmountToBePaidDuringCheckout(shoppingItemsFromDb, currency),
-                    CurrencyToBePaidIn = currency
-                };
-
-                ShoppingCartListResponse shoppingCartListResponse = new()
-                {
-                    CartTotal = cartTotalResponse,
-                    ItemsInCart = shoppingDetailsResponse
-                };
-
-                return new APIResponse<ShoppingCartListResponse>(shoppingCartListResponse);
-            }
-            catch (Exception)
+            ShoppingCartListResponse shoppingCartListResponse = new()
             {
-                throw;
-            }
+                CartTotal = cartTotalResponse,
+                ItemsInCart = shoppingDetailsResponse
+            };
+
+            return new APIResponse<ShoppingCartListResponse>(shoppingCartListResponse);
         }
 
         public async Task<APIResponse<ShoppingCartDetailsResponse>> GetItemInCartAsync(int shoppingCartId)

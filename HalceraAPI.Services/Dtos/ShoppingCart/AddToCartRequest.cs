@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Enums = HalceraAPI.Common.Enums;
 
 namespace HalceraAPI.Services.Dtos.ShoppingCart
 {
@@ -9,8 +8,6 @@ namespace HalceraAPI.Services.Dtos.ShoppingCart
 
         [Range(1, 100)]
         public int? Quantity { get; set; } = 1;
-
-        public Enums.Currency Currency { get; set; } = Enums.Currency.NGN;
 
         public int SelectedCompositionId { get; set; }
 
