@@ -8,7 +8,6 @@ using HalceraAPI.Services.Contract;
 using HalceraAPI.Services.Dtos.APIResponse;
 using HalceraAPI.Services.Dtos.BaseAddress;
 using HalceraAPI.Services.Dtos.Payment;
-using HalceraAPI.Services.Dtos.Product;
 using HalceraAPI.Services.Dtos.ShoppingCart;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -35,32 +34,32 @@ namespace HalceraAPI.Services.Operations
             _paystackOptions = options.Value;
         }
 
-        public async Task<APIResponse<AddToCartResponse>> AddProductToCartAsync(ShoppingCartRequest shoppingCartRequest)
+        public async Task<APIResponse<AddToCartResponse>> AddProductToCartAsync(AddToCartRequest addToCartRequest)
         {
             ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
             ShoppingCart? cart = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
                 cart => cart.ApplicationUserId != null
                 && cart.ApplicationUserId.Equals(applicationUser.Id)
-                && cart.ProductId == shoppingCartRequest.ProductId,
+                && cart.ProductId == addToCartRequest.ProductId,
                 includeProperties: $"{nameof(ShoppingCart.Product)},Product.Compositions,Composition.Sizes");
 
             if (cart == null)
             {
                 var productItem = await _unitOfWork.Product.GetFirstOrDefault(
-                    product => product.Id == shoppingCartRequest!.ProductId, 
-                    includeProperties: 
+                    product => product.Id == addToCartRequest!.ProductId,
+                    includeProperties:
                     $"{nameof(Product.Compositions)}" +
                     ",Compositions.Sizes");
 
-                ValidateAddingItemToCart(productItem, shoppingCartRequest!);
-                cart = _mapper.Map<ShoppingCart>(shoppingCartRequest);
+                ValidateAddingItemToCart(productItem, addToCartRequest!);
+                cart = _mapper.Map<ShoppingCart>(addToCartRequest);
                 cart.ApplicationUserId = applicationUser.Id;
 
                 await _unitOfWork.ShoppingCart.Add(cart);
             }
             else
             {
-                ValidateAndUpdateShoppingCartQuantity(cart, shoppingCartRequest);
+                ValidateAndUpdateShoppingCartQuantity(cart, addToCartRequest);
             }
 
             await _unitOfWork.SaveAsync();
@@ -73,60 +72,54 @@ namespace HalceraAPI.Services.Operations
             int shoppingCartId,
             ShoppingCartRequest? shoppingCartRequest)
         {
-            try
+            ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
+            IEnumerable<ShoppingCart> shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
+                shoppingCart =>
+                shoppingCart.ApplicationUserId != null
+                && shoppingCart.ApplicationUserId.Equals(applicationUser.Id),
+                includeProperties: $"{nameof(ShoppingCart.Product)},Product.Compositions,Composition.Sizes,Composition.Prices")
+                ?? throw new Exception("There is no item in your cart.");
+
+            ShoppingCart? cartItemFromDb = shoppingItemsFromDb
+                .FirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
+
+            if (cartItemFromDb == null || cartItemFromDb.Product == null)
+                throw new Exception("Item not found");
+
+            if (!ProductInCartIsValid(cartItemFromDb))
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
-                IEnumerable<ShoppingCart> shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
-                    shoppingCart =>
-                    shoppingCart.ApplicationUserId != null
-                    && shoppingCart.ApplicationUserId.Equals(applicationUser.Id),
-                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Prices")
-                    ?? throw new Exception("There is no item in your cart.");
-
-                ShoppingCart? cartItemFromDb = shoppingItemsFromDb
-                    .FirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId);
-
-                if (cartItemFromDb == null || cartItemFromDb.Product == null)
-                    throw new Exception("Item not found");
-
-                if (!ProductInCartIsValid(cartItemFromDb))
-                {
-                    // remove invalid Item from Shopping Cart
-                    _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
-                    await _unitOfWork.SaveAsync();
-                    throw new Exception("This item is not available");
-                }
-
-                int totalQuantityToRemove = cartItemFromDb.Quantity - (shoppingCartRequest?.Quantity ?? 1);
-                List<ShoppingCart> updatedShoppingCarts = shoppingItemsFromDb.ToList();
-
-                if (totalQuantityToRemove <= 0)
-                {
-                    _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
-                    updatedShoppingCarts.Remove(cartItemFromDb);
-
-                    totalQuantityToRemove = 0;
-                }
-                cartItemFromDb.Quantity = totalQuantityToRemove;
-
+                // remove invalid Item from Shopping Cart
+                _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
                 await _unitOfWork.SaveAsync();
-                Currency currency = shoppingCartRequest?.Currency ?? Defaults.DefaultCurrency;
-                ShoppingCartUpdateResponse response = new()
-                {
-                    Quantity = cartItemFromDb.Quantity,
-                    CartTotal = new()
-                    {
-                        CurrencyToBePaidIn = currency,
-                        TotalAmount = GetTotalAmountToBePaidDuringCheckout(updatedShoppingCarts, currency)
-                    }
-                };
+                throw new Exception("This item is not available");
+            }
 
-                return new APIResponse<ShoppingCartUpdateResponse>(response);
-            }
-            catch (Exception)
+            int updatedTotalQuantity = cartItemFromDb.Quantity - (shoppingCartRequest?.Quantity ?? 1);
+            List<ShoppingCart> updatedShoppingCarts = shoppingItemsFromDb.ToList();
+
+            if (updatedTotalQuantity <= 0)
             {
-                throw;
+                _unitOfWork.ShoppingCart.Remove(cartItemFromDb);
+                updatedShoppingCarts.Remove(cartItemFromDb);
+
+                updatedTotalQuantity = 0;
             }
+
+            cartItemFromDb.Quantity = updatedTotalQuantity;
+            await _unitOfWork.SaveAsync();
+
+            Currency currency = shoppingCartRequest?.Currency ?? Defaults.DefaultCurrency;
+            ShoppingCartUpdateResponse response = new()
+            {
+                Quantity = cartItemFromDb.Quantity,
+                CartTotal = new()
+                {
+                    CurrencyToBePaidIn = currency,
+                    TotalAmount = GetTotalAmountToBePaidDuringCheckout(updatedShoppingCarts, currency)
+                }
+            };
+
+            return new APIResponse<ShoppingCartUpdateResponse>(response);
         }
 
         public async Task<APIResponse<ShoppingCartUpdateResponse>> DeleteItemInCartAsync(int shoppingCartId, Currency currency)
@@ -240,7 +233,8 @@ namespace HalceraAPI.Services.Operations
                     ?? throw new Exception("Item not found.");
 
                 int requestedQuantity = shoppingCartRequest?.Quantity ?? 1;
-                ValidateAndUpdateShoppingCartQuantity(cartItemFromDb, shoppingCartRequest);
+                //ValidateAndUpdateShoppingCartQuantity(cartItemFromDb, shoppingCartRequest);
+                ProductInCartIsValid(cartItemFromDb);
                 await _unitOfWork.SaveAsync();
 
                 Currency currency = shoppingCartRequest?.Currency ?? Defaults.DefaultCurrency;
@@ -374,7 +368,7 @@ namespace HalceraAPI.Services.Operations
         /// <summary>
         /// Checks if a product is available for purchase, i.e. being added to cart
         /// </summary>
-        private static void ValidateAddingItemToCart(Product? product, ShoppingCartRequest shoppingCartRequest)
+        private static void ValidateAddingItemToCart(Product? product, AddToCartRequest addToCartRequest)
         {
             if (product == null)
             {
@@ -384,29 +378,29 @@ namespace HalceraAPI.Services.Operations
             {
                 throw new Exception("This item is not available");
             }
-            if(product.Compositions == null)
+            if (product.Compositions == null)
             {
                 throw new Exception("Invalid product compositions.");
             }
 
-            var selectedComposition = product.Compositions?.FirstOrDefault(u => u.Id == shoppingCartRequest.SelectedCompositionId);
-            var selectedProductSize = selectedComposition?.Sizes?.FirstOrDefault(u => u.Id == shoppingCartRequest.SelectedProductSizeId);
+            var selectedComposition = product.Compositions?.FirstOrDefault(u => u.Id == addToCartRequest.SelectedCompositionId);
+            var selectedProductSize = selectedComposition?.Sizes?.FirstOrDefault(u => u.Id == addToCartRequest.SelectedProductSizeId);
 
             if (selectedProductSize?.Quantity <= 0)
             {
                 throw new Exception("No item in stock");
             }
-            if (shoppingCartRequest.Quantity > selectedProductSize?.Quantity)
+            if (addToCartRequest.Quantity > selectedProductSize?.Quantity)
             {
                 throw new Exception($"Only {selectedProductSize?.Quantity} item(s) available in stock");
             }
         }
 
-        private static void ValidateAndUpdateShoppingCartQuantity(ShoppingCart cart, ShoppingCartRequest shoppingCartRequest)
+        private static void ValidateAndUpdateShoppingCartQuantity(ShoppingCart cart, AddToCartRequest addToCartRequest)
         {
-            shoppingCartRequest.Quantity = cart.Quantity + (shoppingCartRequest.Quantity ?? 1);
-            ValidateAddingItemToCart(cart.Product, shoppingCartRequest);
-            cart.Quantity = shoppingCartRequest.Quantity ?? 1;
+            addToCartRequest.Quantity = cart.Quantity + (addToCartRequest.Quantity ?? 1);
+            ValidateAddingItemToCart(cart.Product, addToCartRequest);
+            cart.Quantity = addToCartRequest.Quantity ?? 1;
         }
 
         /// <summary>
@@ -437,19 +431,20 @@ namespace HalceraAPI.Services.Operations
             decimal totalAmount = 0.0M;
             List<OrderDetails> orderDetails = new();
 
-            foreach (var cartItem in cartItemsFromDb)
+            foreach (var cartItem in cartItemsFromDb.Where(u => u.Product != null && u.Product.Active))
             {
-                //if (ProductInCartIsValid(cartItem))
-                //{
-                //    Price? productSelectedPrice = cartItem?.Product?.Prices?.FirstOrDefault(price => price.Currency != null && price.Currency == currencyToBePaidIn);
-                //    if (productSelectedPrice != null)
-                //    {
-                //        // Total amount
-                //        decimal productAmount = productSelectedPrice.DiscountAmount ?? productSelectedPrice.Amount ?? 0M;
-                //        totalAmount += (productAmount * (cartItem?.Quantity ?? 1));
-                //    }
-                //}
+                if (ProductInCartIsValid(cartItem))
+                {
+                    Price? productSelectedPrice = cartItem?.Composition?.Prices?.FirstOrDefault(price => price.Currency != null && price.Currency == currencyToBePaidIn);
+                    if (productSelectedPrice != null)
+                    {
+                        // Total amount
+                        decimal productAmount = productSelectedPrice.DiscountAmount ?? productSelectedPrice.Amount ?? 0M;
+                        totalAmount += (productAmount * (cartItem?.Quantity ?? 1));
+                    }
+                }
             }
+
             return totalAmount;
         }
 
@@ -458,9 +453,9 @@ namespace HalceraAPI.Services.Operations
             return (
                 cartItem != null
                 && cartItem.Product != null
-                //&& cartItem.Product.Prices != null
                 && cartItem.Product.Active
-                //&& cartItem.Product.Quantity > 0
+                && cartItem.ProductSize != null
+                && cartItem.ProductSize.Quantity > 0
                 && cartItem.Quantity > 0);
         }
 

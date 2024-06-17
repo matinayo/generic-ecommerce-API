@@ -26,9 +26,9 @@ namespace HalceraAPI.Areas.Customer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> AddProductToCartAsync(
             
-            [FromBody] ShoppingCartRequest shoppingCartRequest)
+            [FromBody] AddToCartRequest addToCartRequest)
         {
-            var response = await _shoppingCartOperation.AddProductToCartAsync(shoppingCartRequest);
+            var response = await _shoppingCartOperation.AddProductToCartAsync(addToCartRequest);
 
             return Ok(response);
         }

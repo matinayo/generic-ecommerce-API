@@ -8,7 +8,7 @@ namespace HalceraAPI.Services.Contract
 {
     public interface IShoppingCartOperation
     {
-        Task<APIResponse<AddToCartResponse>> AddProductToCartAsync(ShoppingCartRequest shoppingCartRequest);
+        Task<APIResponse<AddToCartResponse>> AddProductToCartAsync(AddToCartRequest addToCartRequest);
 
         Task<APIResponse<ShoppingCartListResponse>> GetAllItemsInCartAsync(Currency currency = Defaults.DefaultCurrency);
 
