@@ -180,66 +180,48 @@ namespace HalceraAPI.Services.Operations
 
         public async Task<APIResponse<ShoppingCartDetailsResponse>> GetItemInCartAsync(int shoppingCartId)
         {
-            try
-            {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
-                ShoppingCart shoppingCartFromDb = await _unitOfWork.ShoppingCart.GetFirstOrDefault(
-                    shoppingCart => shoppingCart.ApplicationUserId != null
-                    && shoppingCart.ApplicationUserId.Equals(applicationUser.Id)
-                    && shoppingCart.Id == shoppingCartId,
-                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Categories,Product.MediaCollection,Product.Prices")
-                    ?? throw new Exception("Item not found");
+            ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
+            var response = await _unitOfWork.ShoppingCart.GetFirstOrDefault<ShoppingCartDetailsResponse>(
+                shoppingCart => shoppingCart.ApplicationUserId != null
+                && shoppingCart.ApplicationUserId.Equals(applicationUser.Id)
+                && shoppingCart.Id == shoppingCartId)
+                ?? throw new Exception("Item not found");
 
-                var response = _mapper.Map<ShoppingCartDetailsResponse>(shoppingCartFromDb);
-
-                return new APIResponse<ShoppingCartDetailsResponse>(response);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new APIResponse<ShoppingCartDetailsResponse>(response);
         }
 
         public async Task<APIResponse<ShoppingCartUpdateResponse>> IncreaseItemInCartAsync(
             int shoppingCartId,
             ShoppingCartRequest? shoppingCartRequest)
         {
-            try
+            ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
+            IEnumerable<ShoppingCart> shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
+                shoppingCart =>
+                shoppingCart.ApplicationUserId != null
+                && shoppingCart.ApplicationUserId.Equals(applicationUser.Id),
+                includeProperties: $"{nameof(ShoppingCart.Product)},Product.Compositions,Composition.Sizes,Composition.Prices")
+                ?? throw new Exception("There is no item in your cart.");
+
+            ShoppingCart cartItemFromDb = shoppingItemsFromDb
+                .FirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId)
+                ?? throw new Exception("Item not found.");
+
+            ProductInCartIsValid(cartItemFromDb);
+            cartItemFromDb.Quantity += (shoppingCartRequest?.Quantity ?? 1);
+            await _unitOfWork.SaveAsync();
+
+            Currency currency = shoppingCartRequest?.Currency ?? Defaults.DefaultCurrency;
+            ShoppingCartUpdateResponse response = new()
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
-                IEnumerable<ShoppingCart> shoppingItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
-                    shoppingCart =>
-                    shoppingCart.ApplicationUserId != null
-                    && shoppingCart.ApplicationUserId.Equals(applicationUser.Id),
-                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Prices")
-                    ?? throw new Exception("There is no item in your cart.");
-
-                ShoppingCart cartItemFromDb = shoppingItemsFromDb
-                    .FirstOrDefault(shoppingCart => shoppingCart.Id == shoppingCartId)
-                    ?? throw new Exception("Item not found.");
-
-                int requestedQuantity = shoppingCartRequest?.Quantity ?? 1;
-                //ValidateAndUpdateShoppingCartQuantity(cartItemFromDb, shoppingCartRequest);
-                ProductInCartIsValid(cartItemFromDb);
-                await _unitOfWork.SaveAsync();
-
-                Currency currency = shoppingCartRequest?.Currency ?? Defaults.DefaultCurrency;
-                ShoppingCartUpdateResponse response = new()
+                Quantity = cartItemFromDb.Quantity,
+                CartTotal = new()
                 {
-                    Quantity = cartItemFromDb.Quantity,
-                    CartTotal = new()
-                    {
-                        CurrencyToBePaidIn = currency,
-                        TotalAmount = GetTotalAmountToBePaidDuringCheckout(shoppingItemsFromDb, currency)
-                    }
-                };
+                    CurrencyToBePaidIn = currency,
+                    TotalAmount = GetTotalAmountToBePaidDuringCheckout(shoppingItemsFromDb, currency)
+                }
+            };
 
-                return new APIResponse<ShoppingCartUpdateResponse>(response);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new APIResponse<ShoppingCartUpdateResponse>(response);
         }
 
         public APIResponse<InitializePaymentResponse> InitializeTransactionForCheckout(
@@ -279,47 +261,41 @@ namespace HalceraAPI.Services.Operations
 
         public async Task<APIResponse<CheckoutResponse>> CheckoutAsync(CheckoutRequest checkoutRequest)
         {
-            try
+            ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
+
+            IEnumerable<ShoppingCart> cartItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
+                filter: shoppingCart => shoppingCart.ApplicationUserId != null
+                && shoppingCart.ApplicationUserId == applicationUser.Id,
+                includeProperties: $"{nameof(ShoppingCart.Product)},Product.Compositions,Composition.Sizes,Composition.Prices");
+
+            if (cartItemsFromDb == null || cartItemsFromDb.IsNullOrEmpty())
+                throw new Exception("No items found in cart");
+
+            // TODO: Verify Delivery, Estimated delivery date
+            _ = VerifyTransaction(new VerifyPaymentRequest()
             {
-                ApplicationUser applicationUser = await _identityOperation.GetLoggedInUserAsync();
+                Currency = checkoutRequest.PaymentDetailsRequest.Currency,
+                Reference = checkoutRequest.PaymentDetailsRequest.Reference,
+                PaymentProvider = checkoutRequest.PaymentDetailsRequest.PaymentProvider
+            });
 
-                IEnumerable<ShoppingCart> cartItemsFromDb = await _unitOfWork.ShoppingCart.GetAll(
-                    filter: shoppingCart => shoppingCart.ApplicationUserId != null
-                    && shoppingCart.ApplicationUserId == applicationUser.Id,
-                    includeProperties: $"{nameof(ShoppingCart.Product)},Product.Prices");
-
-                if (cartItemsFromDb == null || cartItemsFromDb.IsNullOrEmpty()) throw new Exception("No items found in cart");
-
-                // TODO: Verify Delivery, Estimated delivery date
-                _ = VerifyTransaction(new VerifyPaymentRequest()
-                {
-                    Currency = checkoutRequest.PaymentDetailsRequest.Currency,
-                    Reference = checkoutRequest.PaymentDetailsRequest.Reference,
-                    PaymentProvider = checkoutRequest.PaymentDetailsRequest.PaymentProvider
-                });
-
-                OrderHeader orderHeader = new()
-                {
-                    OrderStatus = OrderStatus.Pending,
-                    PaymentDetails = ProcessPaymentOrderDetails(checkoutRequest.PaymentDetailsRequest, cartItemsFromDb),
-                    OrderDetails = ProcessOrderDetails(cartItemsFromDb, checkoutRequest.PaymentDetailsRequest.Currency),
-                    ShippingDetails = ProcessShippingOrderDetails(checkoutRequest.ShippingAddress),
-                    ApplicationUserId = applicationUser.Id,
-                };
-
-                await _unitOfWork.OrderHeader.Add(orderHeader);
-
-                _unitOfWork.ShoppingCart.RemoveRange(cartItemsFromDb);
-                await _unitOfWork.SaveAsync();
-
-                var result = _mapper.Map<CheckoutResponse>(orderHeader);
-
-                return new APIResponse<CheckoutResponse>(result);
-            }
-            catch (Exception)
+            OrderHeader orderHeader = new()
             {
-                throw;
-            }
+                OrderStatus = OrderStatus.Pending,
+                PaymentDetails = ProcessPaymentOrderDetails(checkoutRequest.PaymentDetailsRequest, cartItemsFromDb),
+                OrderDetails = ProcessOrderDetails(cartItemsFromDb, checkoutRequest.PaymentDetailsRequest.Currency),
+                ShippingDetails = ProcessShippingOrderDetails(checkoutRequest.ShippingAddress),
+                ApplicationUserId = applicationUser.Id,
+            };
+
+            await _unitOfWork.OrderHeader.Add(orderHeader);
+
+            _unitOfWork.ShoppingCart.RemoveRange(cartItemsFromDb);
+            await _unitOfWork.SaveAsync();
+
+            var result = _mapper.Map<CheckoutResponse>(orderHeader);
+
+            return new APIResponse<CheckoutResponse>(result);
         }
 
         private static bool InvalidAmountForTransaction(decimal amount)

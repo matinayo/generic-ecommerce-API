@@ -8,20 +8,38 @@ namespace HalceraAPI.Models
         [Key]
         public int Id { get; set; }
 
+        public string? Reference { get; set; } = Guid.NewGuid().ToString();
+
+        [Required]
+        public int CompositionId { get; set; }
+
+        [Required]
+        public int ProductSizeId { get; set; }
+
         [Required]
         public int PurchaseDetailsId { get; set; }
-        [ForeignKey(nameof(PurchaseDetailsId))]
-        public PurchaseDetails? PurchaseDetails { get; set; }
+
+        [Required]
+        public int ProductReferenceId { get; set; }
 
         [Required]
         public string? OrderHeaderId { get; set; }
+
+        [ForeignKey(nameof(PurchaseDetailsId))]
+        public PurchaseDetails? PurchaseDetails { get; set; }
+
         [ForeignKey(nameof(OrderHeaderId))]
         public OrderHeader? OrderHeader { get; set; }
 
-        // component if selected producct
-        [Required]
-        public int ProductId { get; set; }
-        [ForeignKey(nameof(ProductId))]
+        [ForeignKey(nameof(ProductReferenceId))]
         public Product? Product { get; set; }
+
+        // Add OrderProduct and reference to OrderProduct
+
+        [ForeignKey(nameof(ProductSizeId))]
+        public OrderProductSize? ProductSize { get; set; }
+
+        [ForeignKey(nameof(CompositionId))]
+        public OrderComposition? Composition { get; set; }
     }
 }

@@ -5,7 +5,6 @@ namespace HalceraAPI.Services.Dtos.ShoppingCart
 {
     public class CheckoutRequest
     {
-        // payment status and address details
         [Required]
         public required PaymentDetailsRequest PaymentDetailsRequest { get; set; }
         [Required]
