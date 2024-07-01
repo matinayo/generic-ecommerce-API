@@ -4,13 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HalceraAPI.Models
 {
-    /// <summary>
-    /// Order and User data
-    /// </summary>
     public class OrderHeader
     {
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
+
         public OrderStatus OrderStatus { get; set; }
 
         public DateTime? OrderDate { get; set; } = DateTime.UtcNow;
@@ -24,9 +22,6 @@ namespace HalceraAPI.Models
         [ForeignKey(nameof(ShippingDetailsId))]
         public ShippingDetails? ShippingDetails { get; set; }
 
-        /// <summary>
-        /// Corresponding order details
-        /// </summary>
         public ICollection<OrderDetails>? OrderDetails { get; set; }
 
         [Required]

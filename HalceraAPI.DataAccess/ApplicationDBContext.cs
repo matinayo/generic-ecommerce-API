@@ -28,5 +28,6 @@ namespace HalceraAPI.DataAccess
         public DbSet<ShippingDetails>? ShippingDetails { get; set; }
         public DbSet<OrderProductSize>? OrderProductSizes { get; set; }
         public DbSet<OrderComposition>? OrderCompositions { get; set; }
+        public DbSet<OrderProduct>? OrderProducts { get; set; }
     }
 }

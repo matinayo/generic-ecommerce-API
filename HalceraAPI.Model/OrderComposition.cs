@@ -4,6 +4,7 @@ namespace HalceraAPI.Models
 {
     public class OrderComposition
     {
+        [Key]
         public int Id { get; set; }
 
         [Required]

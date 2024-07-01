@@ -10,6 +10,9 @@ namespace HalceraAPI.Models
 
         public string? Reference { get; set; } = Guid.NewGuid().ToString();
 
+        [Required] 
+        public int ProductId { get; set; }
+
         [Required]
         public int CompositionId { get; set; }
 
@@ -32,9 +35,10 @@ namespace HalceraAPI.Models
         public OrderHeader? OrderHeader { get; set; }
 
         [ForeignKey(nameof(ProductReferenceId))]
-        public Product? Product { get; set; }
+        public Product? ProductReference { get; set; }
 
-        // Add OrderProduct and reference to OrderProduct
+        [ForeignKey(nameof(ProductId))]
+        public OrderProduct? Product { get; set; }
 
         [ForeignKey(nameof(ProductSizeId))]
         public OrderProductSize? ProductSize { get; set; }

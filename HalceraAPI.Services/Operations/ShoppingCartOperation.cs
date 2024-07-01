@@ -227,24 +227,17 @@ namespace HalceraAPI.Services.Operations
         public APIResponse<InitializePaymentResponse> InitializeTransactionForCheckout(
             InitializePaymentRequest initializePaymentRequest)
         {
-            try
-            {
-                if (InvalidAmountForTransaction(initializePaymentRequest.Amount))
-                    throw new Exception("Amount should be greater than 0.");
+            if (InvalidAmountForTransaction(initializePaymentRequest.Amount))
+                throw new Exception("Amount should be greater than 0.");
 
-                APIResponse<InitializePaymentResponse>? response = initializePaymentRequest.PaymentProvider switch
-                {
-                    PaymentProvider.Paystack => InitializePaystackTransaction(
-                            initializePaymentRequest.Email, initializePaymentRequest.Amount, initializePaymentRequest.Currency),
-                    _ => throw new Exception("Unsupported payment provider.")
-                };
-
-                return response ?? throw new Exception("Failed to initialize payment transaction.");
-            }
-            catch (Exception)
+            APIResponse<InitializePaymentResponse>? response = initializePaymentRequest.PaymentProvider switch
             {
-                throw;
-            }
+                PaymentProvider.Paystack => InitializePaystackTransaction(
+                        initializePaymentRequest.Email, initializePaymentRequest.Amount, initializePaymentRequest.Currency),
+                _ => throw new Exception("Unsupported payment provider.")
+            };
+
+            return response ?? throw new Exception("Failed to initialize payment transaction.");
         }
 
         public APIResponse<VerifyPaymentResponse> VerifyTransaction(VerifyPaymentRequest verifyPaymentRequest)
@@ -327,6 +320,24 @@ namespace HalceraAPI.Services.Operations
             return Convert.ToInt16(amountInNaira * 100);
         }
 
+        private APIResponse<VerifyPaymentResponse> VerifyPaystackTransaction(string reference, Currency currency)
+        {
+            if (currency != Currency.NGN)
+                throw new Exception("The selected provider only supports Naira transactions.");
+
+            var paystackApi = new PayStackApi(_paystackOptions.SecretKey);
+            TransactionVerifyResponse? response = paystackApi.Transactions.Verify(reference);
+
+            if (response != null && response.Status)
+            {
+                return _mapper.Map<APIResponse<VerifyPaymentResponse>>(response);
+            }
+            else
+            {
+                throw new Exception(response?.Message ?? "Invalid request. Please try again");
+            }
+        }
+
         /// <summary>
         /// Checks if a product is available for purchase, i.e. being added to cart
         /// </summary>
@@ -381,12 +392,6 @@ namespace HalceraAPI.Services.Operations
             return paymentDetails;
         }
 
-        /// <summary>
-        /// Calculate total amount of Items added in Shopping Cart
-        /// </summary>
-        /// <param name="cartItemsFromDb">ShoppingCart Items of User Id Including Product.Price</param>
-        /// <param name="currencyToBePaidIn">Currency of Product Price to be calculated</param>
-        /// <returns>Product total amount</returns>
         private static decimal GetTotalAmountToBePaidDuringCheckout(IEnumerable<ShoppingCart> cartItemsFromDb, Currency currencyToBePaidIn)
         {
             // TODO: only product that are active
@@ -421,11 +426,6 @@ namespace HalceraAPI.Services.Operations
                 && cartItem.Quantity > 0);
         }
 
-        /// <summary>
-        /// Process Order Shipping Address and Data
-        /// </summary>
-        /// <param name="shippingAddressRequest">Shipping Address request</param>
-        /// <returns>Shipping Details</returns>
         private ShippingDetails ProcessShippingOrderDetails(AddressRequest shippingAddressRequest)
         {
             BaseAddress baseAddress = _mapper.Map<BaseAddress>(shippingAddressRequest);
@@ -433,65 +433,57 @@ namespace HalceraAPI.Services.Operations
             {
                 ShippingAddress = baseAddress
             };
+
             return shippingDetails;
         }
 
-        /// <summary>
-        /// Process Order details
-        /// </summary>
-        /// <param name="cartItemsFromDb">User Cart items from including Product Price</param>
-        /// <param name="currencyToBePaidIn">User checkout currency</param>
-        /// <returns>List of Order Details</returns>
         private static ICollection<OrderDetails> ProcessOrderDetails(IEnumerable<ShoppingCart> cartItemsFromDb, Currency currencyToBePaidIn)
         {
             List<OrderDetails> orderDetails = new();
             foreach (var cartItem in cartItemsFromDb)
             {
-                //if (cartItem.Product != null && cartItem.Product.Prices != null)
-                //{
-                //    Price? productSelectedPrice = cartItem.Product.Prices.FirstOrDefault(price => price.Currency != null && price.Currency == currencyToBePaidIn);
-                //    if (productSelectedPrice != null)
-                //    {
-                //        // Order details
-                //        OrderDetails orderDetail = new()
-                //        {
-                //            ProductId = cartItem.ProductId,
-                //            // Purchase details
-                //            PurchaseDetails = new()
-                //            {
-                //                ApplicationUserId = cartItem.ApplicationUserId,
-                //                Currency = productSelectedPrice?.Currency,
-                //                DiscountAmount = productSelectedPrice?.DiscountAmount,
-                //                ProductAmountAtPurchase = productSelectedPrice?.Amount,
-                //                Quantity = cartItem.Quantity,
-                //                PurchaseDate = DateTime.UtcNow
-                //            }
-                //        };
-                //        orderDetails.Add(orderDetail);
-                //        // Update product quantity in stock
-                //        cartItem.Product.Quantity -= cartItem.Quantity;
-                //    }
-                //}
+                if (cartItem != null)
+                {
+                    continue;
+                }
+
+                Price? selectedProductPrice = cartItem!.Composition?.Prices?.FirstOrDefault(u => u.Currency == currencyToBePaidIn);
+                OrderDetails orderDetail = new()
+                {
+                    ProductReferenceId = cartItem!.ProductId,
+                    Product = new OrderProduct()
+                    {
+                        Title = cartItem?.Product?.Title
+                    },
+                    ProductSize = new OrderProductSize()
+                    {
+                        Quantity = cartItem!.Quantity,
+                        Size = cartItem!.ProductSize?.Size
+                    },
+                    Composition = new OrderComposition()
+                    {
+                        ColorName = cartItem!.Composition?.ColorName ?? string.Empty,
+                        ColorCode = cartItem!.Composition?.ColorCode ?? string.Empty
+                    },
+                    PurchaseDetails = new PurchaseDetails()
+                    {
+                        ApplicationUserId = cartItem!.ApplicationUserId,
+                        Currency = currencyToBePaidIn,
+                        DiscountAmount = selectedProductPrice?.DiscountAmount,
+                        ProductAmountAtPurchase = selectedProductPrice?.Amount,
+                        PurchaseDate = DateTime.UtcNow
+                    }
+                };
+
+                orderDetails.Add(orderDetail);
+                if (cartItem.ProductSize != null)
+                {
+                    cartItem.ProductSize.Quantity -= cartItem.Quantity;
+                }
             }
+
             return orderDetails;
         }
 
-        private APIResponse<VerifyPaymentResponse> VerifyPaystackTransaction(string reference, Currency currency)
-        {
-            if (currency != Currency.NGN)
-                throw new Exception("The selected provider only supports Naira transactions.");
-
-            var paystackApi = new PayStackApi(_paystackOptions.SecretKey);
-            TransactionVerifyResponse? response = paystackApi.Transactions.Verify(reference);
-
-            if (response != null && response.Status)
-            {
-                return _mapper.Map<APIResponse<VerifyPaymentResponse>>(response);
-            }
-            else
-            {
-                throw new Exception(response?.Message ?? "Invalid request. Please try again");
-            }
-        }
     }
 }
