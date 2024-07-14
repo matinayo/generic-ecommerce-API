@@ -13,11 +13,8 @@ namespace HalceraAPI.Models
         public decimal AmountPaid { get; set; }
         [Required]
         public Currency? Currency { get; set; }
-        /// <summary>
-        /// Total Amount to be paid
-        /// </summary>
         [Column(TypeName = "decimal(10,4)")]
-        public decimal? TotalAmount { get; set; }
+        public decimal? TotalAmountToBePaid { get; set; }
         public PaymentStatus? PaymentStatus { get; set; }
         public DateTime? PaymentDate { get; set; } = DateTime.UtcNow;
         public DateTime? PaymentDueDate { get; set; }

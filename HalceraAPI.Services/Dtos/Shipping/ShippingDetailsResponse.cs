@@ -10,6 +10,7 @@ namespace HalceraAPI.Services.Dtos.Shipping
         public Enums.ShippingStatus? ShippingStatus { get; init; } = Enums.ShippingStatus.Pending;
         public DateTime? ShippingDate { get; init; }
         public DateTime? DateShipped { get; init; }
+        public DateTime? CancelledDate { get; set; }
         public ShippingAddressResponse? ShippingAddress { get; init; }
     }
 }

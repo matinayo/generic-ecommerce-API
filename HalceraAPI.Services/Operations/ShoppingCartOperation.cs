@@ -385,10 +385,10 @@ namespace HalceraAPI.Services.Operations
         private PaymentDetails ProcessPaymentOrderDetails(PaymentDetailsRequest paymentDetailsRequest, IEnumerable<ShoppingCart> cartItemsFromDb)
         {
             PaymentDetails paymentDetails = _mapper.Map<PaymentDetails>(paymentDetailsRequest);
-            paymentDetails.TotalAmount = GetTotalAmountToBePaidDuringCheckout(cartItemsFromDb, paymentDetailsRequest.Currency);
+            paymentDetails.TotalAmountToBePaid = GetTotalAmountToBePaidDuringCheckout(cartItemsFromDb, paymentDetailsRequest.Currency);
             // Payment status
             paymentDetails.PaymentStatus =
-                paymentDetails.TotalAmount > paymentDetails.AmountPaid ? PaymentStatus.PartialPayment : PaymentStatus.PaymentSucceeded;
+                paymentDetails.TotalAmountToBePaid > paymentDetails.AmountPaid ? PaymentStatus.PartialPayment : PaymentStatus.PaymentSucceeded;
             return paymentDetails;
         }
 

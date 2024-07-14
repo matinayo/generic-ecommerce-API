@@ -10,8 +10,6 @@ using HalceraAPI.Services.Dtos.Composition.ComponentData;
 using HalceraAPI.Services.Dtos.Media;
 using HalceraAPI.Services.Dtos.OrderHeader;
 using HalceraAPI.Services.Dtos.OrderHeader.CustomerResponse;
-using HalceraAPI.Services.Dtos.OrderHeader.CustomerResponse.CustomerOrderDetails;
-using HalceraAPI.Services.Dtos.OrderHeader.CustomerResponse.PurchaseDetails;
 using HalceraAPI.Services.Dtos.Payment;
 using HalceraAPI.Services.Dtos.PaymentDetails;
 using HalceraAPI.Services.Dtos.Price;
@@ -21,6 +19,7 @@ using HalceraAPI.Services.Dtos.Role;
 using HalceraAPI.Services.Dtos.Shipping;
 using HalceraAPI.Services.Dtos.ShoppingCart;
 using PayStack.Net;
+using HalceraAPI.Services.Dtos.OrderHeader.OrderDetails;
 
 namespace HalceraAPI.Services.Automapper
 {
@@ -121,6 +120,7 @@ namespace HalceraAPI.Services.Automapper
             CreateMap<OrderHeader, OrderOverviewResponse>().ReverseMap();
             CreateMap<OrderDetails, OrderDetailsResponse>().ReverseMap();
             CreateMap<Product, ProductSummaryResponse>();
+            CreateMap<OrderProduct, ProductSummaryResponse>();
 
             // Order Purchase
             CreateMap<PurchaseDetails, PurchaseDetailsSummaryResponse>().ReverseMap();
@@ -131,6 +131,10 @@ namespace HalceraAPI.Services.Automapper
             CreateMap<UpdateProductSizeRequest, ProductSize>()
                 .ForMember(destination => destination.Id, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((source, destination, srcMember) => srcMember is not null));
+
+            CreateMap<OrderProductSize, OrderProductSizeResponse>();
+
+            CreateMap<OrderComposition, OrderCompositionResponse>();
 
         }
     }

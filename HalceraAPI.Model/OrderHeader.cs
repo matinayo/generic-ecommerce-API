@@ -12,13 +12,16 @@ namespace HalceraAPI.Models
         public OrderStatus OrderStatus { get; set; }
 
         public DateTime? OrderDate { get; set; } = DateTime.UtcNow;
+
         public DateTime? CancelledDate { get; set; }
 
         public int? PaymentDetailId { get; set; }
+
         [ForeignKey(nameof(PaymentDetailId))]
         public PaymentDetails? PaymentDetails { get; set; }
 
         public int? ShippingDetailsId { get; set; }
+
         [ForeignKey(nameof(ShippingDetailsId))]
         public ShippingDetails? ShippingDetails { get; set; }
 

@@ -6,7 +6,7 @@ namespace HalceraAPI.Services.Dtos.PaymentDetails
     {
         public decimal AmountPaid { get; set; }
         public Currency? Currency { get; set; }
-        public decimal? TotalAmount { get; set; }
+        public decimal? TotalAmountToBePaid { get; set; }
         public PaymentStatus? PaymentStatus { get; set; }
         public DateTime? PaymentDate { get; set; }
         public DateTime? PaymentDueDate { get; set; }
