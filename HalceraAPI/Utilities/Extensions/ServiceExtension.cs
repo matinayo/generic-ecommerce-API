@@ -27,6 +27,7 @@ namespace HalceraAPI.Utilities.Extensions
 
             services.Configure<JWTOptions>(configuration.GetSection("JWTOptions"));
             services.Configure<PaystackOptions>(configuration.GetSection("PaystackOptions"));
+            services.Configure<EmailSenderOptions>(configuration.GetSection("EmailSenderOptions"));
         }
 
         public static void ConfigureOperationsInjection(this IServiceCollection services)
@@ -46,6 +47,7 @@ namespace HalceraAPI.Utilities.Extensions
             services.AddScoped<IShippingOperation, ShippingOperation>();
             services.AddScoped<IUserOperation, UserOperation>();
             services.AddScoped<IProductSizeOperation, ProductSizeOperation>();
+            services.AddScoped<IEmailSenderOperation, EmailSenderOperation>();
         }
 
         public static void ConfigureApplicationServices(this IServiceCollection services, IConfiguration configuration)

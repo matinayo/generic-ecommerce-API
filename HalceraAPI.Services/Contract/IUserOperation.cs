@@ -2,7 +2,6 @@
 using HalceraAPI.Services.Dtos.APIResponse;
 using HalceraAPI.Services.Dtos.ApplicationUser;
 using HalceraAPI.Services.Dtos.BaseAddress;
-using HalceraAPI.Services.Dtos.Role;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -20,5 +19,6 @@ namespace HalceraAPI.Services.Contract
         Task LockUnlockUserAsync(string userId, AccountAction accountAction);
         Task <APIResponse<UserAuthResponse>> DeleteRoleFromUserAsync(string userId, int roleId);
         Task<APIResponse<UserAuthResponse>> UpdateUserRoleUserAsync(string userId, int roleId);
+        void ResetPassword(string email);
     }
 }

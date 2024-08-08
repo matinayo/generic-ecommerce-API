@@ -3,6 +3,7 @@ using HalceraAPI.Common.Enums;
 using HalceraAPI.Services.Dtos.ApplicationUser;
 using HalceraAPI.Services.Dtos.RefreshToken;
 using HalceraAPI.Services.Dtos.Role;
+using HalceraAPI.Services.Dtos.Identity;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -14,5 +15,9 @@ namespace HalceraAPI.Services.Contract
         Task<ApplicationUser> GetLoggedInUserAsync();
         Task<IEnumerable<RoleResponse>> GetApplicationRoles();
         Task<ApplicationUser?> GetUserWithEmail(string? email);
+        Task ForgotPassword(string email);
+        Task ResetUserPassword(ResetUserPasswordRequest resetUserPasswordRequest);
+
+        void Logout();
     }
 }

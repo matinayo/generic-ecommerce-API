@@ -394,7 +394,6 @@ namespace HalceraAPI.Services.Operations
 
         private static decimal GetTotalAmountToBePaidDuringCheckout(IEnumerable<ShoppingCart> cartItemsFromDb, Currency currencyToBePaidIn)
         {
-            // TODO: only product that are active
             decimal totalAmount = 0.0M;
             List<OrderDetails> orderDetails = new();
 

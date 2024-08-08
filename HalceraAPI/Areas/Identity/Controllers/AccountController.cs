@@ -4,8 +4,9 @@ using HalceraAPI.Services.Dtos.Role;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using HalceraAPI.Services.Dtos.Identity;
 
-namespace HalceraAPI.Areas.Identity
+namespace HalceraAPI.Areas.Identity.Controllers
 {
     [Area("Identity")]
     [Route("api/[area]/[controller]")]
@@ -38,6 +39,28 @@ namespace HalceraAPI.Areas.Identity
             UserAuthResponse applicationUser = await _applicationUserOperation.Login(loginRequest);
 
             return Ok(applicationUser);
+        }
+
+        [HttpPost]
+        [Route("ForgotPassword")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> ForgotPassword(string email)
+        {
+            await _applicationUserOperation.ForgotPassword(email);
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("ResetPassword")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult> ResetPassword(ResetUserPasswordRequest resetUserPasswordRequest)
+        {
+            await _applicationUserOperation.ResetUserPassword(resetUserPasswordRequest);
+
+            return Ok();
         }
 
         [Authorize]

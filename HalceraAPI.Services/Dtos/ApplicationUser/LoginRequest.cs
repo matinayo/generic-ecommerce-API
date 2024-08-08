@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace HalceraAPI.Services.Dtos.ApplicationUser
 {
@@ -14,7 +9,6 @@ namespace HalceraAPI.Services.Dtos.ApplicationUser
         public string? Email { get; set; }
 
         [Required]
-        [StringLength(255, ErrorMessage = "Must be between 5 and 255 characters", MinimumLength = 5)]
         [DataType(DataType.Password)]
         public string? Password { get; set; }
     }

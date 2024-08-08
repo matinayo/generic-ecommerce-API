@@ -40,233 +40,177 @@ namespace HalceraAPI.Services.Operations
 
         public async Task DeleteAccountAsync(string userId)
         {
-            try
-            {
-                ApplicationUser userDetails = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
-                    user => user.Id.ToLower().Equals(userId.ToLower()))
-                    ?? throw new Exception("This user cannot be found");
+            ApplicationUser userDetails = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
+                user => user.Id.Equals(userId))
+                ?? throw new Exception("This user cannot be found");
 
-                userDetails.DeleteUserAccount();
-                await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            userDetails.DeleteUserAccount();
+            await _unitOfWork.SaveAsync();
         }
 
         public async Task<APIResponse<UserDetailsResponse>> UpdateUserDetailsAsync(string userId, UpdateUserRequest updateUserRequest)
         {
-            try
+            if (updateUserRequest.Email != null)
             {
-                if (updateUserRequest.Email != null)
+                var emailIdentity = await _identityOperation.GetUserWithEmail(updateUserRequest.Email);
+                if (emailIdentity != null)
                 {
-                    var emailIdentity = await _identityOperation.GetUserWithEmail(updateUserRequest.Email);
-                    if (emailIdentity != null)
-                    {
-                        throw new Exception("This email is already in use");
-                    }
+                    throw new Exception("This email is already in use");
                 }
-
-                ApplicationUser user = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
-                    user => user.Id.ToLower().Equals(userId.ToLower()))
-                    ?? throw new Exception("This user cannot be found");
-
-                _mapper.Map(updateUserRequest, user);
-                user.FormatUserEmail();
-
-                await _unitOfWork.SaveAsync();
-                UserDetailsResponse userResponse = _mapper.Map<UserDetailsResponse>(user);
-
-                return new APIResponse<UserDetailsResponse>(userResponse);
-
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            ApplicationUser user = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
+                user => user.Id.Equals(userId))
+                ?? throw new Exception("This user cannot be found");
+
+            _mapper.Map(updateUserRequest, user);
+            user.FormatUserEmail();
+
+            await _unitOfWork.SaveAsync();
+            UserDetailsResponse userResponse = _mapper.Map<UserDetailsResponse>(user);
+
+            return new APIResponse<UserDetailsResponse>(userResponse);
         }
 
         public async Task<APIResponse<UserDetailsResponse>> GetUserByIdAsync(string userId)
         {
-            try
-            {
-                UserDetailsResponse userDetails = await _unitOfWork.ApplicationUser.GetFirstOrDefault<UserDetailsResponse>(
-                    user => user.Id.ToLower().Equals(userId.ToLower()))
-                    ?? throw new Exception("This user cannot be found");
+            UserDetailsResponse userDetails = await _unitOfWork.ApplicationUser.GetFirstOrDefault<UserDetailsResponse>(
+                user => user.Id.Equals(userId))
+                ?? throw new Exception("This user cannot be found");
 
-                return new APIResponse<UserDetailsResponse>(userDetails);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new APIResponse<UserDetailsResponse>(userDetails);
         }
 
         public async Task<APIResponse<IEnumerable<UserResponse>>> GetUsersAsync(int? roleId, bool? active, bool? deleted, int? page)
         {
-            try
+            Expression<Func<ApplicationUser, bool>>? filterExpression = null;
+            if (deleted.HasValue)
             {
-                Expression<Func<ApplicationUser, bool>>? filterExpression = null;
-                if (deleted.HasValue)
-                {
-                    filterExpression = user => user.AccountDeleted == deleted.Value;
-                }
-                else if (roleId != null && active.HasValue)
-                {
-                    filterExpression = user => user.Roles != null
-                                        && user.Roles.Any(role => role.Id == roleId)
-                                        && user.Active == active.Value;
-                }
-                else if (roleId != null)
-                {
-                    filterExpression = user => user.Roles != null
-                                        && user.Roles.Any(role => role.Id == roleId);
-                }
-                else if (active.HasValue)
-                {
-                    filterExpression = user => user.Active == active.Value;
-                }
-
-                int totalItems = await _unitOfWork.ApplicationUser.CountAsync(filterExpression);
-                IEnumerable<UserResponse> listOfUsersResponse =
-                    await _unitOfWork.ApplicationUser.GetAll<UserResponse>(
-                        filter: filterExpression,
-                        skip: ((page ?? 1) - 1) * Pagination.DefaultItemsPerPage,
-                        take: Pagination.DefaultItemsPerPage);
-
-                var meta = new Meta(totalItems, Pagination.DefaultItemsPerPage, page ?? 1);
-
-                return new APIResponse<IEnumerable<UserResponse>>(listOfUsersResponse, meta);
+                filterExpression = user => user.AccountDeleted == deleted.Value;
             }
-            catch (Exception)
+            else if (roleId != null && active.HasValue)
             {
-                throw;
+                filterExpression = user => user.Roles != null
+                                    && user.Roles.Any(role => role.Id == roleId)
+                                    && user.Active == active.Value;
             }
+            else if (roleId != null)
+            {
+                filterExpression = user => user.Roles != null
+                                    && user.Roles.Any(role => role.Id == roleId);
+            }
+            else if (active.HasValue)
+            {
+                filterExpression = user => user.Active == active.Value;
+            }
+
+            int totalItems = await _unitOfWork.ApplicationUser.CountAsync(filterExpression);
+            IEnumerable<UserResponse> listOfUsersResponse =
+                await _unitOfWork.ApplicationUser.GetAll<UserResponse>(
+                    filter: filterExpression,
+                    skip: ((page ?? 1) - 1) * Pagination.DefaultItemsPerPage,
+                    take: Pagination.DefaultItemsPerPage);
+
+            var meta = new Meta(totalItems, Pagination.DefaultItemsPerPage, page ?? 1);
+
+            return new APIResponse<IEnumerable<UserResponse>>(listOfUsersResponse, meta);
         }
 
         public async Task<APIResponse<AddressResponse>> UpdateAddressAsync(string userId, AddressRequest updateAddressRequest)
         {
-            try
-            {
-                ApplicationUser user = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
-                    user => user.Id.ToLower().Equals(userId.ToLower()),
-                    includeProperties: nameof(ApplicationUser.Address))
-                    ?? throw new Exception("This user cannot be found");
+            ApplicationUser user = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
+                user => user.Id.Equals(userId),
+                includeProperties: nameof(ApplicationUser.Address))
+                ?? throw new Exception("This user cannot be found");
 
-                _mapper.Map(updateAddressRequest, user.Address ??= new());
-                await _unitOfWork.SaveAsync();
+            _mapper.Map(updateAddressRequest, user.Address ??= new());
+            await _unitOfWork.SaveAsync();
 
-                var addressResponse = _mapper.Map<AddressResponse>(user.Address);
+            var addressResponse = _mapper.Map<AddressResponse>(user.Address);
 
-                return new APIResponse<AddressResponse>(addressResponse);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new APIResponse<AddressResponse>(addressResponse);
         }
 
 
         public async Task LockUnlockUserAsync(string userId, AccountAction accountAction)
         {
-            try
-            {
-                IdenticalUserCannotModify(userId);
-                ApplicationUser applicationUser = await _unitOfWork.ApplicationUser
-                    .GetFirstOrDefault(user => user.Id.ToLower().Equals(userId.ToLower()))
-                    ?? throw new Exception("This user cannot be found");
+            IdenticalUserCannotModify(userId);
+            ApplicationUser applicationUser = await _unitOfWork.ApplicationUser
+                .GetFirstOrDefault(user => user.Id.Equals(userId))
+                ?? throw new Exception("This user cannot be found");
 
-                if (applicationUser.LockoutEnd != null && applicationUser.LockoutEnd > DateTime.UtcNow)
-                {
-                    applicationUser.LockoutEnd = DateTime.UtcNow;
-                    applicationUser.Active = true;
-                }
-                else
-                {
-                    applicationUser.LockoutEnd = DateTime.UtcNow.AddYears(1000);
-                    applicationUser.Active = false;
-                }
-
-                await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
+            if (applicationUser.LockoutEnd != null && applicationUser.LockoutEnd > DateTime.UtcNow)
             {
-                throw;
+                applicationUser.LockoutEnd = DateTime.UtcNow;
+                applicationUser.Active = true;
             }
+            else
+            {
+                applicationUser.LockoutEnd = DateTime.UtcNow.AddYears(1000);
+                applicationUser.Active = false;
+            }
+
+            await _unitOfWork.SaveAsync();
+
         }
 
         public async Task<APIResponse<UserAuthResponse>> DeleteRoleFromUserAsync(string userId, int roleId)
         {
-            try
+            IdenticalUserCannotModify(userId);
+            ApplicationUser applicationUser = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
+                user => user.Id.Equals(userId),
+                includeProperties: nameof(ApplicationUser.Roles))
+            ?? throw new Exception("This user cannot be found");
+
+            if (applicationUser.Roles == null || !applicationUser.Roles.Any())
             {
-                IdenticalUserCannotModify(userId);
-                ApplicationUser applicationUser = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
-                    user => user.Id.ToLower().Equals(userId.ToLower()),
-                    includeProperties: nameof(ApplicationUser.Roles))
-                ?? throw new Exception("This user cannot be found");
-
-                if (applicationUser.Roles == null || !applicationUser.Roles.Any())
-                {
-                    throw new Exception("No roles available for this user");
-                }
-
-                Roles role = applicationUser.Roles.FirstOrDefault(role => role.Id == roleId)
-                    ?? throw new Exception("This role is invalid");
-
-                applicationUser.Roles.Remove(role);
-                if (!applicationUser.Roles.Any())
-                {
-                    Roles? customerRoleFromDb = await _unitOfWork.Roles.GetFirstOrDefault(role =>
-                    role.Title.ToLower().Equals(RoleDefinition.Customer.ToLower()));
-
-                    if (customerRoleFromDb != null)
-                    {
-                        applicationUser.Roles.Add(customerRoleFromDb);
-                    }
-                }
-                await _unitOfWork.SaveAsync();
-
-                UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUser);
-                userResponse.Token = JWTManager.CreateToken(applicationUser, jwtOptions.Token);
-
-                return new APIResponse<UserAuthResponse>(userResponse);
+                throw new Exception("No roles available for this user");
             }
-            catch (Exception)
+
+            Roles role = applicationUser.Roles.FirstOrDefault(role => role.Id == roleId)
+                ?? throw new Exception("This role is invalid");
+
+            applicationUser.Roles.Remove(role);
+            if (!applicationUser.Roles.Any())
             {
-                throw;
+                Roles? customerRoleFromDb = await _unitOfWork.Roles.GetFirstOrDefault(role =>
+                role.Title.ToLower().Equals(RoleDefinition.Customer.ToLower()));
+
+                if (customerRoleFromDb != null)
+                {
+                    applicationUser.Roles.Add(customerRoleFromDb);
+                }
             }
+            await _unitOfWork.SaveAsync();
+
+            UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUser);
+            userResponse.Token = JWTManager.CreateToken(applicationUser, jwtOptions.Token);
+
+            return new APIResponse<UserAuthResponse>(userResponse);
         }
 
         public async Task<APIResponse<UserAuthResponse>> UpdateUserRoleUserAsync(string userId, int roleId)
         {
-            try
+            IdenticalUserCannotModify(userId);
+            ApplicationUser applicationUser = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
+                user => user.Id.Equals(userId),
+                includeProperties: nameof(ApplicationUser.Roles))
+                ?? throw new Exception("This user cannot be found");
+
+            if (applicationUser.Roles == null || !applicationUser.Roles.Any())
             {
-                IdenticalUserCannotModify(userId);
-                ApplicationUser applicationUser = await _unitOfWork.ApplicationUser.GetFirstOrDefault(
-                    user => user.Id.ToLower().Equals(userId.ToLower()),
-                    includeProperties: nameof(ApplicationUser.Roles))
-                    ?? throw new Exception("This user cannot be found");
-
-                if (applicationUser.Roles == null || !applicationUser.Roles.Any())
-                {
-                    throw new Exception("No roles available for this user");
-                }
-
-                Roles role = await _unitOfWork.Roles.GetFirstOrDefault(role => role.Id == roleId)
-                    ?? throw new Exception("This role is invalid");
-
-                applicationUser.Roles.Add(role);
-                await _unitOfWork.SaveAsync();
-                UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUser);
-                userResponse.Token = JWTManager.CreateToken(applicationUser, jwtOptions.Token);
-
-                return new APIResponse<UserAuthResponse>(userResponse);
+                throw new Exception("No roles available for this user");
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            Roles role = await _unitOfWork.Roles.GetFirstOrDefault(role => role.Id == roleId)
+                ?? throw new Exception("This role is invalid");
+
+            applicationUser.Roles.Add(role);
+            await _unitOfWork.SaveAsync();
+            UserAuthResponse userResponse = _mapper.Map<UserAuthResponse>(applicationUser);
+            userResponse.Token = JWTManager.CreateToken(applicationUser, jwtOptions.Token);
+
+            return new APIResponse<UserAuthResponse>(userResponse);
         }
 
         private void IdenticalUserCannotModify(string userId)
@@ -276,12 +220,17 @@ namespace HalceraAPI.Services.Operations
                 var claim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
                 if (claim != null)
                 {
-                    if (claim.Value.ToLower().Equals(userId.ToLower()))
+                    if (claim.Value.Equals(userId))
                     {
                         throw new Exception("You cannot modify your own role");
                     }
                 }
             }
+        }
+
+        public void ResetPassword(string email)
+        {
+            throw new NotImplementedException();
         }
     }
 }

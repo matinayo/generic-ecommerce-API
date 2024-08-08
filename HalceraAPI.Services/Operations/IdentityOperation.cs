@@ -5,6 +5,7 @@ using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
 using HalceraAPI.Services.Contract;
 using HalceraAPI.Services.Dtos.ApplicationUser;
+using HalceraAPI.Services.Dtos.Identity;
 using HalceraAPI.Services.Dtos.RefreshToken;
 using HalceraAPI.Services.Dtos.Role;
 using HalceraAPI.Services.Token;
@@ -20,17 +21,20 @@ namespace HalceraAPI.Services.Operations
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly JWTOptions jwtOptions;
+        private readonly IEmailSenderOperation _emailSenderOperation;
 
         public IdentityOperation(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor,
-            IOptions<JWTOptions> options)
+            IOptions<JWTOptions> options,
+            IEmailSenderOperation emailSenderOperation)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             jwtOptions = options.Value;
+            _emailSenderOperation = emailSenderOperation;
         }
 
         public async Task<UserAuthResponse> Register(RegisterRequest registerRequest)
@@ -152,6 +156,54 @@ namespace HalceraAPI.Services.Operations
                     applicationUser.Roles = new List<Roles> { roleId };
                 }
             }
+        }
+
+        public async Task ForgotPassword(string email)
+        {
+            var user = await _unitOfWork.ApplicationUser
+                .GetFirstOrDefault(user => user.Email.Trim().ToLower().Equals(email.Trim().ToLower()));
+
+            if (user != null)
+            {
+                user.PasswordResetToken = CreateRandomToken();
+                user.ResetTokenExpires = DateTime.UtcNow.AddHours(1);
+                await _unitOfWork.SaveAsync();
+
+                await _emailSenderOperation.SendEmailAsync(
+                    "madeayo04@gmail.com", //user.Email, 
+                    EmailConstants.ForgotPasswordSubject,
+                    EmailConstants.ForgotPasswordPlainTextMessage(user.PasswordResetToken),
+                    EmailConstants.ForgotPasswordHtmlMessage);
+            }
+        }
+
+        public async Task ResetUserPassword(ResetUserPasswordRequest resetUserPasswordRequest)
+        {
+            var user = await _unitOfWork.ApplicationUser
+                .GetFirstOrDefault(user => user.Email.Trim().ToLower().Equals(resetUserPasswordRequest.Email.Trim().ToLower()));
+
+            if (user != null && user.PasswordResetToken != null && DateTime.UtcNow < user.ResetTokenExpires)
+            {
+                if (resetUserPasswordRequest.OTP.Trim().Equals(user.PasswordResetToken.Trim()))
+                {
+                    user.ResetPassword(resetUserPasswordRequest.Password);
+                    await _unitOfWork.SaveAsync();
+
+                    return;
+                }
+            }
+
+            throw new Exception("Invalid Token");
+        }
+
+        public void Logout()
+        {
+            throw new NotImplementedException();
+        }
+
+        private static string CreateRandomToken()
+        {
+            return Guid.NewGuid().ToString()[..5];
         }
     }
 }
