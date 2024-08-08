@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.Price;
 using HalceraAPI.Services.Contract;
+using HalceraAPI.Services.Dtos.Price;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -17,90 +17,77 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
-        public async Task DeletePriceFromProductByPriceIdAsync(int productId, int priceId)
+        public async Task DeletePriceFromCompositionByPriceIdAsync(int compositionId, int priceId)
         {
-            try
-            {
-                Price priceToDelete = await _unitOfWork.Price.GetFirstOrDefault(
-                    price => price.Id == priceId
-                    && price.ProductId == productId)
-                    ?? throw new Exception("No price available for this product");
+            Price priceToDelete = await _unitOfWork.Price.GetFirstOrDefault(
+                price => price.Id == priceId
+                && price.CompositionId == compositionId)
+                ?? throw new Exception("No price available for this composition.");
 
-                _unitOfWork.Price.Remove(priceToDelete);
-                await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
+            _unitOfWork.Price.Remove(priceToDelete);
+            await _unitOfWork.SaveAsync();
+        }
+
+        public async Task DeletePricesByListOfCompositionIdAsync(List<int> compositionIds)
+        {
+            IEnumerable<Price>? priceCollection = await _unitOfWork.Price.GetAll(
+                                                                    price => price.CompositionId != null
+                                                                    && compositionIds.Contains(price.CompositionId ?? 0));
+
+            if (priceCollection is not null && priceCollection.Any())
             {
-                throw;
+                _unitOfWork.Price.RemoveRange(priceCollection);
             }
         }
 
-        public async Task DeleteProductPricesAsync(int productId)
+        public async Task ResetDiscountOfCompositionPriceByPriceIdAsync(int compositionId, int priceId)
         {
-            try
-            {
-                IEnumerable<Price>? productPrices = await _unitOfWork.Price.GetAll(price => price.ProductId == productId);
-                if (productPrices is not null && productPrices.Any())
-                {
-                    _unitOfWork.Price.RemoveRange(productPrices);
-                    await _unitOfWork.SaveAsync();
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+            Price price = await _unitOfWork.Price.GetFirstOrDefault(
+                price => price.Id == priceId
+                && price.CompositionId == compositionId)
+                ?? throw new Exception("No price available for this composition.");
 
-        public async Task ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId)
-        {
-            try
-            {
-                Price price = await _unitOfWork.Price.GetFirstOrDefault(
-                    price => price.Id == priceId
-                    && price.ProductId == productId)
-                    ?? throw new Exception("No price available for this product");
-
-                price.DiscountAmount = null;
-                await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            price.DiscountAmount = null;
+            await _unitOfWork.SaveAsync();
         }
 
         public void UpdatePrice(
             IEnumerable<UpdatePriceRequest>? priceCollection,
             ICollection<Price>? existingPriceFromDb)
         {
-            try
+            if (priceCollection is not null && priceCollection.Any())
             {
-                if (priceCollection is not null && priceCollection.Any())
+                existingPriceFromDb ??= new List<Price>();
+
+                var tempPrices = priceCollection.Select(u => u.Currency).ToList();
+                tempPrices.AddRange(existingPriceFromDb.Select(u => u.Currency));
+                foreach (var priceRequest in priceCollection)
                 {
-                    existingPriceFromDb ??= new List<Price>();
-                    foreach (var priceRequest in priceCollection)
+                    Price? existingPrice = existingPriceFromDb?.FirstOrDefault(em => em.Id == priceRequest.Id);
+                    if (existingPrice != null)
                     {
-                        // Find existing price with the same ID in the database
-                        Price? existingPrice = existingPriceFromDb?.FirstOrDefault(em => em.Id == priceRequest.Id);
-                        if (existingPrice != null)
+                        var samePrice = priceCollection.FirstOrDefault(u => u.Currency == existingPrice.Currency);
+                        if (samePrice != null && samePrice.Id != existingPrice.Id)
                         {
-                            // If the price already exists, update its properties
-                            _mapper.Map(priceRequest, existingPrice);
+                            throw new Exception($"Duplicate currency type: {samePrice.Currency?.ToString()} specified");
                         }
-                        else
+                        _mapper.Map(priceRequest, existingPrice);
+                    }
+                    else
+                    {
+                        int noOfCurrentCurrency = tempPrices.Where(u => u == priceRequest.Currency).Count();
+                        if (noOfCurrentCurrency > 1)
                         {
-                            // If the price does not exist, create a new price object and map the properties
-                            Price newPrice = _mapper.Map<Price>(priceRequest);
-                            existingPriceFromDb?.Add(newPrice);
+                            throw new Exception($"Duplicate currency type: {priceRequest.Currency?.ToString()} specified");
                         }
+
+                        existingPrice = _mapper.Map<Price>(priceRequest);
+
+                        existingPriceFromDb?.Add(existingPrice);
                     }
                 }
             }
-            catch (Exception)
-            {
-                throw;
-            }
         }
+
     }
 }

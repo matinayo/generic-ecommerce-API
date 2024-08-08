@@ -9,13 +9,13 @@ namespace HalceraAPI.DataAccess.Contract
     public interface IRepository<T>
       where T : class
     {
-        Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>,
+        Task<IList<T>> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>,
             IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null);
 
         /// <summary>
         /// Select with defined Entity of different types: T and TResult
         /// </summary>
-        Task<IEnumerable<TResult>> GetAll<TResult>(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null);
+        Task<IList<TResult>> GetAll<TResult>(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, int? skip = null, int? take = null, string? includeProperties = null);
 
         Task<T?> GetFirstOrDefault(
             Expression<Func<T, bool>>? filter = null,
@@ -30,7 +30,7 @@ namespace HalceraAPI.DataAccess.Contract
 
         Task Add(T entity);
 
-        Task AddRange(IEnumerable<T> entities);
+        Task AddRange(IList<T> entities);
 
         void Update(T entity);
 

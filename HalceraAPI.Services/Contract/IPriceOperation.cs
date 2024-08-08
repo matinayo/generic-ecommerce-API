@@ -1,14 +1,14 @@
 ﻿using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.Media;
-using HalceraAPI.Models.Requests.Price;
+using HalceraAPI.Services.Dtos.Media;
+using HalceraAPI.Services.Dtos.Price;
 
 namespace HalceraAPI.Services.Contract
 {
     public interface IPriceOperation
     {
+        Task DeletePricesByListOfCompositionIdAsync(List<int> compositionIds);
         void UpdatePrice(IEnumerable<UpdatePriceRequest>? priceCollection, ICollection<Price>? pricesFromDb);
-        Task DeleteProductPricesAsync(int productId);
-        Task DeletePriceFromProductByPriceIdAsync(int productId, int priceId);
-        Task ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId);
+        Task DeletePriceFromCompositionByPriceIdAsync(int compositionId, int priceId);
+        Task ResetDiscountOfCompositionPriceByPriceIdAsync(int compositionId, int priceId);
     }
 }

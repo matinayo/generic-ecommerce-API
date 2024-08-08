@@ -15,7 +15,7 @@ namespace HalceraAPI.DataAccess
         public DbSet<ShoppingCart>? ShoppingCart { get; set; }
         public DbSet<Category>? Categories { get; set; }
         public DbSet<Composition>? Compositions { get; set; }
-        public DbSet<CompositionData>? CompositionData { get; set; }
+        public DbSet<ComponentData>? ComponentData { get; set; }
         public DbSet<Media>? Medias { get; set; }
         public DbSet<Price>? Prices { get; set; }
         public DbSet<Rating>? Ratings { get; set; }
@@ -26,6 +26,8 @@ namespace HalceraAPI.DataAccess
         public DbSet<PurchaseDetails>? PurchaseDetails { get; set; }
         public DbSet<PaymentDetails>? PaymentDetails { get; set; }
         public DbSet<ShippingDetails>? ShippingDetails { get; set; }
-
+        public DbSet<OrderProductSize>? OrderProductSizes { get; set; }
+        public DbSet<OrderComposition>? OrderCompositions { get; set; }
+        public DbSet<OrderProduct>? OrderProducts { get; set; }
     }
 }

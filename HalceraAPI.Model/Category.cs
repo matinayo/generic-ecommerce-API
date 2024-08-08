@@ -17,14 +17,11 @@ namespace HalceraAPI.Models
         /// </summary>
         public ICollection<Media>? MediaCollection { get; set; }
 
+        public ICollection<Product>? Products { get; set; }
+
         public bool Active { get; set; } = true;
 
         public bool? Featured { get; set; }
-
-        /// <summary>
-        /// Product Categories
-        /// </summary>
-        public ICollection<Product>? Products { get; set; }
 
         public DateTime? DateAdded { get; set; } = DateTime.UtcNow;
 

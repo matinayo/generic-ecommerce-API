@@ -40,7 +40,6 @@ namespace HalceraAPI.DataAccess.DbInitializer
 
         private List<Roles> LoadApplicationRoles()
         {
-            // Create all roles required
             List<Roles> applicationRoles = new()
             {
                 new() {
@@ -62,8 +61,8 @@ namespace HalceraAPI.DataAccess.DbInitializer
             ApplicationUser applicationUser = new()
             {
                 Name = "Admin",
-                Email = "admin@halcera.com",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("MASTER123*"),
+                Email = "user@example.com",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("string"),
                 Roles = roleId != null ? new List<Roles>() { roleId } : null
             };
 

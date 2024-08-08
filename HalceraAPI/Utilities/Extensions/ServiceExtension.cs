@@ -1,8 +1,10 @@
-﻿using HalceraAPI.Common.AppsettingsOptions;
+﻿using AutoMapper;
+using HalceraAPI.Common.AppsettingsOptions;
 using HalceraAPI.DataAccess;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.DataAccess.DbInitializer;
 using HalceraAPI.DataAccess.Repository;
+using HalceraAPI.Services.Automapper;
 using HalceraAPI.Services.Contract;
 using HalceraAPI.Services.Operations;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +27,7 @@ namespace HalceraAPI.Utilities.Extensions
 
             services.Configure<JWTOptions>(configuration.GetSection("JWTOptions"));
             services.Configure<PaystackOptions>(configuration.GetSection("PaystackOptions"));
+            services.Configure<EmailSenderOptions>(configuration.GetSection("EmailSenderOptions"));
         }
 
         public static void ConfigureOperationsInjection(this IServiceCollection services)
@@ -37,12 +40,14 @@ namespace HalceraAPI.Utilities.Extensions
             services.AddScoped<IMediaOperation, MediaOperation>();
             services.AddScoped<ICompositionOperation, CompositionOperation>();
             services.AddScoped<IPriceOperation, PriceOperation>();
-            services.AddScoped<ICompositionDataOperation, CompositionDataOperation>();
+            services.AddScoped<IComponentDataOperation, ComponentDataOperation>();
             services.AddScoped<IIdentityOperation, IdentityOperation>();
             services.AddScoped<ICustomerOrderOperation, CustomerOrderOperation>();
             services.AddScoped<IAdminOrderOperation, AdminOrderOperation>();
             services.AddScoped<IShippingOperation, ShippingOperation>();
             services.AddScoped<IUserOperation, UserOperation>();
+            services.AddScoped<IProductSizeOperation, ProductSizeOperation>();
+            services.AddScoped<IEmailSenderOperation, EmailSenderOperation>();
         }
 
         public static void ConfigureApplicationServices(this IServiceCollection services, IConfiguration configuration)
@@ -66,10 +71,8 @@ namespace HalceraAPI.Utilities.Extensions
                 });
 
             services.ConfigureSwagger();
-
             services.AddHttpContextAccessor();
-
-            services.AddAutoMapper(typeof(Program).Assembly);
+            services.RegisterMappingProfiles();
         }
 
         private static void ConfigureSwagger(this IServiceCollection services)
@@ -88,6 +91,25 @@ namespace HalceraAPI.Utilities.Extensions
             });
 
             services.AddSwaggerGenNewtonsoftSupport();
+        }
+
+        private static void RegisterMappingProfiles(this IServiceCollection services)
+        {
+            List<Profile> mapperProfiles = new()
+            {
+                new MappingProfiles(),
+                new ProductProfile(),
+                new CompositionProfile(),
+                new ShoppingCartProfile(),
+            };
+
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfiles(mapperProfiles);
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
         }
     }
 }

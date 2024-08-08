@@ -1,5 +1,5 @@
-﻿using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Utilities.Exceptions;
+﻿using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Exceptions;
 using System.Net;
 
 namespace HalceraAPI.Utilities.Middleware

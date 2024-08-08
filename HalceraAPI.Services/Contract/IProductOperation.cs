@@ -1,5 +1,5 @@
-﻿using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.Product;
+﻿using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.Product;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -17,14 +17,8 @@ namespace HalceraAPI.Services.Contract
 
         Task DeleteCategoryFromProductByCategoryIdAsync(int productId, int categoryId);
 
-        Task DeletePriceFromProductByPriceIdAsync(int productId, int priceId);
-
-        Task DeleteMediaFromProductByMediaIdAsync(int productId, int mediaId);
-
         Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId);
 
-        Task DeleteProductCompositionDataByCompositionDataIdAsync(int productId, int compositionId, int compositionDataId);
-
-        Task ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId);
+        Task DeleteComponentDataFromProductByComponentIdAsync(int productId, int componentId);
     }
 }

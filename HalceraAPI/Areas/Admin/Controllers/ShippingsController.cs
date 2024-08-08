@@ -1,7 +1,7 @@
 ﻿using HalceraAPI.Common.Utilities;
-using HalceraAPI.Models.Enums;
-using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.Shipping;
+using HalceraAPI.Common.Enums;
+using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.Shipping;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

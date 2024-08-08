@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.Media;
 using HalceraAPI.Services.Contract;
+using HalceraAPI.Services.Dtos.Media;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -17,100 +17,77 @@ namespace HalceraAPI.Services.Operations
             _mapper = mapper;
         }
 
-        public async Task DeleteMediaCollection(int? categoryId, int? productId)
+        public async Task DeleteMediaByListOfCompositionIdAsync(List<int> compositionIds)
         {
-            try
+            IEnumerable<Media>? mediaCollection = await _unitOfWork.Media.GetAll(
+                                                        media => media.CompositionId != null
+                                                        && compositionIds.Contains(media.CompositionId ?? 0));
+
+            if (mediaCollection is not null && mediaCollection.Any())
             {
-                IEnumerable<Media>? relatedMediaCollection = null;
-
-                if (categoryId != null)
-                    relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.CategoryId == categoryId);
-                else if (productId != null)
-                    relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.ProductId == productId);
-
-                if (relatedMediaCollection != null && relatedMediaCollection.Any())
-                {
-                    _unitOfWork.Media.RemoveRange(relatedMediaCollection);
-                }
+                _unitOfWork.Media.RemoveRange(mediaCollection);
             }
-            catch (Exception)
+        }
+
+        public async Task DeleteMediaCollection(int? categoryId)
+        {
+            IEnumerable<Media>? relatedMediaCollection = null;
+
+            if (categoryId != null)
+                relatedMediaCollection = await _unitOfWork.Media.GetAll(media => media.CategoryId == categoryId);
+
+            if (relatedMediaCollection != null && relatedMediaCollection.Any())
             {
-                throw;
+                _unitOfWork.Media.RemoveRange(relatedMediaCollection);
             }
         }
 
         public async Task DeleteMediaFromCategoryByMediaIdAsync(int categoryId, int mediaId)
         {
-            try
-            {
-                Media mediaToDelete = await _unitOfWork.Media
-                    .GetFirstOrDefault(
-                    media => media.Id == mediaId
-                    && media.CategoryId == categoryId)
-                    ?? throw new Exception("No media available for this product");
+            Media mediaToDelete = await _unitOfWork.Media
+                .GetFirstOrDefault(
+                media => media.Id == mediaId
+                && media.CategoryId == categoryId)
+                ?? throw new Exception("No media available for this product");
 
-                _unitOfWork.Media.Remove(mediaToDelete);
-                await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            _unitOfWork.Media.Remove(mediaToDelete);
+            await _unitOfWork.SaveAsync();
         }
 
-        public async Task DeleteMediaFromProductByMediaIdAsync(int productId, int mediaId)
+        public async Task DeleteMediaFromCompositionByMediaIdAsync(int compositionId, int mediaId)
         {
-            try
-            {
-                Media mediaToDelete = await _unitOfWork.Media
-                    .GetFirstOrDefault(
-                    media => media.Id == mediaId
-                    && media.ProductId == productId)
-                    ?? throw new Exception("No media available for this product");
+            Media mediaToDelete = await _unitOfWork.Media
+                .GetFirstOrDefault(
+                media => media.Id == mediaId && media.CompositionId == compositionId)
+                ?? throw new Exception("No media available for this composition");
 
-                _unitOfWork.Media.Remove(mediaToDelete);
-                await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            _unitOfWork.Media.Remove(mediaToDelete);
+            await _unitOfWork.SaveAsync();
         }
 
         public void UpdateMediaCollection(IEnumerable<UpdateMediaRequest>? mediaCollection, ICollection<Media>? mediaCollectionFromDb)
         {
-            try
+            if (mediaCollection is not null && mediaCollection.Any())
             {
-                if (mediaCollection is not null && mediaCollection.Any())
+                mediaCollectionFromDb ??= new List<Media>();
+                foreach (var mediaRequest in mediaCollection)
                 {
-                    // Retrieve existing media from the database
-                    mediaCollectionFromDb ??= new List<Media>();
-                    foreach (var mediaRequest in mediaCollection)
+                    Media? existingMediaItem = mediaCollectionFromDb.FirstOrDefault(em => em.Id == mediaRequest.Id);
+                    if (existingMediaItem != null)
                     {
-                        // Find existing media with the same ID in the database
-                        Media? existingMediaItem = mediaCollectionFromDb.FirstOrDefault(em => em.Id == mediaRequest.Id);
-
-                        if (existingMediaItem != null)
+                        _mapper.Map(mediaRequest, existingMediaItem);
+                    }
+                    else
+                    {
+                        if (mediaRequest.Type != null)
                         {
-                            // If the media already exists, update its properties
-                            _mapper.Map(mediaRequest, existingMediaItem);
-                        }
-                        else
-                        {
-                            // If the media does not exist, create a new Media object and map the properties
-                            if (mediaRequest.Type != null)
-                            {
-                                Media newMedia = _mapper.Map<Media>(mediaRequest);
-                                mediaCollectionFromDb.Add(newMedia);
-                            }
+                            existingMediaItem = _mapper.Map<Media>(mediaRequest);
+                            mediaCollectionFromDb.Add(existingMediaItem);
                         }
                     }
                 }
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
         }
     }
 }

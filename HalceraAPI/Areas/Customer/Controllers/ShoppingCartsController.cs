@@ -1,7 +1,7 @@
-﻿using HalceraAPI.Models.Enums;
-using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.Payment;
-using HalceraAPI.Models.Requests.ShoppingCart;
+﻿using HalceraAPI.Common.Enums;
+using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.Payment;
+using HalceraAPI.Services.Dtos.ShoppingCart;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,14 +21,14 @@ namespace HalceraAPI.Areas.Customer.Controllers
             _shoppingCartOperation = shoppingCartOperation;
         }
 
-        [HttpPost("{productId}")]
+        [HttpPost]
         [ProducesResponseType(typeof(APIResponse<AddToCartResponse>), 200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult> AddProductToCartAsync(
-            int productId,
-            [FromBody] ShoppingCartRequest? shoppingCartRequest)
+            
+            [FromBody] AddToCartRequest addToCartRequest)
         {
-            var response = await _shoppingCartOperation.AddProductToCartAsync(productId, shoppingCartRequest);
+            var response = await _shoppingCartOperation.AddProductToCartAsync(addToCartRequest);
 
             return Ok(response);
         }

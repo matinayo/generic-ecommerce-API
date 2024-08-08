@@ -1,15 +1,10 @@
-﻿using BCrypt.Net;
-using HalceraAPI.Models.Requests.ApplicationUser;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 namespace HalceraAPI.Models
 {
-    /// <summary>
-    /// Application User Models
-    /// </summary>
     public class ApplicationUser
     {
         [Key]
@@ -26,21 +21,34 @@ namespace HalceraAPI.Models
         public string PasswordHash { get; set; } = string.Empty;
 
         public bool Active { get; set; } = true;
-        /// <summary>
-        /// End date if account is locked
-        /// </summary>
+
         public DateTime? LockoutEnd { get; set; }
+
         public DateTime? UserCreatedDate { get; set; } = DateTime.UtcNow;
+
         public DateTime? DateLastModified { get; set; }
+
         public DateTime? LastLoginDate { get; set; }
+
         public ICollection<Roles>? Roles { get; set; }
+
         public int? RefreshTokenId { get; set; }
+
         [ForeignKey(nameof(RefreshTokenId))]
         public RefreshToken? RefreshToken { get; set; }
+
         public bool AccountDeleted { get; set; }
+
         public DateTime? DateAccountDeleted { get; set; }
 
+        public string? PasswordResetToken { get; set; }
+
+        public DateTime? ResetTokenExpires { get; set; }
+
+        public DateTime? PasswordResetDate { get; set; }
+
         public int? AddressId { get; set; }
+
         [ForeignKey(nameof(AddressId))]
         public BaseAddress? Address { get; set; }
 
@@ -77,11 +85,16 @@ namespace HalceraAPI.Models
             LastLoginDate = DateTime.UtcNow;
         }
 
-        /// <summary>
-        /// Set created password hash
-        /// </summary>
-        /// <param name="password">Password string request</param>
-        /// <returns>Password Hash</returns>
+        public void ResetPassword(string password)
+        {
+            ValidateAccountStatus();
+            SetPasswordHash(password);
+            PasswordResetDate = DateTime.UtcNow;
+            DateLastModified = DateTime.UtcNow;
+            PasswordResetToken = null;
+            ResetTokenExpires = null;
+        }
+
         private void SetPasswordHash(string? password)
         {
             if (string.IsNullOrWhiteSpace(password))
@@ -92,10 +105,6 @@ namespace HalceraAPI.Models
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
         }
 
-        /// <summary>
-        /// Verify user password
-        /// </summary>
-        /// <param name="requestedPassword">Input password from user</param>
         private void VerifyPassword(string? requestedPassword)
         {
             if (string.IsNullOrWhiteSpace(requestedPassword) 
@@ -105,10 +114,6 @@ namespace HalceraAPI.Models
             }
         }
 
-        /// <summary>
-        /// Validating Account status and preferences 
-        /// </summary>
-        /// <param name="applicationUser">Application User from db</param>
         private void ValidateAccountStatus()
         {
             bool accountIsInactive = !Active;
@@ -128,10 +133,6 @@ namespace HalceraAPI.Models
             }
         }
 
-        /// <summary>
-        /// Generate Refresh Token
-        /// </summary>
-        /// <returns>New refresh token</returns>
         public void GenerateRefreshToken()
         {
             RefreshToken = new RefreshToken

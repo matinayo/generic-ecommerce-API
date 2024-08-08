@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.Composition;
 using HalceraAPI.Services.Contract;
+using HalceraAPI.Services.Dtos.Composition;
 
 namespace HalceraAPI.Services.Operations
 {
@@ -10,100 +10,111 @@ namespace HalceraAPI.Services.Operations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IPriceOperation _priceOperation;
+        private readonly IMediaOperation _mediaOperation;
+        private readonly IProductSizeOperation _productSizeOperation;
 
-        private readonly ICompositionDataOperation _compositionDataOperation;
-
-        public CompositionOperation(IUnitOfWork unitOfWork, IMapper mapper, ICompositionDataOperation compositionDataOperation)
+        public CompositionOperation(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            IProductSizeOperation productSizeOperation,
+            IMediaOperation mediaOperation,
+            IPriceOperation priceOperation)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _compositionDataOperation = compositionDataOperation;
+            _priceOperation = priceOperation;
+            _mediaOperation = mediaOperation;
+            _productSizeOperation = productSizeOperation;
+        }
+
+        public void UpdateComposition(
+            IEnumerable<UpdateCompositionRequest>? compositionCollection,
+            ICollection<Composition>? existingCompositionsFromDb)
+        {
+            if (compositionCollection is not null && compositionCollection.Any())
+            {
+                existingCompositionsFromDb ??= new List<Composition>();
+                foreach (var compositionRequest in compositionCollection)
+                {
+                    Composition? existingComposition = existingCompositionsFromDb?.FirstOrDefault(em => em.Id == compositionRequest.Id);
+
+                    if (existingComposition != null)
+                    {
+                        _mapper.Map(compositionRequest, existingComposition);
+                    }
+                    else
+                    {
+                        existingComposition = _mapper.Map<Composition>(compositionRequest);
+
+                        existingComposition.Sizes = new List<ProductSize>();
+                        existingComposition.MediaCollection = new List<Media>();
+                        existingComposition.Prices = new List<Price>();
+
+                        existingCompositionsFromDb?.Add(existingComposition);
+                    }
+
+                    _productSizeOperation.UpdateProductSize(compositionRequest.Sizes, existingComposition.Sizes);
+                    _mediaOperation.UpdateMediaCollection(compositionRequest.MediaCollection, existingComposition.MediaCollection);
+                    _priceOperation.UpdatePrice(compositionRequest.Prices, existingComposition?.Prices);
+                }
+            }
+        }
+        
+        public async Task DeleteProductCompositions(int productId)
+        {
+            IEnumerable<Composition>? productCompositions = await _unitOfWork.Composition.GetAll(
+                composition => composition.ProductId == productId);
+
+            if (productCompositions is null || !productCompositions.Any())
+            {
+                return;
+            }
+
+            List<int> compositionIds = productCompositions.Select(u => u.Id).ToList();
+            await _priceOperation.DeletePricesByListOfCompositionIdAsync(compositionIds);
+            await _mediaOperation.DeleteMediaByListOfCompositionIdAsync(compositionIds);
+            await _productSizeOperation.DeleteSizeByListOfCompositionIdAsync(compositionIds);
+
+            _unitOfWork.Composition.RemoveRange(productCompositions);
         }
 
         public async Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId)
         {
-            try
-            {
-                Composition compositionToDelete = await _unitOfWork.Composition
-                    .GetFirstOrDefault(
-                    composition => composition.Id == compositionId 
-                    && composition.ProductId == productId)
-                    ?? throw new Exception("No composition available for this product");
+            Composition compositionToDelete = await _unitOfWork.Composition
+                .GetFirstOrDefault(
+                composition => composition.Id == compositionId
+                && composition.Id == productId)
+                ?? throw new Exception("No composition available for this product");
 
-                await _compositionDataOperation.DeleteCompositionDataCollectionAsync(new List<int>() { compositionToDelete.Id });
+            var compositionIds = new List<int>() { compositionToDelete.Id };
 
-                _unitOfWork.Composition.Remove(compositionToDelete);
-                await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await _priceOperation.DeletePricesByListOfCompositionIdAsync(compositionIds);
+            await _mediaOperation.DeleteMediaByListOfCompositionIdAsync(compositionIds);
+            await _productSizeOperation.DeleteSizeByListOfCompositionIdAsync(compositionIds);
+
+            _unitOfWork.Composition.Remove(compositionToDelete);
+            await _unitOfWork.SaveAsync();
         }
 
-        public async Task<bool> DeleteProductCompositions(int productId)
+        public async Task DeleteMediaFromCompositionByMediaIdAsync(int compositionId, int mediaId)
         {
-            try
-            {
-                IEnumerable<Composition>? productCompositions = await _unitOfWork.Composition.GetAll(
-                    composition => composition.ProductId == productId);
-                if (productCompositions is not null && productCompositions.Any())
-                {
-                    // delete product composition data
-                    await _compositionDataOperation.DeleteCompositionDataCollectionAsync(productCompositions.Select(comp => comp.Id));
-
-                    _unitOfWork.Composition.RemoveRange(productCompositions);
-                    await _unitOfWork.SaveAsync();
-                }
-                return true;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await _mediaOperation.DeleteMediaFromCompositionByMediaIdAsync(compositionId, mediaId);
         }
 
-        public void UpdateComposition(
-            IEnumerable<UpdateCompositionRequest>? compositionCollection, 
-            ICollection<Composition>? existingCompositionsFromDb)
+        public async Task DeletePriceFromCompositionByPriceIdAsync(int compositionId, int priceId)
         {
-            try
-            {
-                if (compositionCollection is not null && compositionCollection.Any())
-                {
-                    existingCompositionsFromDb ??= new List<Composition>();
-                    foreach (var compositionRequest in compositionCollection)
-                    {
-                        // Find existing composition with the same ID in the database
-                        Composition? existingComposition = existingCompositionsFromDb?.FirstOrDefault(em => em.Id == compositionRequest.Id);
+            await _priceOperation.DeletePriceFromCompositionByPriceIdAsync(compositionId, priceId);
+        }
 
-                        if (existingComposition != null)
-                        {
-                            // If the composition already exists, update its properties
-                            _mapper.Map(compositionRequest, existingComposition);
-                            if (compositionRequest.CompositionDataCollection != null)
-                            {
-                                _compositionDataOperation.UpdateCompositionData(compositionRequest.CompositionDataCollection, existingComposition.CompositionDataCollection);
-                            }
-                        }
-                        else
-                        {
-                            // If the composition does not exist, create a new composition object and map the properties
-                            Composition newComposition = _mapper.Map<Composition>(compositionRequest);
-                            newComposition.CompositionDataCollection = new List<CompositionData>();
-                            if (compositionRequest.CompositionDataCollection != null)
-                            {
-                                _compositionDataOperation.UpdateCompositionData(compositionRequest.CompositionDataCollection, newComposition.CompositionDataCollection);
-                            }
-                            existingCompositionsFromDb?.Add(newComposition);
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+        public async Task DeleteSizeFromCompositionBySizeIdAsync(int compositionId, int sizeId)
+        {
+            await _productSizeOperation.DeleteSizeFromCompositionBySizeIdAsync(compositionId, sizeId);
+        }
+
+        public async Task ResetDiscountOfCompositionPriceByPriceIdAsync(int compositionId, int priceId)
+        {
+            await _priceOperation.ResetDiscountOfCompositionPriceByPriceIdAsync(compositionId, priceId);
         }
     }
 }

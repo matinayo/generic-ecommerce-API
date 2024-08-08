@@ -1,8 +1,7 @@
-﻿using HalceraAPI.Models.Enums;
-using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.ApplicationUser;
-using HalceraAPI.Models.Requests.BaseAddress;
-using HalceraAPI.Models.Requests.Role;
+﻿using HalceraAPI.Common.Enums;
+using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.ApplicationUser;
+using HalceraAPI.Services.Dtos.BaseAddress;
 
 namespace HalceraAPI.Services.Contract
 {
@@ -20,5 +19,6 @@ namespace HalceraAPI.Services.Contract
         Task LockUnlockUserAsync(string userId, AccountAction accountAction);
         Task <APIResponse<UserAuthResponse>> DeleteRoleFromUserAsync(string userId, int roleId);
         Task<APIResponse<UserAuthResponse>> UpdateUserRoleUserAsync(string userId, int roleId);
+        void ResetPassword(string email);
     }
 }

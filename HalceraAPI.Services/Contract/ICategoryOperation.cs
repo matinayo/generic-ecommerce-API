@@ -1,12 +1,14 @@
 ﻿using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.Category;
+using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.Category;
 
 namespace HalceraAPI.Services.Contract
 {
     public interface ICategoryOperation
     {
         Task<APIResponse<IEnumerable<CategoryResponse>>> GetAllCategoriesAsync(bool? active, bool? featured, int? page);
+
+        Task<ICollection<Category>> GetCategoriesByIdAsync(IEnumerable<ProductCategoryRequest>? listOfCategoryId);
 
         Task<APIResponse<CategoryResponse>> GetCategoryAsync(int categoryId);
 

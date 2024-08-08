@@ -2,9 +2,11 @@
 using HalceraAPI.Common.Utilities;
 using HalceraAPI.DataAccess.Contract;
 using HalceraAPI.Models;
-using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.Product;
 using HalceraAPI.Services.Contract;
+using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.Product;
+using HalceraAPI.Services.Exceptions;
+using HalceraAPI.Services.Exceptions.ErrorMessages;
 using System.Linq.Expressions;
 
 namespace HalceraAPI.Services.Operations
@@ -13,79 +15,35 @@ namespace HalceraAPI.Services.Operations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IMediaOperation _mediaOperation;
         private readonly ICompositionOperation _compositionOperation;
-        private readonly ICompositionDataOperation _compositionDataOperation;
-        private readonly IPriceOperation _priceOperation;
+        private readonly IComponentDataOperation _componentDataOperation;
         private readonly ICategoryOperation _categoryOperation;
 
         public ProductOperation(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            IMediaOperation mediaOperation,
             ICompositionOperation compositionOperation,
-            ICompositionDataOperation compositionDataOperation,
-            IPriceOperation priceOperation,
+            IComponentDataOperation componentDataOperation,
             ICategoryOperation categoryOperation)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _mediaOperation = mediaOperation;
             _compositionOperation = compositionOperation;
-            _compositionDataOperation = compositionDataOperation;
-            _priceOperation = priceOperation;
+            _componentDataOperation = componentDataOperation;
             _categoryOperation = categoryOperation;
         }
 
         public async Task<APIResponse<ProductDetailsResponse>> CreateProductAsync(CreateProductRequest productRequest)
         {
-            try
-            {
-                Product product = _mapper.Map<Product>(productRequest);
-                product.ValidateProductForCreate();
+            Product product = _mapper.Map<Product>(productRequest);
+            product.Categories = await _categoryOperation.GetCategoriesByIdAsync(productRequest.Categories);
 
-                if (productRequest.Categories is not null && productRequest.Categories.Any())
-                {
-                    var categories = await _unitOfWork.Category.GetAll(
-                        category => productRequest.Categories != null
-                        && productRequest.Categories.Select(opt => opt.CategoryId).Contains(category.Id));
+            await _unitOfWork.Product.Add(product);
+            await _unitOfWork.SaveAsync();
 
-                    if (categories != null && categories.Any())
-                    {
-                        product.Categories = categories.ToList();
-                    }
-                }
-                await _unitOfWork.Product.Add(product);
-                await _unitOfWork.SaveAsync();
+            ProductDetailsResponse productResponse = _mapper.Map<ProductDetailsResponse>(product);
 
-                ProductDetailsResponse productResponse = _mapper.Map<ProductDetailsResponse>(product);
-
-                return new APIResponse<ProductDetailsResponse>(productResponse);
-            }
-            catch (Exception) { throw; }
-        }
-
-        public async Task DeleteProductAsync(int productId)
-        {
-            try
-            {
-                Product? productDetails = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId)
-                    ?? throw new Exception("Product not found");
-
-                // delete product media
-                await _mediaOperation.DeleteMediaCollection(null, productId);
-
-                // delete product composition and prices
-                await _compositionOperation.DeleteProductCompositions(productId);
-                await _priceOperation.DeleteProductPricesAsync(productId);
-
-                _unitOfWork.Product.Remove(productDetails);
-                await _unitOfWork.SaveAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new APIResponse<ProductDetailsResponse>(productResponse);
         }
 
         public async Task<APIResponse<IEnumerable<ProductResponse>>> GetAllProductsAsync(
@@ -130,7 +88,6 @@ namespace HalceraAPI.Services.Operations
                 int totalItems = await _unitOfWork.Product.CountAsync(filterExpression);
                 IEnumerable<ProductResponse>? listOfProductResponse = await _unitOfWork.Product.GetAll<ProductResponse>(
                  filter: filterExpression,
-                 includeProperties: $"{nameof(Product.Categories)},{nameof(Product.MediaCollection)},{nameof(Product.Prices)}",
                  skip: ((page ?? 1) - 1) * Pagination.DefaultItemsPerPage,
                  take: Pagination.DefaultItemsPerPage);
 
@@ -146,160 +103,71 @@ namespace HalceraAPI.Services.Operations
 
         public async Task<APIResponse<ProductDetailsResponse>> GetProductByIdAsync(int productId)
         {
-            try
-            {
-                Product? product = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId,
-                    includeProperties: $"{nameof(Product.Categories)},{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.MediaCollection)},{nameof(Product.Prices)}");
+            ProductDetailsResponse response = await _unitOfWork.Product
+                .GetFirstOrDefault<ProductDetailsResponse>(product => product.Id == productId)
+                ?? throw new NotFoundException(message: ProductErrorMessage.ProductCannotBeFound);
 
-                ProductDetailsResponse response = new();
-                if (product is not null)
-                {
-                    response = _mapper.Map<ProductDetailsResponse>(product);
-                }
-
-                return new APIResponse<ProductDetailsResponse>(response);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new APIResponse<ProductDetailsResponse>(response);
         }
 
         public async Task<APIResponse<ProductDetailsResponse>> UpdateProductAsync(
             int productId,
             UpdateProductRequest productRequest)
         {
-            try
+            Product productFromDb = await _unitOfWork.Product
+                .GetFirstOrDefault(productDetails => productDetails.Id == productId,
+                includeProperties:
+                    $"{nameof(Product.Compositions)}" +
+                    ",Compositions.Sizes,Compositions.Prices,Compositions.MediaCollection" +
+                    $",{nameof(Product.Categories)}" +
+                    $",{nameof(Product.ComponentDataCollection)}")
+                ?? throw new NotFoundException(ProductErrorMessage.ProductCannotBeFound);
+
+            _compositionOperation.UpdateComposition(productRequest.Compositions, productFromDb.Compositions);
+            _componentDataOperation.UpdateComponentData(productRequest.ComponentDataCollection, productFromDb.ComponentDataCollection);
+
+            var categories = await _categoryOperation.GetCategoriesFromListOfCategoryIdAsync(productRequest.Categories);
+            if (categories != null && categories.Any())
             {
-                Product productFromDb = await _unitOfWork.Product.GetFirstOrDefault(productDetails => productDetails.Id == productId,
-                    includeProperties: $"{nameof(Product.ProductCompositions)},ProductCompositions.CompositionDataCollection,{nameof(Product.Prices)},{nameof(Product.MediaCollection)}")
-                    ?? throw new Exception("Product not found");
-
-                CanUpdateProductRequest(productFromDb, productRequest);
-
-                _priceOperation.UpdatePrice(productRequest.Prices, productFromDb.Prices);
-                _mediaOperation.UpdateMediaCollection(productRequest.MediaCollection, productFromDb.MediaCollection);
-                _compositionOperation.UpdateComposition(productRequest.ProductCompositions, productFromDb.ProductCompositions);
-
-                var categories = await _categoryOperation.GetCategoriesFromListOfCategoryIdAsync(productRequest.Categories);
-                if (categories != null && categories.Any())
-                {
-                    productFromDb.Categories = categories.ToList();
-                }
-                bool tempActiveValue = productFromDb.Active;
-                _mapper.Map(productRequest, productFromDb);
-                // restore Active value
-                if (productRequest.Active == null)
-                {
-                    productFromDb.Active = tempActiveValue;
-                }
-
-                productFromDb.DateLastModified = DateTime.UtcNow;
-                await _unitOfWork.SaveAsync();
-
-                ProductDetailsResponse response = _mapper.Map<ProductDetailsResponse>(productFromDb);
-
-                return new APIResponse<ProductDetailsResponse>(response);
+                productFromDb.Categories = categories.ToList();
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            _mapper.Map(productRequest, productFromDb);
+            productFromDb.DateLastModified = DateTime.UtcNow;
+
+            await _unitOfWork.SaveAsync();
+            ProductDetailsResponse response = _mapper.Map<ProductDetailsResponse>(productFromDb);
+
+            return new APIResponse<ProductDetailsResponse>(response);
         }
 
-        private void CanUpdateProductRequest(Product productFromDb, UpdateProductRequest productRequest)
+        public async Task DeleteProductAsync(int productId)
         {
-            // prevent duplicate CompositionType
-            List<Price> tempPrices = productFromDb.Prices?.ToList() ?? new();
-            tempPrices.AddRange(_mapper.Map<List<Price>>(productRequest.Prices));
+            Product? productDetails = await _unitOfWork.Product.GetFirstOrDefault(product => product.Id == productId)
+                ?? throw new Exception("Product not found");
 
-            var tempCompositions = productFromDb.ProductCompositions?.ToList() ?? new();
-            tempCompositions.AddRange(_mapper.Map<List<Composition>>(productRequest.ProductCompositions));
+            await _compositionOperation.DeleteProductCompositions(productId);
+            await _componentDataOperation.DeleteProductComponents(productId);
 
-            Product tempValidation = new()
-            {
-                Prices = tempPrices,
-                ProductCompositions = tempCompositions
-            };
-            tempValidation.ValidateProductForCreate();
+            _unitOfWork.Product.Remove(productDetails);
+            await _unitOfWork.SaveAsync();
         }
 
         public async Task DeleteCategoryFromProductByCategoryIdAsync(int productId, int categoryId)
         {
-            try
-            {
-                await _categoryOperation.DeleteCategoryFromProductByCategoryIdAsync(productId, categoryId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task DeletePriceFromProductByPriceIdAsync(int productId, int priceId)
-        {
-            try
-            {
-                await _priceOperation.DeletePriceFromProductByPriceIdAsync(productId, priceId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task DeleteMediaFromProductByMediaIdAsync(int productId, int mediaId)
-        {
-            try
-            {
-                await _mediaOperation.DeleteMediaFromProductByMediaIdAsync(productId, mediaId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await _categoryOperation.DeleteCategoryFromProductByCategoryIdAsync(productId, categoryId);
         }
 
         public async Task DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId)
         {
-            try
-            {
-                await _compositionOperation.DeleteCompositionFromProductByCompositionIdAsync(productId, compositionId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await _compositionOperation.DeleteCompositionFromProductByCompositionIdAsync(productId, compositionId);
         }
 
-        public async Task DeleteProductCompositionDataByCompositionDataIdAsync(
+        public async Task DeleteComponentDataFromProductByComponentIdAsync(
             int productId,
-            int compositionId,
-            int compositionDataId)
+            int componentId)
         {
-            try
-            {
-                await _compositionDataOperation.DeleteCompositionDataFromProductCompositionAsync(
-                    productId,
-                    compositionId,
-                    compositionDataId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId)
-        {
-            try
-            {
-                await _priceOperation.ResetDiscountOfProductPriceByPriceIdAsync(productId, priceId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await _componentDataOperation.DeleteComponentDataByComponentIdAsync(productId, componentId);
         }
 
         private static Expression<Func<Product, bool>> GetFeaturedProducts(bool? featured) => product => product.Featured == featured;
@@ -324,5 +192,6 @@ namespace HalceraAPI.Services.Operations
 
         private static Expression<Func<Product, bool>> GetProductsByCategoryId(int categoryId) =>
             product => product.Categories!.Any(category => category.Id == categoryId);
+
     }
 }

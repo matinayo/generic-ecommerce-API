@@ -1,6 +1,6 @@
 ﻿using HalceraAPI.Common.Utilities;
-using HalceraAPI.Models.Requests.APIResponse;
-using HalceraAPI.Models.Requests.Product;
+using HalceraAPI.Services.Dtos.APIResponse;
+using HalceraAPI.Services.Dtos.Product;
 using HalceraAPI.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -79,42 +79,9 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [HttpDelete("{productId}/Category/{categoryId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> DeleteProductCategoryAsync(int productId, int categoryId)
+        public async Task<ActionResult> DeleteCategoryFromProductByCategoryIdAsync(int productId, int categoryId)
         {
             await _productOperation.DeleteCategoryFromProductByCategoryIdAsync(productId, categoryId);
-
-            return NoContent();
-        }
-
-        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpDelete("{productId}/Price/{priceId}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult> DeleteProductPriceByPriceIdAsync(int productId, int priceId)
-        {
-            await _productOperation.DeletePriceFromProductByPriceIdAsync(productId, priceId);
-
-            return NoContent();
-        }
-
-        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpDelete("{productId}/Price/{priceId}/ResetDiscount")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult> ResetDiscountOfProductPriceByPriceIdAsync(int productId, int priceId)
-        {
-            await _productOperation.ResetDiscountOfProductPriceByPriceIdAsync(productId, priceId);
-
-            return NoContent();
-        }
-
-        [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpDelete("{productId}/Media/{mediaId}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult> DeleteProductMediaByMediaIdAsync(int productId, int mediaId)
-        {
-            await _productOperation.DeleteMediaFromProductByMediaIdAsync(productId, mediaId);
 
             return NoContent();
         }
@@ -123,7 +90,7 @@ namespace HalceraAPI.Areas.Admin.Controllers
         [HttpDelete("{productId}/Composition/{compositionId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> DeleteProductCompositionByCompositionIdAsync(int productId, int compositionId)
+        public async Task<ActionResult> DeleteCompositionFromProductByCompositionIdAsync(int productId, int compositionId)
         {
             await _productOperation.DeleteCompositionFromProductByCompositionIdAsync(productId, compositionId);
 
@@ -131,18 +98,16 @@ namespace HalceraAPI.Areas.Admin.Controllers
         }
 
         [Authorize(Roles = $"{RoleDefinition.Admin},{RoleDefinition.Employee}")]
-        [HttpDelete("{productId}/Composition/{compositionId}/Data/{compositionDataId}")]
+        [HttpDelete("{productId}/ComponentData/{componentDataId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> DeleteProductCompositionDataByCompositionDataIdAsync(
+        public async Task<ActionResult> DeleteComponentDataFromProductByComponentIdAsync(
             int productId,
-            int compositionId,
-            int compositionDataId)
+            int componentDataId)
         {
-            await _productOperation.DeleteProductCompositionDataByCompositionDataIdAsync(
+            await _productOperation.DeleteComponentDataFromProductByComponentIdAsync(
                 productId,
-                compositionId,
-                compositionDataId);
+                componentDataId);
 
             return NoContent();
         }
